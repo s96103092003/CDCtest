@@ -37,17 +37,17 @@ app.post("/", function (request, response) {
         'to': userMessage.events[0].source.userId,
         'replyToken': userMessage.events[0].replyToken
     };
-    var uri = ''
+    var getUri = ''
     switch (userMessage.events[0].message.type) {
         case "text":
             var msg = userMessage.events[0].message.text;
-            uri = 'http://140.129.20.136:5000/parse?q=' + msg + '&project=default&model=model_oldint1-1'
+            getUri = 'http://140.129.20.136:5000/parse?q=' + msg + '&project=default&model=model_oldint1-1'
 
             break;
     }
-    readEntities(uri,function (reg) {
+    readEntities(function (reg) {
         if (reg) {
-            url_encode(uri, function (uri) {
+            url_encode(getUri, function (uri) {
                 request(uri, (err, res, body) => {
                     var rasaData = JSON.parse(body);
                     //console.log(body)
