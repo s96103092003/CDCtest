@@ -124,6 +124,7 @@ app.post("/", function (req, response) {
                         }];
                         console.log(entities_csv[0][infectiousDisease] + '-' + entities_csv[1][class1])
                     }
+                    PostToLINE(data, channel_access_token, function (reg) { });
                 })
             })
         }
@@ -133,8 +134,9 @@ app.post("/", function (req, response) {
                 'text': '沒有entities檔案'
             }];
             console.log('沒有entities檔案')
+            PostToLINE(data, channel_access_token, function (reg) { });
         }
-        PostToLINE(data, channel_access_token, function (reg) { });
+
     })
 
 
@@ -154,7 +156,7 @@ function readEntities(callback) {
         }
 
         ConvertToTable(entities_data, function (entities_table) {
-            console.log(JSON.stringify(entities_table, null, 2))
+            //console.log(JSON.stringify(entities_table, null, 2))
             entities_list = entities_table[0];
             for (var i = 0; i < entities_table[0].length; i++) {
                 entities_csv[i] = [];
@@ -193,7 +195,7 @@ function ConvertToTable(data, callBack) {
 }
 
 function PostToLINE(data, channel_access_token, callback) {
-    console.log(JSON.stringify(data));
+    //console.log(JSON.stringify(data));
     var options = {
         host: 'api.line.me',
         port: '443',
