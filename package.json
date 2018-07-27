@@ -16,6 +16,7 @@
     "mongoose": "latest",
     "azure-storage": "latest",
     "iconv-lite": "latest",
-    "azure-storage": "latest"
+    "azure-storage": "latest",
+    "request": "latest"
   }
 }
