@@ -8,7 +8,7 @@ var bodyParser = require("body-parser");
 var app = express();
 var port = process.env.PORT || 8080;
 var server = http.Server(app).listen(port);
-
+var iconv = require('iconv-lite');
 var request = require('request');
 
 /*
@@ -24,21 +24,6 @@ app.use(bodyParser.urlencoded({
 app.use(bodyParser.json());
 var channel_access_token = 'yHeoGNC/JKjX3Fc1LVrQSf3jTXpvF+zn4rId5lZaqbgoAmIHTW0cmG35VlLmHzJ6KUkuoPokEvsQe3pVBDM5xLZUPWdtmTn0MyLof3OGx5VQ0hlj6PhDN2ds2In7MvTXKtd/17iO9gmOUi4M5Qt1FwdB04t89/1O/w1cDnyilFU=';
 //接收LINE訊息
-a = {
-    "type": "message",
-    "replyToken": "4ba29cd3790049528f5aceedf030d46a",
-    "source":
-        {
-            "userId": "Uff16cdc269b781d9e95bba911b52af70",
-            "type": "user"
-        },
-    "timestamp": 1532700818040, "message":
-        {
-            "type": "text",
-            "id": "8329107202890",
-            "text": "455"
-        }
-}
 app.post("/", function (request, response) {
 
     console.log("Get LINE Message");
@@ -55,53 +40,153 @@ app.post("/", function (request, response) {
     switch (userMessage.events[0].message.type) {
         case "text":
             var msg = userMessage.events[0].message.text;
-            data.messages = [{
-                'type': 'text',
-                'text': msg
-            }];
+            var uri = 'http://140.129.20.136:5000/parse?q=' + msg + '&project=default&model=model_oldint1-1'
+
             break;
     }
+    readEntities(function (reg) {
+        if (reg) {
+            url_encode('http://140.129.20.136:5000/parse?q=漢生病有什麼政策法規&project=default&model=model_oldint1-1', function (uri) {
+                request(uri, (err, res, body) => {
+                    var rasaData = JSON.parse(body);
+                    //console.log(body)
+                    if (rasaData.intent.name == 'disease') {
+                        if (rasaData.entities.length < 2) {
+                            if (rasaData.entities[0].entity == 'infectiousDisease') {
+                                data.messages = [{
+                                    'type': 'text',
+                                    'text': 'noclass'
+                                }];
+                                console.log('noclass')
+                            }
+                            else if (rasaData.entities[0].entity == 'class') {
+                                data.messages = [{
+                                    'type': 'text',
+                                    'text': 'noinfectiousDisease'
+                                }];
+                                console.log('noinfectiousDisease')
+                            }
+                        }/*
+                        else if (rasaData.entities.length == 2) {
+                            if (rasaData.entities[0].entity == 'infectiousDisease') {
+                                for (var i = 0; i < entities_csv[0].length; i++) {
+                                    if (rasaData.entities[0].value == entities_csv[0][i]) {
+                                        console.log(i)
+                                        console.log(entities_csv[0][i])
+                                    }
+                                }
+                                for (var i = 0; i < entities_csv[1].length; i++) {                           
+                                    if (rasaData.entities[1].value == entities_csv[1][i]) {
+                                        console.log(i)
+                                        console.log(entities_csv[1][i])
+                                    }
+                                }
     
-    PostToLINE(data, channel_access_token, function (reg) { });            
-    
+                            }
+                            if (rasaData.entities[0].entity == 'class') {
+                                for (var i = 0; i < entities_csv[0].length; i++) {
+                                    if (rasaData.entities[1].value == entities_csv[0][i]) {
+                                        console.log(i)
+                                        console.log(entities_csv[0][i])
+                                    }
+                                }
+                                for (var i = 0; i < entities_csv[1].length; i++) {
+                                    if (rasaData.entities[0].value == entities_csv[1][i]) {
+                                        console.log(i)
+                                        console.log(entities_csv[1][i])
+                                    }
+                                }
+                            }
+                        }*/
+                    }
+                    else if (rasaData.intent.name == 'noinfectiousDisease') {
+                        console.log('noinfectiousDisease')
+                        data.messages = [{
+                            'type': 'text',
+                            'text': 'noinfectiousDisease'
+                        }];
+                    }
+                    else if (rasaData.intent.name == 'noclass') {
+                        data.messages = [{
+                            'type': 'text',
+                            'text': 'noclass'
+                        }];
+                        console.log('noclass')
+                    }
+                    else {
+                        console.log(rasaData.intent.name)
+                        var infectiousDisease = rasaData.intent.name.split('-')[0];
+                        var class1 = rasaData.intent.name.split('-')[1];
+                        data.messages = [{
+                            'type': 'text',
+                            'text': rasaData.intent.name + '\n' + entities_csv[0][infectiousDisease] + '-' + entities_csv[1][class1]
+                        }];
+                        console.log(entities_csv[0][infectiousDisease] + '-' + entities_csv[1][class1])
+                    }
+                })
+            })
+        }
+        else {
+            data.messages = [{
+                'type': 'text',
+                'text': '沒有entities檔案'
+            }];
+            console.log('沒有entities檔案')
+        }
+        PostToLINE(data, channel_access_token, function (reg) { });
+    })
+
+
 });
 app.get("/api", function (req, res) {
     res.send("API is running");
 });
-PostToLINE({ 'to': 'Uff16cdc269b781d9e95bba911b52af70', 'messages': [{ 'type': 'text', 'text': 'qweqweqwe' }] }, channel_access_token, function (reg) { });
-function ReplyMessage(data, channel_access_token, reply_token, callback) {
-    data.replyToken = reply_token;
-    console.log(JSON.stringify(data));
-    var options = {
-        host: 'api.line.me',
-        port: '443',
-        path: '/v2/bot/message/reply',
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Content-Length': Buffer.byteLength(JSON.stringify(data)),
-            'Authorization': 'Bearer <' + channel_access_token + '>'
+//PostToLINE({ 'to': 'Uff16cdc269b781d9e95bba911b52af70', 'messages': [{ 'type': 'text', 'text': 'qweqweqwe' }] }, channel_access_token, function (reg) { });
+
+
+function readEntities(callback) {
+    fs.readFile('entities.csv', 'binary', function (err, entities_data) {
+        if (err) {
+            console.log(err.stack);
+            callback(false)
+            return;
         }
-    };
-    var https = require('https');
-    var req = https.request(options, function (res) {
-        res.setEncoding('utf8');
-        res.on('data', function (chunk) {
-            console.log('Response: ' + chunk);
-        });
-        res.on('end', function () {
-        });
-        console.log('Reply message status code: ' + res.statusCode);
-        if (res.statusCode == 200) {
-            console.log('Reply message success');
+
+        ConvertToTable(entities_data, function (entities_table) {
+            //console.log(JSON.stringify(entities_table, null, 2))
+            entities_list = entities_table[0];
+            for (var i = 0; i < entities_table[0].length; i++) {
+                entities_csv[i] = [];
+                for (var j = 1; j < entities_table.length; j++) {
+                    if (entities_table[j][i] != undefined)
+                        entities_csv[i].push(entities_table[j][i]);
+                }
+            }
+            for (var i = 0; i < entities_csv.length; i++) {
+                for (var j = 0; j < entities_csv[i].length; j++) {
+                    if (entities_csv[i][j] == "") {
+                        entities_csv[i].splice(j, 1);
+                        j -= 1;
+                    }
+                }
+            }
+            //console.log(JSON.stringify(entities_csv, null, 2));
             callback(true);
-        } else {
-            console.log('Reply message failure');
-            callback(false);
-        }
+        })
     });
-    req.write(JSON.stringify(data));
-    req.end();
+}
+
+function ConvertToTable(data, callBack) {
+    data = data.toString();
+    var table = new Array();
+    var rows = new Array();
+    var buf = new Buffer(data, 'binary');
+    var str = iconv.decode(buf, 'utf-8');
+    rows = str.split("\r\n");
+    for (var i = 0; i < rows.length; i++) {
+        table.push(rows[i].split(","));
+    }
+    callBack(table);
 }
 
 function PostToLINE(data, channel_access_token, callback) {
