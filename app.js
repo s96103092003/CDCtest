@@ -146,7 +146,7 @@ app.get("/api", function (req, res) {
 
 
 function readEntities(callback) {
-    fs.readFile('entities.csv', 'binary', function (err, entities_data) {
+    fs.readFile('https://github.com/s96103092003/CDCtest/blob/master/entities.csv', 'binary', function (err, entities_data) {
         if (err) {
             console.log(err.stack);
             callback(false)
