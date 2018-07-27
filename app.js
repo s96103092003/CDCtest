@@ -24,42 +24,51 @@ app.use(bodyParser.urlencoded({
 app.use(bodyParser.json());
 var channel_access_token = 'yHeoGNC/JKjX3Fc1LVrQSf3jTXpvF+zn4rId5lZaqbgoAmIHTW0cmG35VlLmHzJ6KUkuoPokEvsQe3pVBDM5xLZUPWdtmTn0MyLof3OGx5VQ0hlj6PhDN2ds2In7MvTXKtd/17iO9gmOUi4M5Qt1FwdB04t89/1O/w1cDnyilFU=';
 //接收LINE訊息
-
-app.post("/", function (request, response){
+a = {
+    "type": "message",
+    "replyToken": "4ba29cd3790049528f5aceedf030d46a",
+    "source":
+        {
+            "userId": "Uff16cdc269b781d9e95bba911b52af70",
+            "type": "user"
+        },
+    "timestamp": 1532700818040, "message":
+        {
+            "type": "text",
+            "id": "8329107202890",
+            "text": "455"
+        }
+}
+app.post("/", function (request, response) {
 
     console.log("Get LINE Message");
     var userMessage = request.body;
-   
+
     console.log(JSON.stringify(userMessage.events[0]));
 
-    var SearchList = new Array();
-    var channel_access_token = 'yHeoGNC/JKjX3Fc1LVrQSf3jTXpvF+zn4rId5lZaqbgoAmIHTW0cmG35VlLmHzJ6KUkuoPokEvsQe3pVBDM5xLZUPWdtmTn0MyLof3OGx5VQ0hlj6PhDN2ds2In7MvTXKtd/17iO9gmOUi4M5Qt1FwdB04t89/1O/w1cDnyilFU=';
-    
-   
 
-    var data={'to': userMessage.events[0].source.userID,
-            'replyToken': userMessage.events[0].replyToken};
+    var data = {
+        'to': userMessage.events[0].source.userId,
+        'replyToken': userMessage.events[0].replyToken
+    };
 
-    switch(userMessage.events[0].message.type){
+    switch (userMessage.events[0].message.type) {
         case "text":
-            var msg = userMessage.events[0].message.text; 
+            var msg = userMessage.events[0].message.text;
             data.messages = [{
-              'type': 'text',
-              'text': msg
+                'type': 'text',
+                'text': msg
             }];
             break;
     }
-    ReplyMessage(data, channel_access_token, data.replyToken, function (ret) {
-      if (!ret)
-          PostToLINE(data, channel_access_token, this.callback);// reply_token 已過期，改用 PUSH_MESSAGE                   
-  });
     
-
+    PostToLINE(data, channel_access_token, function (reg) { });            
+    
 });
-app.get("/api", function(req,res){
-  res.send("API is running");
+app.get("/api", function (req, res) {
+    res.send("API is running");
 });
-PostToLINE({'to': 'Uff16cdc269b781d9e95bba911b52af70','messages': [{'type': 'text','text': 'qweqweqwe'}]}, channel_access_token,function(reg){});
+PostToLINE({ 'to': 'Uff16cdc269b781d9e95bba911b52af70', 'messages': [{ 'type': 'text', 'text': 'qweqweqwe' }] }, channel_access_token, function (reg) { });
 function ReplyMessage(data, channel_access_token, reply_token, callback) {
     data.replyToken = reply_token;
     console.log(JSON.stringify(data));
@@ -121,20 +130,20 @@ function PostToLINE(data, channel_access_token, callback) {
     req.end();
     try {
         callback(true);
-    } catch (e) {};
+    } catch (e) { };
 }
 
 
 
 
-    
+
 
 function url_encode(url, callback) {
-  url = encodeURIComponent(url);
-  url = url.replace(/\%3A/g, ":");
-  url = url.replace(/\%2F/g, "/");
-  url = url.replace(/\%3F/g, "?");
-  url = url.replace(/\%3D/g, "=");
-  url = url.replace(/\%26/g, "&");
-  callback(url)
+    url = encodeURIComponent(url);
+    url = url.replace(/\%3A/g, ":");
+    url = url.replace(/\%2F/g, "/");
+    url = url.replace(/\%3F/g, "?");
+    url = url.replace(/\%3D/g, "=");
+    url = url.replace(/\%26/g, "&");
+    callback(url)
 }
