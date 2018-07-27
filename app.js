@@ -36,17 +36,17 @@ app.post("/", function (request, response) {
         'to': userMessage.events[0].source.userId,
         'replyToken': userMessage.events[0].replyToken
     };
-
+    var uri = ''
     switch (userMessage.events[0].message.type) {
         case "text":
             var msg = userMessage.events[0].message.text;
-            var uri = 'http://140.129.20.136:5000/parse?q=' + msg + '&project=default&model=model_oldint1-1'
+            uri = 'http://140.129.20.136:5000/parse?q=' + msg + '&project=default&model=model_oldint1-1'
 
             break;
     }
-    readEntities(function (reg) {
+    readEntities(uri,function (reg) {
         if (reg) {
-            url_encode('http://140.129.20.136:5000/parse?q=漢生病有什麼政策法規&project=default&model=model_oldint1-1', function (uri) {
+            url_encode(uri, function (uri) {
                 request(uri, (err, res, body) => {
                     var rasaData = JSON.parse(body);
                     //console.log(body)
