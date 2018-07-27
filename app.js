@@ -146,7 +146,7 @@ app.get("/api", function (req, res) {
 
 
 function readEntities(callback) {
-    fs.readFile('https://github.com/s96103092003/CDCtest/blob/master/entities.csv', 'binary', function (err, entities_data) {
+    fs.readFile('entities.csv', 'binary', function (err, entities_data) {
         if (err) {
             console.log(err.stack);
             callback(false)
@@ -154,7 +154,7 @@ function readEntities(callback) {
         }
 
         ConvertToTable(entities_data, function (entities_table) {
-            //console.log(JSON.stringify(entities_table, null, 2))
+            console.log(JSON.stringify(entities_table, null, 2))
             entities_list = entities_table[0];
             for (var i = 0; i < entities_table[0].length; i++) {
                 entities_csv[i] = [];
