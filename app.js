@@ -183,6 +183,7 @@ function ConvertToTable(data, callBack) {
     var rows = new Array();
     var buf = new Buffer(data, 'binary');
     var str = iconv.decode(buf, 'utf-8');
+    console.log('ConvertToTable')
     console.log(str)
     rows = str.split("\n");
     for (var i = 0; i < rows.length; i++) {
