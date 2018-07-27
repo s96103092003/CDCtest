@@ -11,12 +11,12 @@ var server = http.Server(app).listen(port);
 var iconv = require('iconv-lite');
 var request = require('request');
 
-
+/*
 url_encode('http://140.129.20.136:5000/parse?q=天花&project=default&model=model_3030disease', function (uri) {
   request(uri, (err, res, body) => {
     console.log(body)
   })
-})
+})*/
 app.use(bodyParser.urlencoded({
     extended: true
 }));
@@ -25,10 +25,10 @@ app.use(bodyParser.json());
 var channel_access_token = 'yHeoGNC/JKjX3Fc1LVrQSf3jTXpvF+zn4rId5lZaqbgoAmIHTW0cmG35VlLmHzJ6KUkuoPokEvsQe3pVBDM5xLZUPWdtmTn0MyLof3OGx5VQ0hlj6PhDN2ds2In7MvTXKtd/17iO9gmOUi4M5Qt1FwdB04t89/1O/w1cDnyilFU=';
 //接收LINE訊息
 var entities_csv = [];
-app.post("/", function (request, response) {
+app.post("/", function (req, response) {
 
     console.log("Get LINE Message");
-    var userMessage = request.body;
+    var userMessage = req.body;
 
     console.log(JSON.stringify(userMessage.events[0]));
 
