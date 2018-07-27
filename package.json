@@ -14,7 +14,11 @@
     "log4js": "^1.1.1",
     "log4js-extend": "^0.1.2",
     "mongoose": "latest",
+<<<<<<< HEAD
     "azure-storage": "latest",
     "iconv-lite": "latest"
+=======
+    "azure-storage": "latest"
+>>>>>>> d35eb82eb72c79c73bbdaca6621799c7a9c5b5f0
   }
 }
