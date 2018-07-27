@@ -11,12 +11,12 @@ var server = http.Server(app).listen(port);
 var iconv = require('iconv-lite');
 var request = require('request');
 
-/*
+
 url_encode('http://140.129.20.136:5000/parse?q=天花&project=default&model=model_3030disease', function (uri) {
   request(uri, (err, res, body) => {
     console.log(body)
   })
-})*/
+})
 app.use(bodyParser.urlencoded({
     extended: true
 }));
