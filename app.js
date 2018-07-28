@@ -41,7 +41,7 @@ app.post("/", function (req, response) {
     switch (userMessage.events[0].message.type) {
         case "text":
             var msg = userMessage.events[0].message.text;
-            getUri = 'http://140.129.20.136:5000/parse?q=' + msg + '&project=default&model=model_oldint1-1'
+            getUri = 'http://140.129.20.136:5000/parse?q=' + msg + '&project=default&model=model_20180728-100335'
 
             break;
     }
