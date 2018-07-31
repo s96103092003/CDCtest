@@ -67,7 +67,7 @@ app.post("/", function (req, response) {
                                 }];
                                 console.log('noinfectiousDisease')
                             }
-                        }/*
+                        }
                         else if (rasaData.entities.length == 2) {
                             if (rasaData.entities[0].entity == 'infectiousDisease') {
                                 for (var i = 0; i < entities_csv[0].length; i++) {
@@ -82,7 +82,6 @@ app.post("/", function (req, response) {
                                         console.log(entities_csv[1][i])
                                     }
                                 }
-    
                             }
                             if (rasaData.entities[0].entity == 'class') {
                                 for (var i = 0; i < entities_csv[0].length; i++) {
@@ -98,8 +97,9 @@ app.post("/", function (req, response) {
                                     }
                                 }
                             }
-                        }*/
+                        }
                     }
+                    /*
                     else if (rasaData.intent.name == 'noinfectiousDisease') {
                         console.log('noinfectiousDisease')
                         data.messages = [{
@@ -123,7 +123,7 @@ app.post("/", function (req, response) {
                             'text': rasaData.intent.name + '\n' + entities_csv[0][infectiousDisease] + '-' + entities_csv[1][class1]
                         }];
                         console.log(entities_csv[0][infectiousDisease] + '-' + entities_csv[1][class1])
-                    }
+                    }*/
                     PostToLINE(data, channel_access_token, function (reg) { });
                 })
             })
@@ -145,8 +145,6 @@ app.get("/api", function (req, res) {
     res.send("API is running");
 });
 //PostToLINE({ 'to': 'Uff16cdc269b781d9e95bba911b52af70', 'messages': [{ 'type': 'text', 'text': 'qweqweqwe' }] }, channel_access_token, function (reg) { });
-
-
 function readEntities(callback) {
     fs.readFile('entities.csv', 'binary', function (err, entities_data) {
         if (err) {
