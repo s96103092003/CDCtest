@@ -88,7 +88,7 @@ app.post("/", function (req, response) {
                                     if (rasaData.entities[1].value == entities_csv[0][i]) {
                                         console.log(i)
                                         console.log(entities_csv[0][i])
-                                    }
+                                    }//
                                 }
                                 for (var i = 0; i < entities_csv[1].length; i++) {
                                     if (rasaData.entities[0].value == entities_csv[1][i]) {
