@@ -44,7 +44,7 @@ app.post("/", function (req, response) {
             getUri = 'http://140.129.20.136:5000/parse?q=' + msg + '&project=default&model=model_3030disease'
 
             break;
-    }
+    }//
     readEntities(function (reg) {
         if (reg) {
             url_encode(getUri, function (uri) {
