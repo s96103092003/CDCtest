@@ -47,7 +47,7 @@ app.post("/", function (req, response) {
             url_encode(getUri, function (uri) {
                 request(uri, (err, res, body) => {
                     var rasaData = JSON.parse(body);
-                    //console.log(body)
+                    console.log(body)
                     if (rasaData.intent.name == 'disease') {
                         if (rasaData.entities.length < 2) {
                             if (rasaData.entities[0].entity == 'infectiousDisease') {
