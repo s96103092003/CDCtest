@@ -67,33 +67,54 @@ app.post("/", function (req, response) {
                         }
                         else if (rasaData.entities.length == 2) {
                             if (rasaData.entities[0].entity == 'infectiousDisease') {
+                                let txt = '';
+                                let txt1 = '';
                                 for (var i = 0; i < entities_csv[0].length; i++) {
                                     if (rasaData.entities[0].value == entities_csv[0][i]) {
                                         console.log(i)
                                         console.log(entities_csv[0][i])
+                                        txt+=i+'-';
+                                        txt1 += entities_csv[0][i];
                                     }
                                 }
                                 for (var i = 0; i < entities_csv[1].length; i++) {                           
                                     if (rasaData.entities[1].value == entities_csv[1][i]) {
                                         console.log(i)
                                         console.log(entities_csv[1][i])
+                                        txt += i + '';
+                                        txt1 += entities_csv[1][i];
                                     }
                                 }
-    
+                                data.messages = [{
+                                    'type': 'text',
+                                    'text': txt+'\n'+txt1
+                                }];
+                                PostToLINE(data, channel_access_token, function (reg) { });
                             }
                             if (rasaData.entities[0].entity == 'class') {
+                                let txt = '';
+                                let txt1 = '';
                                 for (var i = 0; i < entities_csv[0].length; i++) {
                                     if (rasaData.entities[1].value == entities_csv[0][i]) {
                                         console.log(i)
                                         console.log(entities_csv[0][i])
+                                        txt += i + '-';
+                                        txt1 += entities_csv[0][i];
                                     }
                                 }
                                 for (var i = 0; i < entities_csv[1].length; i++) {
                                     if (rasaData.entities[0].value == entities_csv[1][i]) {
                                         console.log(i)
                                         console.log(entities_csv[1][i])
+                                        txt += i + '';
+                                        txt1 += entities_csv[1][i];
                                     }
                                 }
+                                data.messages = [{
+                                    'type': 'text',
+                                    'text': txt + '\n' + txt1
+                                }];
+                                PostToLINE(data, channel_access_token, function (reg) { });
                             }
                         }
                     }
@@ -103,6 +124,7 @@ app.post("/", function (req, response) {
                             'type': 'text',
                             'text': 'noinfectiousDisease'
                         }];
+                        PostToLINE(data, channel_access_token, function (reg) { });
                     }
                     else if (rasaData.intent.name == 'noclass') {
                         data.messages = [{
@@ -110,6 +132,7 @@ app.post("/", function (req, response) {
                             'text': 'noclass'
                         }];
                         console.log('noclass')
+                        PostToLINE(data, channel_access_token, function (reg) { });
                     }
                     else {
                         console.log(rasaData.intent.name)
