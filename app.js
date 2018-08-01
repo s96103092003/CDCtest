@@ -31,7 +31,6 @@ app.post("/", function (req, response) {
 
     console.log(JSON.stringify(userMessage.events[0]));///
 
-    /*
     var data = {
         'to': userMessage.events[0].source.userId,
         'replyToken': userMessage.events[0].replyToken
@@ -41,7 +40,6 @@ app.post("/", function (req, response) {
         case "text":
             var msg = userMessage.events[0].message.text;
             getUri = 'http://140.129.20.136:5000/parse?q=' + msg + '&project=default&model=model_20180728-100335'
-
             break;
     }
     readEntities(function (reg) {
@@ -66,7 +64,7 @@ app.post("/", function (req, response) {
                                 }];
                                 console.log('noinfectiousDisease')
                             }
-                        }/*
+                        }
                         else if (rasaData.entities.length == 2) {
                             if (rasaData.entities[0].entity == 'infectiousDisease') {
                                 for (var i = 0; i < entities_csv[0].length; i++) {
@@ -97,7 +95,7 @@ app.post("/", function (req, response) {
                                     }
                                 }
                             }
-                        }*
+                        }
                     }
                     else if (rasaData.intent.name == 'noinfectiousDisease') {
                         console.log('noinfectiousDisease')
@@ -136,7 +134,7 @@ app.post("/", function (req, response) {
             PostToLINE(data, channel_access_token, function (reg) { });
         }
 
-    })*/
+    })
 
 
 });
