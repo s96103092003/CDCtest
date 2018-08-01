@@ -30,7 +30,7 @@ app.post("/", function (req, response) {
     console.log("Get LINE Message");
     var userMessage = req.body;
 
-    console.log(JSON.stringify(userMessage.events[0]));
+    console.log(JSON.stringify(userMessage.events[0]));///
 
 
     var data = {
