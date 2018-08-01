@@ -26,8 +26,7 @@ var channel_access_token = 'yHeoGNC/JKjX3Fc1LVrQSf3jTXpvF+zn4rId5lZaqbgoAmIHTW0c
 //接收LINE訊息
 var entities_csv = [];
 app.post("/", function (req, response) {
-
-    console.log("Get LINE Message");
+    console.log('Get LINE Message');
     var userMessage = req.body;
 
     console.log(JSON.stringify(userMessage.events[0]));///
