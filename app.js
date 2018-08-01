@@ -47,7 +47,7 @@ app.post("/", function (req, response) {
             url_encode(getUri, function (uri) {
                 request(uri, (err, res, body) => {
                     var rasaData = JSON.parse(body);
-                    console.log(body)
+                    //console.log(body)
                     if (rasaData.intent.name == 'disease') {
                         if (rasaData.entities.length < 2) {
                             if (rasaData.entities[0].entity == 'infectiousDisease') {
@@ -67,17 +67,17 @@ app.post("/", function (req, response) {
                         }
                         else if (rasaData.entities.length == 2) {
                             if (rasaData.entities[0].entity == 'infectiousDisease') {
-                                let txt = '';
-                                let txt1 = '';
+                                let txt;
+                                let txt1;
                                 for (var i = 0; i < entities_csv[0].length; i++) {
                                     if (rasaData.entities[0].value == entities_csv[0][i]) {
                                         console.log(i)
                                         console.log(entities_csv[0][i])
-                                        txt+=i+'-';
-                                        txt1 += entities_csv[0][i];
+                                        txt = i + '-';
+                                        txt1 = entities_csv[0][i];
                                     }
                                 }
-                                for (var i = 0; i < entities_csv[1].length; i++) {                           
+                                for (var i = 0; i < entities_csv[1].length; i++) {
                                     if (rasaData.entities[1].value == entities_csv[1][i]) {
                                         console.log(i)
                                         console.log(entities_csv[1][i])
@@ -87,7 +87,7 @@ app.post("/", function (req, response) {
                                 }
                                 data.messages = [{
                                     'type': 'text',
-                                    'text': txt+'\n'+txt1
+                                    'text': txt + '\n' + txt1
                                 }];
                                 PostToLINE(data, channel_access_token, function (reg) { });
                             }
@@ -98,8 +98,8 @@ app.post("/", function (req, response) {
                                     if (rasaData.entities[1].value == entities_csv[0][i]) {
                                         console.log(i)
                                         console.log(entities_csv[0][i])
-                                        txt += i + '-';
-                                        txt1 += entities_csv[0][i];
+                                        txt = i + '-';
+                                        txt1 = entities_csv[0][i];
                                     }
                                 }
                                 for (var i = 0; i < entities_csv[1].length; i++) {
@@ -165,7 +165,6 @@ app.get("/api", function (req, res) {
     console.log('API is running')
     res.send("API is running");
 });
-PostToLINE({ 'to': 'Uff16cdc269b781d9e95bba911b52af70', 'messages': [{ 'type': 'text', 'text': 'qweqweqwe' }] }, channel_access_token, function (reg) { });
 console.log('start my app')
 
 function readEntities(callback) {
