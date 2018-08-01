@@ -143,8 +143,9 @@ app.post("/", function (req, response) {
                             'text': rasaData.intent.name + '\n' + entities_csv[0][infectiousDisease] + '-' + entities_csv[1][class1]
                         }];
                         console.log(entities_csv[0][infectiousDisease] + '-' + entities_csv[1][class1])
+                        PostToLINE(data, channel_access_token, function (reg) { });
                     }
-                    PostToLINE(data, channel_access_token, function (reg) { });
+                    
                 })
             })
         }
@@ -158,8 +159,6 @@ app.post("/", function (req, response) {
         }
 
     })
-
-
 });
 app.get("/api", function (req, res) {
     console.log('API is running')
