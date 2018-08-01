@@ -206,7 +206,7 @@ function ConvertToTable(data, callBack) {
     var buf = new Buffer(data, 'binary');
     var str = iconv.decode(buf, 'utf-8');
     console.log('ConvertToTable')
-    console.log(str)
+    //console.log(str)
     rows = str.split("\n");
     for (var i = 0; i < rows.length; i++) {
         table.push(rows[i].split(","));
