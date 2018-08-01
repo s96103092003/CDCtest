@@ -31,7 +31,7 @@ app.post("/", function (req, response) {
 
     console.log(JSON.stringify(userMessage.events[0]));///
 
-
+    /*
     var data = {
         'to': userMessage.events[0].source.userId,
         'replyToken': userMessage.events[0].replyToken
@@ -97,7 +97,7 @@ app.post("/", function (req, response) {
                                     }
                                 }
                             }
-                        }*/
+                        }*
                     }
                     else if (rasaData.intent.name == 'noinfectiousDisease') {
                         console.log('noinfectiousDisease')
@@ -136,7 +136,7 @@ app.post("/", function (req, response) {
             PostToLINE(data, channel_access_token, function (reg) { });
         }
 
-    })
+    })*/
 
 
 });
