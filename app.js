@@ -141,6 +141,7 @@ app.post("/", function (req, response) {
 
 });
 app.get("/api", function (req, res) {
+    console.log('API is running')
     res.send("API is running");
 });
 PostToLINE({ 'to': 'Uff16cdc269b781d9e95bba911b52af70', 'messages': [{ 'type': 'text', 'text': 'qweqweqwe' }] }, channel_access_token, function (reg) { });
