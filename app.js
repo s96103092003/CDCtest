@@ -106,7 +106,7 @@ app.post("/", function (req, response) {
         })
     })
 })
-app.get("lookRasa",function(req, res){
+app.get("/lookRasa",function(req, res){
     res.send(JSON.stringify(asdasdasd, null, 2));
 })
 app.get("/api", function (req, res) {
