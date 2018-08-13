@@ -31,7 +31,7 @@ time_rasa();
 function time_rasa() {
     clearTimeout(timer);//timer重設
     console.log(1);
-    timer = setInterval(time_rasa, 1800000); //每半小時抓取一次新資料
+    timer = setInterval(time_rasa, 300000); //每半小時抓取一次新資料
 }
 app.post("/", function (req, response) {
     console.log('Get LINE Message');
