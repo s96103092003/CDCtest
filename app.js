@@ -26,6 +26,13 @@ app.use(bodyParser.json());
 var channel_access_token = 'yHeoGNC/JKjX3Fc1LVrQSf3jTXpvF+zn4rId5lZaqbgoAmIHTW0cmG35VlLmHzJ6KUkuoPokEvsQe3pVBDM5xLZUPWdtmTn0MyLof3OGx5VQ0hlj6PhDN2ds2In7MvTXKtd/17iO9gmOUi4M5Qt1FwdB04t89/1O/w1cDnyilFU=';
 //接收LINE訊息
 var entities_csv = [];
+var timer;
+time_rasa();
+function time_rasa() {
+    clearTimeout(timer);//timer重設
+    console.log(1);
+    timer = setInterval(_getPMJSON, 1800000); //每半小時抓取一次新資料
+}
 app.post("/", function (req, response) {
     console.log('Get LINE Message');
     var userMessage = req.body;
@@ -97,7 +104,7 @@ app.post("/", function (req, response) {
                 'type': 'text',
                 'text': "信心分數: " + rasaData.intent.confidence + '\n' + JSON.stringify(rasa_res, null, 2)
             }];
-            PostToLINE(data, channel_access_token, function () { 
+            PostToLINE(data, channel_access_token, function () {
                 asdasdasd = rasa_res;
                 fs.writeFile(__dirname + "/demo-userData.json", JSON.stringify(rasa_res, null, 2))
 
@@ -106,7 +113,7 @@ app.post("/", function (req, response) {
         })
     })
 })
-app.get("/lookRasa",function(req, res){
+app.get("/lookRasa", function (req, res) {
     res.send(JSON.stringify(asdasdasd, null, 2));
 })
 app.get("/api", function (req, res) {
