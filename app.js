@@ -78,7 +78,7 @@ app.post("/", function (req, response) {
         
           rasa_res.text = rasaData.text;
           rasa_res.intent = rasaData.intent.name
-          for(var i in rasa_res.entities){
+          for(var i in rasaData.entities){
             var rasa_entities = {
                 "start": "",
                 "end": "",
