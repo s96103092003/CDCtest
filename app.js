@@ -11,7 +11,7 @@ var server = http.Server(app).listen(port);
 var iconv = require('iconv-lite');
 var request = require('request');
 
-
+var asdasdasd;
 /*
 url_encode('http://140.129.20.136:5000/parse?q=天花&project=default&model=model_3030disease', function (uri) {
   request(uri, (err, res, body) => {
@@ -26,7 +26,6 @@ app.use(bodyParser.json());
 var channel_access_token = 'yHeoGNC/JKjX3Fc1LVrQSf3jTXpvF+zn4rId5lZaqbgoAmIHTW0cmG35VlLmHzJ6KUkuoPokEvsQe3pVBDM5xLZUPWdtmTn0MyLof3OGx5VQ0hlj6PhDN2ds2In7MvTXKtd/17iO9gmOUi4M5Qt1FwdB04t89/1O/w1cDnyilFU=';
 //接收LINE訊息
 var entities_csv = [];
-var user_text = [];
 app.post("/", function (req, response) {
     console.log('Get LINE Message');
     var userMessage = req.body;
@@ -48,60 +47,68 @@ app.post("/", function (req, response) {
         "project": "default",
         "model": "model_20180813-123841"
     }
-
-    PostToRasa(rasa_data, function (body) {
-        var rasaData = JSON.parse(body);
-        /*
-        "text": "請問天花的最新消息是什麼",
-        "intent": "disease",
-        "entities": [
-          {
-            "start": 2,
-            "end": 4,
-            "value": "天花",
-            "entity": "infectiousDisease"
-          },
-          {
-            "start": 5,
-            "end": 9,
-            "value": "最新消息",
-            "entity": "class"
-          }
-        ]*/ 
-        console.log(rasaData)
-        var rasa_res = {
-            "text": "",
-            "intent": "",
+    fs.readFile(__dirname + '/userData.json', 'utf8', function (err, user_text) {
+        config = JSON.parse(user_text);
+        PostToRasa(rasa_data, function (body) {
+            var rasaData = JSON.parse(body);
+            /*
+            "text": "請問天花的最新消息是什麼",
+            "intent": "disease",
             "entities": [
-            ]
-        };
-        
-          rasa_res.text = rasaData.text;
-          rasa_res.intent = rasaData.intent.name
-          for(var i in rasaData.entities){
-            var rasa_entities = {
-                "start": "",
-                "end": "",
-                "value": "",
-                "entity": ""
+              {
+                "start": 2,
+                "end": 4,
+                "value": "天花",
+                "entity": "infectiousDisease"
+              },
+              {
+                "start": 5,
+                "end": 9,
+                "value": "最新消息",
+                "entity": "class"
               }
-            rasa_entities.start = rasaData.entities[i].start
-            rasa_entities.end = rasaData.entities[i].end
-            rasa_entities.value = rasaData.entities[i].value
-            rasa_entities.entity = rasaData.entities[i].entity
-            rasa_res.entities.push(rasa_entities) 
-          }
-          
+            ]*/
+            console.log(rasaData)
+            var rasa_res = {
+                "text": "",
+                "intent": "",
+                "entities": [
+                ]
+            };
 
-        data.messages = [{
-            'type': 'text',
-            'text': JSON.stringify(rasa_res,null,2)
-        }];
-        PostToLINE(data,channel_access_token,function(){})
+            rasa_res.text = rasaData.text;
+            rasa_res.intent = rasaData.intent.name
+            for (var i in rasaData.entities) {
+                var rasa_entities = {
+                    "start": "",
+                    "end": "",
+                    "value": "",
+                    "entity": ""
+                }
+                rasa_entities.start = rasaData.entities[i].start
+                rasa_entities.end = rasaData.entities[i].end
+                rasa_entities.value = rasaData.entities[i].value
+                rasa_entities.entity = rasaData.entities[i].entity
+                rasa_res.entities.push(rasa_entities)
+            }
+            user_text.push(rasa_res)
 
+            data.messages = [{
+                'type': 'text',
+                'text': "信心分數: " + rasaData.intent.confidence + '\n' + JSON.stringify(rasa_res, null, 2)
+            }];
+            PostToLINE(data, channel_access_token, function () { 
+                asdasdasd = rasa_res;
+                fs.writeFile(__dirname + "/demo-userData.json", JSON.stringify(rasa_res, null, 2))
+
+            })
+
+        })
     })
 })
-
+app.get("lookRasa",function(req, res){
+    res.send(JSON.stringify(asdasdasd, null, 2));
+})
 app.get("/api", function (req, res) {
     console.log('API is running')
     res.send("API is running");
