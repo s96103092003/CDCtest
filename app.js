@@ -11,6 +11,7 @@ var server = http.Server(app).listen(port);
 var iconv = require('iconv-lite');
 var request = require('request');
 
+
 /*
 url_encode('http://140.129.20.136:5000/parse?q=天花&project=default&model=model_3030disease', function (uri) {
   request(uri, (err, res, body) => {
@@ -25,6 +26,7 @@ app.use(bodyParser.json());
 var channel_access_token = 'yHeoGNC/JKjX3Fc1LVrQSf3jTXpvF+zn4rId5lZaqbgoAmIHTW0cmG35VlLmHzJ6KUkuoPokEvsQe3pVBDM5xLZUPWdtmTn0MyLof3OGx5VQ0hlj6PhDN2ds2In7MvTXKtd/17iO9gmOUi4M5Qt1FwdB04t89/1O/w1cDnyilFU=';
 //接收LINE訊息
 var entities_csv = [];
+var user_text = [];
 app.post("/", function (req, response) {
     console.log('Get LINE Message');
     var userMessage = req.body;
@@ -39,127 +41,67 @@ app.post("/", function (req, response) {
     switch (userMessage.events[0].message.type) {
         case "text":
             var msg = userMessage.events[0].message.text;
-            getUri = 'http://140.129.20.136:5000/parse?q=' + msg + '&project=default&model=model_oldint1-1'
             break;
     }
-    readEntities(function (reg) {
-        if (reg) {
-            url_encode(getUri, function (uri) {
-                request(uri, (err, res, body) => {
-                    var rasaData = JSON.parse(body);
-                    //console.log(body)
-                    if (rasaData.intent.name == 'disease') {
-                        if (rasaData.entities.length < 2) {
-                            if (rasaData.entities[0].entity == 'infectiousDisease') {
-                                data.messages = [{
-                                    'type': 'text',
-                                    'text': 'noclass'
-                                }];
-                                console.log('noclass')
-                            }
-                            else if (rasaData.entities[0].entity == 'class') {
-                                data.messages = [{
-                                    'type': 'text',
-                                    'text': 'noinfectiousDisease'
-                                }];
-                                console.log('noinfectiousDisease')
-                            }
-                        }
-                        else if (rasaData.entities.length == 2) {
-                            if (rasaData.entities[0].entity == 'infectiousDisease') {
-                                let txt;
-                                let txt1;
-                                for (var i = 0; i < entities_csv[0].length; i++) {
-                                    if (rasaData.entities[0].value == entities_csv[0][i]) {
-                                        console.log(i)
-                                        console.log(entities_csv[0][i])
-                                        txt = i + '-';
-                                        txt1 = entities_csv[0][i];
-                                    }
-                                }
-                                for (var i = 0; i < entities_csv[1].length; i++) {
-                                    if (rasaData.entities[1].value == entities_csv[1][i]) {
-                                        console.log(i)
-                                        console.log(entities_csv[1][i])
-                                        txt += i + '';
-                                        txt1 += entities_csv[1][i];
-                                    }
-                                }
-                                data.messages = [{
-                                    'type': 'text',
-                                    'text': txt + '\n' + txt1
-                                }];
-                                PostToLINE(data, channel_access_token, function (reg) { });
-                            }
-                            if (rasaData.entities[0].entity == 'class') {
-                                let txt = '';
-                                let txt1 = '';
-                                for (var i = 0; i < entities_csv[0].length; i++) {
-                                    if (rasaData.entities[1].value == entities_csv[0][i]) {
-                                        console.log(i)
-                                        console.log(entities_csv[0][i])
-                                        txt = i + '-';
-                                        txt1 = entities_csv[0][i];
-                                    }
-                                }
-                                for (var i = 0; i < entities_csv[1].length; i++) {
-                                    if (rasaData.entities[0].value == entities_csv[1][i]) {
-                                        console.log(i)
-                                        console.log(entities_csv[1][i])
-                                        txt += i + '';
-                                        txt1 += entities_csv[1][i];
-                                    }
-                                }
-                                data.messages = [{
-                                    'type': 'text',
-                                    'text': txt + '\n' + txt1
-                                }];
-                                PostToLINE(data, channel_access_token, function (reg) { });
-                            }
-                        }
-                    }
-                    else if (rasaData.intent.name == 'noinfectiousDisease') {
-                        console.log('noinfectiousDisease')
-                        data.messages = [{
-                            'type': 'text',
-                            'text': 'noinfectiousDisease'
-                        }];
-                        PostToLINE(data, channel_access_token, function (reg) { });
-                    }
-                    else if (rasaData.intent.name == 'noclass') {
-                        data.messages = [{
-                            'type': 'text',
-                            'text': 'noclass'
-                        }];
-                        console.log('noclass')
-                        PostToLINE(data, channel_access_token, function (reg) { });
-                    }
-                    else {
-                        console.log(rasaData.intent.name)
-                        var infectiousDisease = rasaData.intent.name.split('-')[0];
-                        var class1 = rasaData.intent.name.split('-')[1];
-                        data.messages = [{
-                            'type': 'text',
-                            'text': rasaData.intent.name + '\n' + entities_csv[0][infectiousDisease] + '-' + entities_csv[1][class1]
-                        }];
-                        console.log(entities_csv[0][infectiousDisease] + '-' + entities_csv[1][class1])
-                        PostToLINE(data, channel_access_token, function (reg) { });
-                    }
-                    
-                })
-            })
-        }
-        else {
-            data.messages = [{
-                'type': 'text',
-                'text': '沒有entities檔案'
-            }];
-            console.log('沒有entities檔案')
-            PostToLINE(data, channel_access_token, function (reg) { });
-        }
+    var rasa_data = {
+        "q": msg,
+        "project": "default",
+        "model": "model_20180808-035410"
+    }
+
+    PostToRasa(rasa_data, function (body) {
+        var rasaData = JSON.parse(body);
+        /*
+        "text": "請問天花的最新消息是什麼",
+        "intent": "disease",
+        "entities": [
+          {
+            "start": 2,
+            "end": 4,
+            "value": "天花",
+            "entity": "infectiousDisease"
+          },
+          {
+            "start": 5,
+            "end": 9,
+            "value": "最新消息",
+            "entity": "class"
+          }
+        ]*/ 
+        console.log(rasaData)
+        var rasa_res = {
+            "text": "",
+            "intent": "",
+            "entities": [
+            ]
+        };
+        
+          rasa_res.text = rasaData.text;
+          rasa_res.intent = rasaData.intent.name
+          for(var i in rasa_res.entities){
+            var rasa_entities = {
+                "start": "",
+                "end": "",
+                "value": "",
+                "entity": ""
+              }
+            rasa_entities.start = rasaData.entities[i].start
+            rasa_entities.end = rasaData.entities[i].end
+            rasa_entities.value = rasaData.entities[i].value
+            rasa_entities.entity = rasaData.entities[i].entity
+            rasa_res.entities.push(rasa_entities) 
+          }
+          
+
+        data.messages = [{
+            'type': 'text',
+            'text': JSON.stringify(rasa_res,null,2)
+        }];
+        PostToLINE(data,channel_access_token,function(){})
 
     })
-});
+})
+
 app.get("/api", function (req, res) {
     console.log('API is running')
     res.send("API is running");
@@ -243,7 +185,34 @@ function PostToLINE(data, channel_access_token, callback) {
 }
 
 
-
+function PostToRasa(data, callback) {
+    console.log(JSON.stringify(data));
+    var options = {
+        host: '140.129.20.136',
+        port: '5000',
+        path: '/parse',
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Content-Length': Buffer.byteLength(JSON.stringify(data)),
+        }
+    };
+    var http = require('http');
+    var req = http.request(options, function (res) {
+        res.setEncoding('utf8');
+        res.body = '';
+        res.on('data', function (chunk) {
+            console.log('Response: ' + chunk);
+            res.body += chunk;
+        });
+        res.on('end', function () {
+            //console.log(res.body)
+            callback(res.body);
+        });
+    });
+    req.write(JSON.stringify(data));
+    req.end();
+}
 
 
 
