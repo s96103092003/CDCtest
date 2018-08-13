@@ -48,7 +48,7 @@ app.post("/", function (req, response) {
         "model": "model_20180813-123841"
     }
     fs.readFile(__dirname + '/userData.json', 'utf8', function (err, user_text) {
-        config = JSON.parse(user_text);
+        user_text = JSON.parse(user_text);
         PostToRasa(rasa_data, function (body) {
             var rasaData = JSON.parse(body);
             /*
