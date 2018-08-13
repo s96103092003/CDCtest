@@ -46,7 +46,7 @@ app.post("/", function (req, response) {
     var rasa_data = {
         "q": msg,
         "project": "default",
-        "model": "model_20180808-035410"
+        "model": "model_20180813-123841"
     }
 
     PostToRasa(rasa_data, function (body) {
