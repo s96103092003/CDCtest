@@ -333,9 +333,9 @@ app.post('/', function (request, response) {
                 }
                 else {
                     logger.info("into manual_seearch..........................................");
-                    manual_seearch(results[idx].message.latitude, results[idx].message.longitude, results[idx].source.userId, function (reg, user_id) {
+                    manual_seearch(results[idx].message.latitude, results[idx].message.longitude, results[idx].source.userId, results[idx].replyToken, function (user_id, replyToken, reg) {
                         if (reg) {
-                            linemessage.SendMessage(user_id, "顯示FLEX", 'linehack2018', results[idx].replyToken, function (result) {
+                            linemessage.SendMessage(user_id, "顯示FLEX", 'linehack2018', replyToken, function (result) {
                                 if (!result) logger.error(result);
                                 else logger.info(result);
                             });
@@ -437,7 +437,7 @@ var flex = lineflex.CreateActivityFlex(activity);
                 }
             }.bind({ response: this.response }));
 */
-function manual_seearch(lat, lng, user_id, callback) {
+function manual_seearch(lat, lng, user_id, replyToken, callback) {
     //this.getdistance = function (lat1, lng1, lat2, lng2)
     //this.get_shuangjious = function (callback) {
     logger.info("manual_seearch: ......................................")
@@ -469,7 +469,7 @@ function manual_seearch(lat, lng, user_id, callback) {
             }
         }
         logger.info("location_compare: " + JSON.stringify(location_compare, null, 2))
-        callback(true)
+        callback(user_id, replyToken, true)
     })
 
 }
