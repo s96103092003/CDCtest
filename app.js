@@ -352,7 +352,7 @@ app.post('/', function (request, response) {
                     });
                     var message = results[idx].message;
                     logger.info("message: " + JSON.stringify(message));
-                    switch (message.type) {
+                    switch (message.type) {//
                         case "text":
                             if (message.text == "搜尋揪團") {
                                 logger.info("搜尋揪團..............................");
