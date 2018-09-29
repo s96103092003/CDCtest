@@ -335,8 +335,9 @@ app.post('/', function (request, response) {
                     logger.info("into manual_seearch..........................................");
                     manual_seearch(results[idx].message.latitude, results[idx].message.longitude, results[idx].source.userId, results[idx].replyToken, function (user_id, replyToken, shuangjious, reg) {
                         if (reg) {
-                            let flex = lineflex.CreateActivityFlex(shuangjious[i]);
-                            for(var i in shuangjious)
+
+                            for (var i in shuangjious) {
+                                let flex = lineflex.CreateActivityFlex(shuangjious[i]);
                                 linemessage.SendFlex(this.userid, flex, 'linehack2018', '', function (result) {
                                     if (!result) {
                                         logger.error('fail: ' + result);
@@ -345,6 +346,7 @@ app.post('/', function (request, response) {
                                         logger.info('success');
                                     }
                                 });
+                            }
                         }
                     });
                 }
@@ -453,7 +455,7 @@ function manual_seearch(lat, lng, user_id, replyToken, callback) {
         for (var idx = 0; idx < shuangjious.length; idx++) {
             logger.info("idx距離: " + linedb.getdistance(Number(shuangjious[idx].latitude), Number(shuangjious[idx].longitude), Number(lat), Number(lng)))
             if (shuangjious[idx].latitude != null && shuangjious[idx].longitude != null) {
-                if (linedb.getdistance(Number(shuangjious[idx].latitude), Number(shuangjious[idx].longitude), Number(lat), Number(lng)) < 1000)
+                if (linedb.getdistance(Number(shuangjious[idx].latitude), Number(shuangjious[idx].longitude), Number(lat), Number(lng)) < 12000)
                     location_compare.push(shuangjious[idx])
                 /*排序未完成
                 if (location_compare.length == 0) {
