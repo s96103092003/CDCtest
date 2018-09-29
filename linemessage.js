@@ -29,7 +29,8 @@ var linemessage = function (logger) {
                 'to': userId,
                 'messages': [
                     { 'type': 'text', 'text': message }
-                ]
+                ],
+                'quickReply':quickreply
             };
             logger.info('傳送訊息給 ' + userId);
             ReplyMessage(data, config.channel_access_token, reply_token, function (ret) {

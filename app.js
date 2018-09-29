@@ -360,7 +360,7 @@ app.post('/', function (request, response) {
                         if (reg) {
 
                             for (var i in shuangjious) {
-                                let flex = lineflex.CreateActivityFlex(shuangjious[i]);
+                                let flex = lineflex.CreateActivityFlexCarousel(shuangjious[i]);
                                 linemessage.SendFlex(this.userid, flex, 'linehack2018', replyToken, function (result) {
                                     if (!result) {
                                         logger.error('fail: ' + result);
