@@ -372,7 +372,7 @@ app.post('/', function (request, response) {
                         if (!result) logger.error(result);
                         else logger.info(result);
                     });
-                    type = "location";
+                    flag = "location";
                 }
             }
             else if (flag == "normal") {
