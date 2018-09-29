@@ -369,6 +369,7 @@ app.post('/', function (request, response) {
                             logger.info('經度: ' + results[idx].message.longitude);
                             logger.info(JSON.stringify(results[idx].type));
                             if (send_location) {
+                                logger.info('location_:send_location ');
                                 send_location = false;
                                 manual_seearch(results[idx].message.latitude, results[idx].message.longitude, function (reg) {
                                     if (reg)
