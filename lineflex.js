@@ -150,7 +150,11 @@ var lineflex = function (logger) {
 
     this.CreateActivityFlexCarousel = function (activitys) {
         var flexs = [];
-        
+        var length;
+        if (activitys.length > 5)
+            length = 5;
+        else
+            length = activitys.length;
         for (var index = 0; index < activitys.length; index++) {
             var activity = activitys[index];
             var url = '';
@@ -300,7 +304,7 @@ var lineflex = function (logger) {
 
         var more_activity_flex = {
             "type": "carousel",
-            "contents" : flexs
+            "contents": flexs
         }
         return more_activity_flex;
     }
