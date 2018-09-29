@@ -367,7 +367,7 @@ app.post('/', function (request, response) {
                         case "text":
                             if (message.text == "搜尋揪團") {
                                 logger.info("搜尋揪團..............................");
-                                send_location = "location";
+                                flag = "location";
                                 linemessage.SendMessage(results[idx].source.userId, "請輸入位置資訊", 'linehack2018', results[idx].replyToken, function (result) {
                                     if (!result) logger.error(result);
                                     else logger.info(result);
