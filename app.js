@@ -454,17 +454,20 @@ function manual_seearch(lat, lng, user_id, replyToken, callback) {
                     for (var idy = 0; idy < location_compare.length; idy++) {
                         if (linedb.getdistance(Number(shuangjious[idx].latitude), Number(shuangjious[idx].longitude), Number(lat), Number(lng)) <=
                             linedb.getdistance(Number(location_compare[idy].latitude), Number(location_compare[idy].longitude), Number(lat), Number(lng))) {
+                            logger.info("爽揪<location_compare")
                             for (var idz = location_compare.length; idz > idy; idz--) {
                                 location_compare[idz] = location_compare[idz - 1];
                             }
-                            location_compare[idy] = location_compare[idx];
+                            location_compare[idy] = shuangjious[idx];
+                            logger.info(idy+" : "+JSON.stringify(location_compare, null, 2))
+                            
                         }
 
                     }
                 }
             }
         }
-        logger.info("location_compare: " + JSON.stringify(location_compare, null, 2))
+        logger.info("location_compare結果: " + JSON.stringify(location_compare, null, 2))
         callback(user_id, replyToken, true)
     })
 
