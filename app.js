@@ -318,7 +318,7 @@ var flag = "normal";
 // 接收來自 LINE 傳送的訊息
 app.post('/', function (request, response) {
     logger.info("POST /");
-    try {
+    try {//
         var results = request.body.events;
         logger.info(JSON.stringify(results));
         logger.info('receive message count: ' + results.length);
