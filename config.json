@@ -1,0 +1,12 @@
+{
+    "channel_id": "1610735667",
+    "channel_secret": "d3c32b24f8f064da4bbdb8771fc9f570",
+    "channel_access_token": "S1wxT4fAbstJUpRVK2cW/D+NtUFZ3iD4pyyhWR135Usu/7pFMSHoxAf5nVvMw9FVzGhFEKxHFG+7n1dW7tSG2NvD4UsebFPCk/ae5IQRZjhcTI0z/AUefvzSCdXAUDxAYBlVfRCJ94RdPFH4JRs0qQdB04t89/1O/w1cDnyilFU=",
+    "image":{
+        "activity_flex":{
+            "stay": "https://cdn.pixabay.com/photo/2018/08/27/20/06/shield-3635898_960_720.jpg",
+            "sale":"https://cdn.pixabay.com/photo/2016/10/03/19/05/sale-1712533_960_720.png",
+            "diet":"https://cdn.pixabay.com/photo/2014/12/11/02/55/corn-syrup-563796_960_720.jpg"
+        }
+    }
+}
