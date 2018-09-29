@@ -1,5 +1,5 @@
 var users = new Map();  // 紀錄進入 Beacon 範圍的使用者
-/*
+
 // Application Log
 var log4js = require('log4js');
 var log4js_extend = require('log4js-extend');
@@ -9,11 +9,11 @@ log4js_extend(log4js, {
 });
 log4js.configure(__dirname + '/log4js.json');
 var logger = log4js.getLogger('bot');
-*/
-//var logger_line_message = log4js.getLogger('line_message');
-//var logger_line_LIFF = log4js.getLogger('line_LIFF');
-var logger_line_message ;
-var logger_line_LIFF ;
+
+var logger_line_message = log4js.getLogger('line_message');
+var logger_line_LIFF = log4js.getLogger('line_LIFF');
+//var logger_line_message ;
+//var logger_line_LIFF ;
 // 連接 mongodb
 var linemongodb = require('./linemongodb');
 var linedb = new linemongodb.linemongodb();
@@ -31,7 +31,6 @@ var lineflexapi = require('./lineflex');
 var lineflex = new lineflexapi.lineflex();
 
 // 建立 express service
-var express = requi
 var logger = log4js.getLogger('bot');
 var logger_line_message = log4js.getLogger('line_message');
 var logger_line_LIFF = log4js.getLogger('line_LIFF');
@@ -227,17 +226,17 @@ app.post('/api/beacon', function (request, response) {
     beacon.locationid = request.body.beacon_id;
     linedb.create_location(beacon, function (err, hosts) {
         if (err) {
-            console.log('create beacon fail: ' + err);
+            logger.info('create beacon fail: ' + err);
             response.send('create beacon fail: ' + err);
         }
-        console.log('create beacon success');
+        logger.info('create beacon success');
         response.send(hosts);
     });
 });
 
 app.post('/api/shungjiou', function (request, response) {
-    console.log('POST /api/shungjiou');
-    console.log(JSON.stringify(request.body));
+    logger.info('POST /api/shungjiou');
+    logger.info(JSON.stringify(request.body));
     var data = request.body;
     data.host.userId = data.host.userId.replace('\"', '').replace('\"', '');
     linedb.get_locationidbyuser(data.host.userId, function (err, locationid) {
@@ -256,7 +255,7 @@ app.post('/api/shungjiou', function (request, response) {
                 if (err)
                     logger.error('fail: ' + err);
                 else
-                    console.log('success');
+                    logger.info('success');
             });
 
             var organiser = new host();
@@ -271,11 +270,11 @@ app.post('/api/shungjiou', function (request, response) {
                 if (err)
                     logger.error('fail: ' + err);
                 else
-                    console.log('success');
+                    logger.info('success');
             });
 
             var flex = lineflex.CreateActivityFlex(activity);
-            console.log(flex);
+            logger.info(flex);
             linedb.get_userbylocationid(locationid, function (err, users) {
                 if (err)
                     logger.error('fail: ' + err);
@@ -287,7 +286,7 @@ app.post('/api/shungjiou', function (request, response) {
                                 this.response.send(err);
                             }
                             else {
-                                console.log('success');
+                                logger.info('success');
                                 this.response.send('200');
                             }
                         }.bind({ response: this.response }));
@@ -318,28 +317,28 @@ app.get('/image/:picture', function (request, response) {
 var send_location = false;
 // 接收來自 LINE 傳送的訊息
 app.post('/', function (request, response) {
-    console.log("POST /");
+    logger.info("POST /");
     try {
         var results = request.body.events;
-        console.log(JSON.stringify(results));
-        console.log('receive message count: ' + results.length);
+        logger.info(JSON.stringify(results));
+        logger.info('receive message count: ' + results.length);
         for (var idx = 0; idx < results.length; idx++) {
 
             if (send_location) {
                 if (results[idx].type != "location")
                     linemessage.SendMessage(results[idx].source.userId, "未輸入位置訊息，請重新操作一次", 'linehack2018', results[idx].replyToken, function (result) {
                         if (!result) logger.error(result);
-                        else console.log(result);
+                        else logger.info(result);
                         send_location = false;
                     });
             }
             else {
                 var acct = results[idx].source.userId;
                 var reply_token = results[idx].replyToken;
-                console.log('reply token: ' + results[idx].replyToken);
-                console.log('createdTime: ' + results[idx].timestamp);
-                console.log('from: ' + results[idx].source.userId);
-                console.log('type: ' + results[idx].type);
+                logger.info('reply token: ' + results[idx].replyToken);
+                logger.info('createdTime: ' + results[idx].timestamp);
+                logger.info('from: ' + results[idx].source.userId);
+                logger.info('type: ' + results[idx].type);
                 if (results[idx].type == 'follow') {
                     FollowEvent(acct);
                 }
@@ -349,33 +348,33 @@ app.post('/', function (request, response) {
                 else if (results[idx].type == 'message') {
                     linemessage.SendMessage(results[idx].source.userId, 'test', 'linehack2018', results[idx].replyToken, function (result) {
                         if (!result) logger.error(result);
-                        else console.log(result);
+                        else logger.info(result);
                     });
                     var message = results[idx].message;
-                    console.log("message: "+ JSON.stringify(message));
+                    logger.info("message: "+ JSON.stringify(message));
                     switch (message.type) {
                         case "text":
                             if (message.text == "搜尋揪團"){
-                                console.log("搜尋揪團..............................");
+                                logger.info("搜尋揪團..............................");
                                 send_location = true;
                                 linemessage.SendMessage(results[idx].source.userId, "請輸入位置資訊", 'linehack2018', results[idx].replyToken, function (result) {
                                     if (!result) logger.error(result);
-                                    else console.log(result);
+                                    else logger.info(result);
                                 });
                             }
                             
                             break;
                         case "location":
-                            console.log('緯度: ' + results[idx].message.latitude);
-                            console.log('經度: ' + results[idx].message.longitude);
-                            console.log(JSON.stringify(results[idx].type));
+                            logger.info('緯度: ' + results[idx].message.latitude);
+                            logger.info('經度: ' + results[idx].message.longitude);
+                            logger.info(JSON.stringify(results[idx].type));
                             if (send_location) {
                                 send_location = false;
                                 manual_seearch(results[idx].message.latitude, results[idx].message.longitude,function(reg){
                                     if(reg)
                                         linemessage.SendMessage(results[idx].source.userId, "顯示FLEX", 'linehack2018', results[idx].replyToken, function (result) {
                                             if (!result) logger.error(result);
-                                            else console.log(result);
+                                            else logger.info(result);
                                         });
                                 });
                             }
@@ -416,7 +415,7 @@ app.post('/', function (request, response) {
 /*
 
 var flex = lineflex.CreateActivityFlex(activity);
-            console.log(flex);
+            logger.info(flex);
             linedb.get_userbylocationid(locationid, function (err, users) {
                 if (err)
                     logger.error('fail: ' + err);
@@ -428,7 +427,7 @@ var flex = lineflex.CreateActivityFlex(activity);
                                 this.response.send(err);
                             }
                             else {
-                                console.log('success');
+                                logger.info('success');
                                 this.response.send('200');
                             }
                         }.bind({ response: this.response }));
@@ -439,12 +438,12 @@ var flex = lineflex.CreateActivityFlex(activity);
 function manual_seearch(lat, lng, callback) {
     //this.getdistance = function (lat1, lng1, lat2, lng2)
     //this.get_shuangjious = function (callback) {
-        console.log("manual_seearch: ......................................")
+        logger.info("manual_seearch: ......................................")
     var location_compare = [];
     linedb.get_shuangjious(function (shuangjious) {
-        console.log("shuangjious: "+JSON.stringify(shuangjious, null, 2))
+        logger.info("shuangjious: "+JSON.stringify(shuangjious, null, 2))
         for (var idx = 0; idx < shuangjious.length; idx++) {
-            console.log("idx距離: "+ linedb.getdistance(shuangjious[idx].latitude, shuangjious[idx].longitude, lat, lng))
+            logger.info("idx距離: "+ linedb.getdistance(shuangjious[idx].latitude, shuangjious[idx].longitude, lat, lng))
             if (location_compare.length == 0) {
                 location_compare.push(shuangjious[idx])
             }
@@ -461,13 +460,13 @@ function manual_seearch(lat, lng, callback) {
                 }
             }
         }
-        console.log("location_compare: "+JSON.stringify(location_compare,null,2))
+        logger.info("location_compare: "+JSON.stringify(location_compare,null,2))
         callback(true)
     })
 
 }
 function FollowEvent(acct) {
-    console.log('----------[Follow]---------');
+    logger.info('----------[Follow]---------');
     var new_user = new user();
     linemessage.GetProfile(acct, function (user) {
         this.new_user.name = user.displayName;
@@ -475,16 +474,16 @@ function FollowEvent(acct) {
         this.new_user.image = user.pictureUrl;
         linedb.create_user(this.new_user, function (err) {
             if (err) logger.error('fail' + err);
-            else console.log('success');
+            else logger.info('success');
         });
     }.bind({ new_user: new_user }));
 }
 
 function BeanconEvent(event) {
-    console.log('----------[Beacon]---------');
-    console.log('source: ' + JSON.stringify(event.source));
-    console.log('beacon: ' + JSON.stringify(event.beacon));
-    console.log('beacon type: ' + event.beacon.type);
+    logger.info('----------[Beacon]---------');
+    logger.info('source: ' + JSON.stringify(event.source));
+    logger.info('beacon: ' + JSON.stringify(event.beacon));
+    logger.info('beacon type: ' + event.beacon.type);
     switch (event.beacon.type) {
         case "enter":
             var update_user = new user();
@@ -495,7 +494,7 @@ function BeanconEvent(event) {
                 this.update_user.location.push(event.beacon.hwid);
                 linedb.set_userbyuserid(this.update_user.userid, this.update_user, function (err) {
                     if (err) logger.error('fail' + err);
-                    else console.log('success');
+                    else logger.info('success');
                 });
             }.bind({ update_user: update_user }));
             linedb.enter_usertolocation(event.source.userId, event.beacon.hwid, function (err) {
