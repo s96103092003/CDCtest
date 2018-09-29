@@ -26,8 +26,7 @@ var linemongodb = function () {
         shuangjiou.number = '999';
         shuangjiou.member = '';
         */
-
-        this.ShuangJiou.findOneAndUpdate({ 'name': shuangjiou.name }, shuangjiou, { upsert: true, new: true, setDefaultsOnInsert: true }, function (err) {
+        this.ShuangJiou.findOneAndUpdate({ 'shuangjiouid': shuangjiou.shuangjiouid }, shuangjiou, { upsert: true, new: true, setDefaultsOnInsert: true }, function (err) {
             if (err) {
                 callback(err);
             }

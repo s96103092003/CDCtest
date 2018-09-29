@@ -11,7 +11,7 @@ var linemessage = function (logger) {
                     { 'type': 'text', 'text': message }
                 ]
             };
-            console.log('傳送訊息給 ' + userId);
+            logger.info('傳送訊息給 ' + userId);
             ReplyMessage(data, config.channel_access_token, reply_token, function (ret) {
                 if (ret) {
                     this.callback(true);
@@ -34,14 +34,14 @@ var linemessage = function (logger) {
                     "baseUrl": baseUrl,
                     "altText": altText,
                     "baseSize": {
-                        "height": 693,
+                        "height": 1040,
                         "width": 1040
                     },
                     "actions": imagemap
                 }]
             };
-            console.log('傳送訊息給 ' + userId);
-            console.log('傳送圖片網址: ' + baseUrl);
+            logger.info('傳送訊息給 ' + userId);
+            logger.info('傳送圖片網址: ' + baseUrl);
             ReplyMessage(data, config.channel_access_token, reply_token, function (ret) {
                 if (ret) {
                     this.callback(true);
@@ -55,7 +55,7 @@ var linemessage = function (logger) {
     }
 
     // 傳送【選單】給 LINE 使用者
-    this.SendButtons = function (userId, image_url, title, text, buttons, alt_text, password, reply_token, callback) {
+    this.SendButtons = function (userId, text, buttons, alt_text, password, reply_token, callback) {
         if (password == 'linehack2018') {
             var data = {
                 'to': userId,
@@ -64,14 +64,12 @@ var linemessage = function (logger) {
                     'altText': alt_text,
                     'template': {
                         'type': 'buttons',
-                        'thumbnailImageUrl': image_url,
-                        'title': title,
                         'text': text,
                         'actions': buttons
                     }
                 }]
             };
-            console.log('傳送訊息給 ' + userId);
+            logger.info('傳送訊息給 ' + userId);
             ReplyMessage(data, config.channel_access_token, reply_token, function (ret) {
                 if (ret) {
                     this.callback(true);
@@ -99,7 +97,7 @@ var linemessage = function (logger) {
                     }
                 }]
             };
-            console.log('傳送訊息給 ' + userId);
+            logger.info('傳送訊息給 ' + userId);
             ReplyMessage(data, config.channel_access_token, reply_token, function (ret) {
                 if (ret) {
                     this.callback(true);
@@ -126,7 +124,7 @@ var linemessage = function (logger) {
                     }
                 }]
             };
-            console.log('傳送訊息給 ' + userId);
+            logger.info('傳送訊息給 ' + userId);
             ReplyMessage(data, config.channel_access_token, reply_token, function (ret) {
                 if (ret) {
                     this.callback(true);
@@ -150,7 +148,7 @@ var linemessage = function (logger) {
                     'contents': flex
                 }]
             };
-            console.log('傳送訊息給 ' + userId);
+            logger.info('傳送訊息給 ' + userId);
             ReplyMessage(data, config.channel_access_token, reply_token, function (ret) {
                 if (ret) {
                     this.callback(true);
@@ -179,16 +177,16 @@ var linemessage = function (logger) {
         var req = https.request(options, function (res) {
             res.setEncoding('utf8');
             res.on('data', function (chunk) {
-                console.log('Response: ' + chunk);
+                logger.info('Response: ' + chunk);
                 if (res.statusCode == 200) {
                     var result = JSON.parse(chunk);
-                    console.log('displayName: ' + result.displayName);
-                    console.log('userId: ' + result.userId);
-                    console.log('pictureUrl: ' + result.pictureUrl);
-                    console.log('statusMessage: ' + result.statusMessage);
+                    logger.info('displayName: ' + result.displayName);
+                    logger.info('userId: ' + result.userId);
+                    logger.info('pictureUrl: ' + result.pictureUrl);
+                    logger.info('statusMessage: ' + result.statusMessage);
                     callback(result);
                 } if (res.statusCode == 401) {
-                    console.log('IssueAccessToken');
+                    logger.info('IssueAccessToken');
                     IssueAccessToken();
                 }
             });
@@ -198,7 +196,7 @@ var linemessage = function (logger) {
     // 直接回覆訊息給 LINE 使用者
     function ReplyMessage (data, channel_access_token, reply_token, callback) {
         data.replyToken = reply_token;
-        console.log(JSON.stringify(data));
+        logger.info(JSON.stringify(data));
         var options = {
             host: 'api.line.me',
             port: '443',
@@ -214,16 +212,16 @@ var linemessage = function (logger) {
         var req = https.request(options, function (res) {
             res.setEncoding('utf8');
             res.on('data', function (chunk) {
-                console.log('Response: ' + chunk);
+                logger.info('Response: ' + chunk);
             });
             res.on('end', function () {
             });
-            console.log('Reply message status code: ' + res.statusCode);
+            logger.info('Reply message status code: ' + res.statusCode);
             if (res.statusCode == 200) {
-                console.log('Reply message success');
+                logger.info('Reply message success');
                 this.callback(true);
             } else {
-                console.log('Reply message failure');
+                logger.info('Reply message failure');
                 this.callback(false);
             }
         }.bind({ callback: callback }));
@@ -232,7 +230,7 @@ var linemessage = function (logger) {
     }
     
     function PostToLINE (data, channel_access_token, callback) {
-        console.log(JSON.stringify(data));
+        logger.info(JSON.stringify(data));
         var options = {
             host: 'api.line.me',
             port: '443',
@@ -248,7 +246,7 @@ var linemessage = function (logger) {
         var req = https.request(options, function (res) {
             res.setEncoding('utf8');
             res.on('data', function (chunk) {
-                console.log('Response: ' + chunk);
+                logger.info('Response: ' + chunk);
             });
         });
         req.write(JSON.stringify(data));
@@ -278,7 +276,7 @@ var linemessage = function (logger) {
         var req = https.request(options, function (res) {
             res.setEncoding('utf8');
             res.on('data', function (chunk) {
-                console.log('Response: ' + chunk);
+                logger.info('Response: ' + chunk);
                 if (res.statusCode == 200) {
                     var result = JSON.parse(chunk);
                     config.channel_access_token = result.access_token;

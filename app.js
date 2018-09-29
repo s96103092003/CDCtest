@@ -335,10 +335,15 @@ app.post('/', function (request, response) {
                     logger.info("into manual_seearch..........................................");
                     manual_seearch(results[idx].message.latitude, results[idx].message.longitude, results[idx].source.userId, results[idx].replyToken, function (user_id, replyToken, shuangjious, reg) {
                         if (reg) {
+                            let flex = lineflex.CreateActivityFlex(shuangjious[i]);
                             for(var i in shuangjious)
-                                linemessage.SendMessage(user_id, shuangjious[i].name, 'linehack2018', replyToken, function (result) {
-                                    if (!result) logger.error(result);
-                                    else logger.info(result);
+                                linemessage.SendFlex(this.userid, flex, 'linehack2018', '', function (result) {
+                                    if (!result) {
+                                        logger.error('fail: ' + result);
+                                    }
+                                    else {
+                                        logger.info('success');
+                                    }
                                 });
                         }
                     });

@@ -4,11 +4,11 @@ config = JSON.parse(config);
 var lineflex = function (logger) {
     this.CreateActivityFlex = function (activity) {
         var url = '';
-        if(activity.type == '飲食') 
+        if(activity.type == 'eat') 
             url = config.image.activity_flex.diet;
-        else if(activity.type == '特賣')
+        else if(activity.type == 'sale')
             url = config.image.activity_flex.sale;
-        else if (activity.type == '住宿')
+        else if (activity.type == 'sleep')
             url = config.image.activity_flex.stay;
         var activity_flex = {
             "type": "bubble",
@@ -132,9 +132,9 @@ var lineflex = function (logger) {
                         "style": "link",
                         "height": "sm",
                         "action": {
-                            "type": "uri",
+                            "type":"postback",
                             "label": "參加",
-                            "uri": "http://linehack2018.azurewebsites.net/api/guest/" + activity.host
+                            "data":"action=" + activity.shuangjiouid
                         }
                     },
                     {
