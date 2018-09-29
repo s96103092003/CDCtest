@@ -184,7 +184,11 @@ var linemessage = function (logger) {
         if (password == 'linehack2018') {
             var data = {
                 'to': userId,
-                'messages': [flex]
+                'messages': [{
+                    'type': 'flex',
+                    'altText': '請至行動裝置檢視訊息',
+                    'contents': flex
+                }]
             };
             logger.info('傳送訊息給 ' + userId);
             ReplyMessage(data, config.channel_access_token, reply_token, function (ret) {
