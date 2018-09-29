@@ -401,10 +401,6 @@ app.post('/', function (request, response) {
                     BeanconEvent(results[idx]);
                 }
                 else if (results[idx].type == 'message') {
-                    linemessage.SendMessage(results[idx].source.userId, 'test', 'linehack2018', results[idx].replyToken, function (result) {
-                        if (!result) logger.error(result);
-                        else logger.info(result);
-                    });
                     var message = results[idx].message;
                     logger.info("message: " + JSON.stringify(message));
                     switch (message.type) {//
@@ -423,7 +419,7 @@ app.post('/', function (request, response) {
                                         }
                                     ]
                                 }
-                                linemessage.SendMessageAndQuickReply(results[idx].source.userId, "請輸入位置資訊", 'linehack2018', results[idx].replyToken, function (result) {
+                                linemessage.SendMessageAndQuickReply(results[idx].source.userId, "請輸入位置資訊", 'linehack2018', results[idx].replyToken, quickreply, function (result) {
                                     if (!result) logger.error(result);
                                     else logger.info(result);
                                 });
