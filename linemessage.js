@@ -191,6 +191,7 @@ var linemessage = function (logger) {
                 }]
             };
             logger.info('傳送訊息給 ' + userId);
+            logger.info('FLEX格式 : \n' + JSON.stringify(flex, null, 2));
             ReplyMessage(data, config.channel_access_token, reply_token, function (ret) {
                 if (ret) {
                     this.callback(true);
