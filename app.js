@@ -370,18 +370,15 @@ app.post('/', function (request, response) {
                 else {
                     manual_seearch(results[idx].message.text, results[idx].message.latitude, results[idx].message.longitude, results[idx].source.userId, results[idx].replyToken, function (user_id, replyToken, shuangjious, reg) {
                         if (reg) {
-
-                            for (var i in shuangjious) {
-                                let flex = lineflex.CreateActivityFlexCarousel(shuangjious[i]);
-                                linemessage.SendFlex(this.userid, flex, 'linehack2018', replyToken, function (result) {
-                                    if (!result) {
-                                        logger.error('fail: ' + result);
-                                    }
-                                    else {
-                                        logger.info('success');
-                                    }
-                                });
-                            }
+                            let flex = lineflex.CreateActivityFlexCarousel(shuangjious[i]);
+                            linemessage.SendFlex(userid, flex, 'linehack2018', replyToken, function (result) {
+                                if (!result) {
+                                    logger.error('fail: ' + result);
+                                }
+                                else {
+                                    logger.info('success');
+                                }
+                            });
                         }
                     });
                     type = "normal";
