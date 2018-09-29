@@ -325,11 +325,11 @@ app.post('/', function (request, response) {
         for (var idx = 0; idx < results.length; idx++) {
 
             if (send_location == "location") {
-                if (results[idx].message.type = "location") {
+                if (results[idx].message.type == "location") {
                     linemessage.SendMessage(results[idx].source.userId, "未輸入位置訊息，請重新操作一次", 'linehack2018', results[idx].replyToken, function (result) {
                         if (!result) logger.error(result);
                         else logger.info(result);
-                        send_location = false;
+                        send_location = "normal";
                     });
                 }
             }
