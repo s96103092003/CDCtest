@@ -331,8 +331,8 @@ app.post('/', function (request, response) {
                         else logger.info(result);
                     });
                 }
-                else{
-                    logger.info("into manual_seearch..........................................");                  
+                else {
+                    logger.info("into manual_seearch..........................................");
                     manual_seearch(results[idx].message.latitude, results[idx].message.longitude, function (reg) {
                         if (reg)
                             linemessage.SendMessage(results[idx].source.userId, "顯示FLEX", 'linehack2018', results[idx].replyToken, function (result) {
@@ -444,20 +444,22 @@ function manual_seearch(lat, lng, callback) {
     linedb.get_shuangjious(function (shuangjious) {
         logger.info("shuangjious: " + JSON.stringify(shuangjious, null, 2))
         for (var idx = 0; idx < shuangjious.length; idx++) {
-            logger.info("idx距離: " + linedb.getdistance(shuangjious[idx].latitude, shuangjious[idx].longitude, lat, lng))
-            if (location_compare.length == 0) {
-                location_compare.push(shuangjious[idx])
-            }
-            else {
-                for (var idy = 0; idy < location_compare.length; idy++) {
-                    if (linedb.getdistance(shuangjious[idx].latitude, shuangjious[idx].longitude, lat, lng) <=
-                        linedb.getdistance(location_compare[idy].latitude, location_compare[idy].longitude, lat, lng)) {
-                        for (var idz = location_compare.length; idz > idy; idz--) {
-                            location_compare[idz] = location_compare[idz - 1];
+            logger.info("idx距離: " + linedb.getdistance(Number(shuangjious[idx].latitude), Number(shuangjious[idx].longitude), Number(lat), Number(lng)))
+            if (shuangjious[idx].latitude != null && shuangjious[idx].longitude != null) {
+                if (location_compare.length == 0) {
+                    location_compare.push(shuangjious[idx])
+                }
+                else {
+                    for (var idy = 0; idy < location_compare.length; idy++) {
+                        if (linedb.getdistance(shuangjious[idx].latitude, shuangjious[idx].longitude, lat, lng) <=
+                            linedb.getdistance(location_compare[idy].latitude, location_compare[idy].longitude, lat, lng)) {
+                            for (var idz = location_compare.length; idz > idy; idz--) {
+                                location_compare[idz] = location_compare[idz - 1];
+                            }
+                            location_compare[idy] = location_compare[idx];
                         }
-                        location_compare[idy] = location_compare[idx];
-                    }
 
+                    }
                 }
             }
         }
