@@ -337,9 +337,8 @@ app.post('/', function (request, response) {
                         if (reg) {
 
                             for (var i in shuangjious) {
-                                if(i==2)break;
                                 let flex = lineflex.CreateActivityFlex(shuangjious[i]);
-                                linemessage.SendFlex(this.userid, flex, 'linehack2018', '', function (result) {
+                                linemessage.SendFlex(this.userid, flex, 'linehack2018', replyToken, function (result) {
                                     if (!result) {
                                         logger.error('fail: ' + result);
                                     }
