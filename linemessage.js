@@ -23,6 +23,26 @@ var linemessage = function (logger) {
             callback(false);
         }
     }
+    this.SendMessageAndQuickReply = function (userId, message, password, reply_token,quickreply, callback) {
+        if (password == 'linehack2018') {
+            var data = {
+                'to': userId,
+                'messages': [
+                    { 'type': 'text', 'text': message }
+                ]
+            };
+            logger.info('傳送訊息給 ' + userId);
+            ReplyMessage(data, config.channel_access_token, reply_token, function (ret) {
+                if (ret) {
+                    this.callback(true);
+                } else {
+                    PostToLINE(data, config.channel_access_token, this.callback);
+                }
+            }.bind({ callback: callback }));
+        } else {
+            callback(false);
+        }
+    }
 
     // 傳送[可點選圖片]給 LINE 使用者
     this.SendImagemap = function (userId, baseUrl, altText, imagemap, password, reply_token, callback) {

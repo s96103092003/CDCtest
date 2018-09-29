@@ -332,7 +332,30 @@ app.post('/', function (request, response) {
                     });
                 }
                 else {
-                    logger.info("into manual_seearch..........................................");
+                    logger.info("get location..........................................");
+                    let quickreply = {
+                        "items": [
+                            {
+                                "type": "action",
+                                "action": {
+                                    "type": "cameraRoll",
+                                    "label": "Send photo"
+                                }
+                            },
+                            {
+                                "type": "action",
+                                "action": {
+                                    "type": "camera",
+                                    "label": "Open camera"
+                                }
+                            }
+                        ]
+                    }
+                    linemessage.SendMessageAndQuickReply(results[idx].source.userId, "請選擇活動類別", 'linehack2018', results[idx].replyToken,quickreply, function (result) {
+                        if (!result) logger.error(result);
+                        else logger.info(result);
+                    });
+                    SendMessageAndQuickReply
                     manual_seearch(results[idx].message.latitude, results[idx].message.longitude, results[idx].source.userId, results[idx].replyToken, function (user_id, replyToken, shuangjious, reg) {
                         if (reg) {
 
@@ -392,6 +415,42 @@ app.post('/', function (request, response) {
 
                             }
                             break;
+                    }
+                }
+                else if (results[idx].type == 'postback') {
+                    var action = results[idx].postback.data.split('=')[1];
+                    logger.info('回傳使用者執行動作: ' + action);
+                    if (action == 'createactivity') {
+                        var activity = new shuangjiou();
+                        if (tentative_activity.has(results[idx].source.userId)) {
+                            linemessage.SendMessage(results[idx].source.userId, "不好意思，您還有一個活動還未結束，請結束後在建立新的活動", "linehack2018", results[idx].replyToken, function (result) {
+                                if (!result) logger.error(result);
+                                else logger.info(result);
+                            });
+                        } else {
+                            activity.shuangjiouid = guid();
+                            tentative_activity.set(results[idx].source.userId, activity);
+                            var imagemap = [
+                                {
+                                    "type": "uri",
+                                    "linkUri": "line://nv/location",
+                                    "area": {
+                                        "x": 0,
+                                        "y": 0,
+                                        "width": 1040,
+                                        "height": 1040
+                                    }
+                                }
+                            ]
+                            linemessage.SendImagemap(results[idx].source.userId, "https://linehack2018.azurewebsites.net/image/location.jpg", "This is an imagemap", imagemap, 'linehack2018', results[idx].replyToken, function (result) {
+                                if (!result) logger.error(result);
+                                else logger.info(result);
+                            });
+                        }
+                    } else if (action == 'searchactivity') {
+
+                    } else if (action == 'isactiveactivity') {
+
                     }
                 }
             }
