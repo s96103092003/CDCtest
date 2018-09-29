@@ -1,5 +1,5 @@
 var users = new Map();  // 紀錄進入 Beacon 範圍的使用者
-
+/*
 // Application Log
 var log4js = require('log4js');
 var log4js_extend = require('log4js-extend');
@@ -9,6 +9,7 @@ log4js_extend(log4js, {
 });
 log4js.configure(__dirname + '/log4js.json');
 var logger = log4js.getLogger('bot');
+*/
 //var logger_line_message = log4js.getLogger('line_message');
 //var logger_line_LIFF = log4js.getLogger('line_LIFF');
 var logger_line_message ;
