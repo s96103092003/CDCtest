@@ -335,8 +335,8 @@ app.post('/', function (request, response) {
                     logger.info("get location..........................................");
                     manual_seearch(results[idx].message.text, results[idx].message.latitude, results[idx].message.longitude, results[idx].source.userId, results[idx].replyToken, function (user_id, replyToken, shuangjious, reg) {
                         if (reg) {
-                            let flex = lineflex.CreateActivityFlexCarousel(shuangjious);
-                            linemessage.SendFlex(user_id, flex, 'linehack2018', replyToken, function (result) {
+                            let flexs = lineflex.CreateActivityFlexCarousel(shuangjious);
+                            linemessage.SendFlex(user_id, flexs, 'linehack2018', replyToken, function (result) {
                                 if (!result) {
                                     logger.error('fail: ' + result);
                                 }
@@ -436,7 +436,7 @@ app.post('/', function (request, response) {
                                     if (!result) logger.error(result);
                                     else logger.info(result);
                                 });
-                                
+
                             }
 
                             break;
@@ -545,7 +545,7 @@ function manual_seearch(activity_type, lat, lng, user_id, replyToken, callback) 
     linedb.get_shuangjious(function (shuangjious) {
         logger.info("shuangjious: " + JSON.stringify(shuangjious, null, 2))
         for (var idx = 0; idx < shuangjious.length; idx++) {
-            logger.info(idx+" :距離: " + linedb.getdistance(Number(shuangjious[idx].latitude), Number(shuangjious[idx].longitude), Number(lat), Number(lng)))
+            logger.info(idx + " :距離: " + linedb.getdistance(Number(shuangjious[idx].latitude), Number(shuangjious[idx].longitude), Number(lat), Number(lng)))
             if (shuangjious[idx].latitude != null && shuangjious[idx].longitude != null) {
                 if (activity_type != "不設限") {
                     if (linedb.getdistance(Number(shuangjious[idx].latitude), Number(shuangjious[idx].longitude), Number(lat), Number(lng)) < 12000)
