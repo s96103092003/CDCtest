@@ -333,41 +333,6 @@ app.post('/', function (request, response) {
                 }
                 else {
                     logger.info("get location..........................................");
-                    let quickreply = {
-                        "items": [
-                            {
-                                "type": "action",
-                                "action": {
-                                    "type": "message",
-                                    "label": "eat",
-                                    "text": "eat"
-                                }
-                            },
-                            {
-                                "type": "action",
-                                "action": {
-                                    "type": "message",
-                                    "label": "drink",
-                                    "text": "drink"
-                                }
-                            }
-                        ]
-                    }
-                    linemessage.SendMessageAndQuickReply(results[idx].source.userId, "請選擇活動類別", 'linehack2018', results[idx].replyToken, quickreply, function (result) {
-                        if (!result) logger.error(result);
-                        else logger.info(result);
-                    });
-                }
-                flag = "type";
-            }
-            else if (flag == "type") {
-                if (results[idx].message.type != "text") {
-                    linemessage.SendMessage(results[idx].source.userId, "未輸入活動類型，請重新操作一次", 'linehack2018', results[idx].replyToken, function (result) {
-                        if (!result) logger.error(result);
-                        else logger.info(result);
-                    });
-                }
-                else {
                     manual_seearch(results[idx].message.text, results[idx].message.latitude, results[idx].message.longitude, results[idx].source.userId, results[idx].replyToken, function (user_id, replyToken, shuangjious, reg) {
                         if (reg) {
                             let flex = lineflex.CreateActivityFlexCarousel(shuangjious[idx]);
@@ -381,7 +346,33 @@ app.post('/', function (request, response) {
                             });
                         }
                     });
-                    type = "normal";
+                }
+                flag = "normal";
+            }
+            else if (flag == "type") {
+                if (results[idx].message.type != "text") {
+                    linemessage.SendMessage(results[idx].source.userId, "未輸入活動類型，請重新操作一次", 'linehack2018', results[idx].replyToken, function (result) {
+                        if (!result) logger.error(result);
+                        else logger.info(result);
+                    });
+                }
+                else {
+                    let quickreply = {
+                        "items": [
+                            {
+                                "type": "action",
+                                "action": {
+                                    "type": "location",
+                                    "label": "location",
+                                }
+                            }
+                        ]
+                    }
+                    linemessage.SendMessageAndQuickReply(results[idx].source.userId, "請輸入位置資訊", 'linehack2018', results[idx].replyToken, quickreply, function (result) {
+                        if (!result) logger.error(result);
+                        else logger.info(result);
+                    });
+                    type = "location";
                 }
             }
             else if (flag == "normal") {
@@ -404,22 +395,32 @@ app.post('/', function (request, response) {
                         case "text":
                             if (message.text == "搜尋揪團") {
                                 logger.info("搜尋揪團..............................");
-                                flag = "location";
+                                flag = "type";
                                 let quickreply = {
                                     "items": [
                                         {
                                             "type": "action",
                                             "action": {
-                                                "type": "location",
-                                                "label": "location",
+                                                "type": "message",
+                                                "label": "eat",
+                                                "text": "eat"
+                                            }
+                                        },
+                                        {
+                                            "type": "action",
+                                            "action": {
+                                                "type": "message",
+                                                "label": "drink",
+                                                "text": "drink"
                                             }
                                         }
                                     ]
                                 }
-                                linemessage.SendMessageAndQuickReply(results[idx].source.userId, "請輸入位置資訊", 'linehack2018', results[idx].replyToken, quickreply, function (result) {
+                                linemessage.SendMessageAndQuickReply(results[idx].source.userId, "請選擇活動類別", 'linehack2018', results[idx].replyToken, quickreply, function (result) {
                                     if (!result) logger.error(result);
                                     else logger.info(result);
                                 });
+                                
                             }
 
                             break;
