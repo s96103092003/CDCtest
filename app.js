@@ -314,7 +314,7 @@ app.get('/image/:picture', function (request, response) {
     }.bind({ req: request, res: response }));
 });
 
-var send_location = "normal";
+var flag = "normal";
 // 接收來自 LINE 傳送的訊息
 app.post('/', function (request, response) {
     logger.info("POST /");
@@ -324,16 +324,26 @@ app.post('/', function (request, response) {
         logger.info('receive message count: ' + results.length);
         for (var idx = 0; idx < results.length; idx++) {
 
-            if (send_location == "location") {
-                if (results[idx].message.type == "location") {
+            if (flag == "location") {
+                if (results[idx].message.type != "location") {
                     linemessage.SendMessage(results[idx].source.userId, "未輸入位置訊息，請重新操作一次", 'linehack2018', results[idx].replyToken, function (result) {
                         if (!result) logger.error(result);
                         else logger.info(result);
-                        send_location = "normal";
                     });
                 }
+                else{
+                    logger.info("into manual_seearch..........................................");                  
+                    manual_seearch(results[idx].message.latitude, results[idx].message.longitude, function (reg) {
+                        if (reg)
+                            linemessage.SendMessage(results[idx].source.userId, "顯示FLEX", 'linehack2018', results[idx].replyToken, function (result) {
+                                if (!result) logger.error(result);
+                                else logger.info(result);
+                            });
+                    });
+                }
+                flag = "normal";
             }
-            else if (send_location == "normal") {
+            else if (flag == "normal") {
                 var acct = results[idx].source.userId;
                 var reply_token = results[idx].replyToken;
                 logger.info('reply token: ' + results[idx].replyToken);
@@ -369,17 +379,6 @@ app.post('/', function (request, response) {
                             logger.info('緯度: ' + results[idx].message.latitude);
                             logger.info('經度: ' + results[idx].message.longitude);
                             logger.info(JSON.stringify(results[idx].type));
-                            if (send_location == "location") {
-                                logger.info('location_:send_location ');
-                                send_location = "normal";
-                                manual_seearch(results[idx].message.latitude, results[idx].message.longitude, function (reg) {
-                                    if (reg)
-                                        linemessage.SendMessage(results[idx].source.userId, "顯示FLEX", 'linehack2018', results[idx].replyToken, function (result) {
-                                            if (!result) logger.error(result);
-                                            else logger.info(result);
-                                        });
-                                });
-                            }
                             if (results[idx].postback.data == '') {
 
                             }
