@@ -333,12 +333,13 @@ app.post('/', function (request, response) {
                 }
                 else {
                     logger.info("into manual_seearch..........................................");
-                    manual_seearch(results[idx].message.latitude, results[idx].message.longitude, results[idx].source.userId, results[idx].replyToken, function (user_id, replyToken, reg) {
+                    manual_seearch(results[idx].message.latitude, results[idx].message.longitude, results[idx].source.userId, results[idx].replyToken, function (user_id, replyToken, shuangjious, reg) {
                         if (reg) {
-                            linemessage.SendMessage(user_id, "顯示FLEX", 'linehack2018', replyToken, function (result) {
-                                if (!result) logger.error(result);
-                                else logger.info(result);
-                            });
+                            for(var i in shuangjious)
+                                linemessage.SendMessage(user_id, shuangjious[i].name, 'linehack2018', replyToken, function (result) {
+                                    if (!result) logger.error(result);
+                                    else logger.info(result);
+                                });
                         }
                     });
                 }
@@ -447,6 +448,9 @@ function manual_seearch(lat, lng, user_id, replyToken, callback) {
         for (var idx = 0; idx < shuangjious.length; idx++) {
             logger.info("idx距離: " + linedb.getdistance(Number(shuangjious[idx].latitude), Number(shuangjious[idx].longitude), Number(lat), Number(lng)))
             if (shuangjious[idx].latitude != null && shuangjious[idx].longitude != null) {
+                if (linedb.getdistance(Number(shuangjious[idx].latitude), Number(shuangjious[idx].longitude), Number(lat), Number(lng)) < 1000)
+                    location_compare.push(shuangjious[idx])
+                /*排序未完成
                 if (location_compare.length == 0) {
                     location_compare.push(shuangjious[idx])
                 }
@@ -465,11 +469,11 @@ function manual_seearch(lat, lng, user_id, replyToken, callback) {
                         }
 
                     }
-                }
+                }*/
             }
         }
         logger.info("location_compare結果: " + JSON.stringify(location_compare, null, 2))
-        callback(user_id, replyToken, true)
+        callback(user_id, replyToken, shuangjious, true)
     })
 
 }
