@@ -410,8 +410,24 @@ app.post('/', function (request, response) {
                                             "type": "action",
                                             "action": {
                                                 "type": "message",
-                                                "label": "drink",
-                                                "text": "drink"
+                                                "label": "sale",
+                                                "text": "sale"
+                                            }
+                                        },
+                                        {
+                                            "type": "action",
+                                            "action": {
+                                                "type": "message",
+                                                "label": "sleep",
+                                                "text": "sleep"
+                                            }
+                                        },
+                                        {
+                                            "type": "action",
+                                            "action": {
+                                                "type": "message",
+                                                "label": "不設限",
+                                                "text": "不設限"
                                             }
                                         }
                                     ]
