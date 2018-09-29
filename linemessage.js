@@ -23,14 +23,12 @@ var linemessage = function (logger) {
             callback(false);
         }
     }
-    this.SendMessageAndQuickReply = function (userId, message, password, reply_token,quickreply, callback) {
+    this.SendMessageAndQuickReply = function (userId, message, password, reply_token,quickReply, callback) {
         if (password == 'linehack2018') {
             var data = {
                 'to': userId,
-                'messages': [
-                    { 'type': 'text', 'text': message }
-                ],
-                'quickReply':quickreply
+                'text': message,
+                'quickReply':quickReply
             };
             logger.info('傳送訊息給 ' + userId);
             ReplyMessage(data, config.channel_access_token, reply_token, function (ret) {
