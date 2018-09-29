@@ -338,25 +338,37 @@ app.post('/', function (request, response) {
                             {
                                 "type": "action",
                                 "action": {
-                                    "type": "cameraRoll",
-                                    "label": "Send photo"
+                                    "type": "message",
+                                    "label": "eat",
+                                    "text": "eat"
                                 }
                             },
                             {
                                 "type": "action",
                                 "action": {
-                                    "type": "camera",
-                                    "label": "Open camera"
+                                    "type": "message",
+                                    "label": "drink",
+                                    "text": "drink"
                                 }
                             }
                         ]
                     }
-                    linemessage.SendMessageAndQuickReply(results[idx].source.userId, "請選擇活動類別", 'linehack2018', results[idx].replyToken,quickreply, function (result) {
+                    linemessage.SendMessageAndQuickReply(results[idx].source.userId, "請選擇活動類別", 'linehack2018', results[idx].replyToken, quickreply, function (result) {
                         if (!result) logger.error(result);
                         else logger.info(result);
                     });
-                    SendMessageAndQuickReply
-                    manual_seearch(results[idx].message.latitude, results[idx].message.longitude, results[idx].source.userId, results[idx].replyToken, function (user_id, replyToken, shuangjious, reg) {
+                }
+                flag = "type";
+            }
+            else if (flag == "type") {
+                if (results[idx].message.type != "text") {
+                    linemessage.SendMessage(results[idx].source.userId, "未輸入活動類型，請重新操作一次", 'linehack2018', results[idx].replyToken, function (result) {
+                        if (!result) logger.error(result);
+                        else logger.info(result);
+                    });
+                }
+                else {
+                    manual_seearch(results[idx].message.text, results[idx].message.latitude, results[idx].message.longitude, results[idx].source.userId, results[idx].replyToken, function (user_id, replyToken, shuangjious, reg) {
                         if (reg) {
 
                             for (var i in shuangjious) {
@@ -373,7 +385,6 @@ app.post('/', function (request, response) {
                         }
                     });
                 }
-                flag = "normal";
             }
             else if (flag == "normal") {
                 var acct = results[idx].source.userId;
@@ -504,7 +515,7 @@ var flex = lineflex.CreateActivityFlex(activity);
                 }
             }.bind({ response: this.response }));
 */
-function manual_seearch(lat, lng, user_id, replyToken, callback) {
+function manual_seearch(activity_type, lat, lng, user_id, replyToken, callback) {
     //this.getdistance = function (lat1, lng1, lat2, lng2)
     //this.get_shuangjious = function (callback) {
     logger.info("manual_seearch: ......................................")
@@ -514,8 +525,15 @@ function manual_seearch(lat, lng, user_id, replyToken, callback) {
         for (var idx = 0; idx < shuangjious.length; idx++) {
             logger.info("idx距離: " + linedb.getdistance(Number(shuangjious[idx].latitude), Number(shuangjious[idx].longitude), Number(lat), Number(lng)))
             if (shuangjious[idx].latitude != null && shuangjious[idx].longitude != null) {
-                if (linedb.getdistance(Number(shuangjious[idx].latitude), Number(shuangjious[idx].longitude), Number(lat), Number(lng)) < 12000)
-                    location_compare.push(shuangjious[idx])
+                if (activity_type != "不設限") {
+                    if (linedb.getdistance(Number(shuangjious[idx].latitude), Number(shuangjious[idx].longitude), Number(lat), Number(lng)) < 12000)
+                        location_compare.push(shuangjious[idx])
+                }
+                else {
+                    if (shuangjious[idx].type == activity_type)
+                        if (linedb.getdistance(Number(shuangjious[idx].latitude), Number(shuangjious[idx].longitude), Number(lat), Number(lng)) < 12000)
+                            location_compare.push(shuangjious[idx])
+                }
                 /*排序未完成
                 if (location_compare.length == 0) {
                     location_compare.push(shuangjious[idx])
