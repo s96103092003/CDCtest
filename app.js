@@ -443,7 +443,7 @@ function manual_seearch(lat, lng, user_id, replyToken, callback) {
     logger.info("manual_seearch: ......................................")
     var location_compare = [];
     linedb.get_shuangjious(function (shuangjious) {
-        logger.info("shuangjious: " + JSON.stringify(shuangjious, null, 2))
+        //logger.info("shuangjious: " + JSON.stringify(shuangjious, null, 2))
         for (var idx = 0; idx < shuangjious.length; idx++) {
             logger.info("idx距離: " + linedb.getdistance(Number(shuangjious[idx].latitude), Number(shuangjious[idx].longitude), Number(lat), Number(lng)))
             if (shuangjious[idx].latitude != null && shuangjious[idx].longitude != null) {
@@ -452,6 +452,7 @@ function manual_seearch(lat, lng, user_id, replyToken, callback) {
                 }
                 else {
                     for (var idy = 0; idy < location_compare.length; idy++) {
+                        logger.info(idy+" : "+JSON.stringify(location_compare, null, 2))
                         if (linedb.getdistance(Number(shuangjious[idx].latitude), Number(shuangjious[idx].longitude), Number(lat), Number(lng)) <=
                             linedb.getdistance(Number(location_compare[idy].latitude), Number(location_compare[idy].longitude), Number(lat), Number(lng))) {
                             logger.info("爽揪<location_compare")
