@@ -27,6 +27,7 @@ var linemessage = function (logger) {
         if (password == 'linehack2018') {
             var data = {
                 'to': userId,
+                'type': "message",
                 'text': message,
                 'quickReply':quickReply
             };
