@@ -334,11 +334,12 @@ app.post('/', function (request, response) {
                 else {
                     logger.info("into manual_seearch..........................................");
                     manual_seearch(results[idx].message.latitude, results[idx].message.longitude, function (reg) {
-                        if (reg)
+                        if (reg){
                             linemessage.SendMessage(results[idx].source.userId, "顯示FLEX", 'linehack2018', results[idx].replyToken, function (result) {
                                 if (!result) logger.error(result);
                                 else logger.info(result);
                             });
+                        }         
                     });
                 }
                 flag = "normal";
@@ -443,7 +444,11 @@ function manual_seearch(lat, lng, callback) {
     var location_compare = [];
     linedb.get_shuangjious(function (shuangjious) {
         logger.info("shuangjious: " + JSON.stringify(shuangjious, null, 2))
-        for (var idx = 0; idx < shuangjious.length; idx++) {
+        for (var idx = 0; idx < 1; idx++) {
+            logger.info("shuangjious[idx].latitude: "+Number(shuangjious[idx].latitude))
+            logger.info("shuangjious[idx].longitude: "+Number(shuangjious[idx].longitude))
+            logger.info("lat: "+Number(lat))
+            logger.info("lng: "+Number(lng))
             logger.info("idx距離: " + linedb.getdistance(Number(shuangjious[idx].latitude), Number(shuangjious[idx].longitude), Number(lat), Number(lng)))
             if (shuangjious[idx].latitude != null && shuangjious[idx].longitude != null) {
                 if (location_compare.length == 0) {
