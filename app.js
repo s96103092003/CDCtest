@@ -445,10 +445,6 @@ function manual_seearch(lat, lng, user_id, replyToken, callback) {
     linedb.get_shuangjious(function (shuangjious) {
         logger.info("shuangjious: " + JSON.stringify(shuangjious, null, 2))
         for (var idx = 0; idx < shuangjious.length; idx++) {
-            logger.info("shuangjious[idx].latitude: " + Number(shuangjious[idx].latitude))
-            logger.info("shuangjious[idx].longitude: " + Number(shuangjious[idx].longitude))
-            logger.info("lat: " + Number(lat))
-            logger.info("lng: " + Number(lng))
             logger.info("idx距離: " + linedb.getdistance(Number(shuangjious[idx].latitude), Number(shuangjious[idx].longitude), Number(lat), Number(lng)))
             if (shuangjious[idx].latitude != null && shuangjious[idx].longitude != null) {
                 if (location_compare.length == 0) {
@@ -456,8 +452,8 @@ function manual_seearch(lat, lng, user_id, replyToken, callback) {
                 }
                 else {
                     for (var idy = 0; idy < location_compare.length; idy++) {
-                        if (linedb.getdistance(shuangjious[idx].latitude, shuangjious[idx].longitude, lat, lng) <=
-                            linedb.getdistance(location_compare[idy].latitude, location_compare[idy].longitude, lat, lng)) {
+                        if (linedb.getdistance(Number(shuangjious[idx].latitude), Number(shuangjious[idx].longitude), Number(lat), Number(lng)) <=
+                            linedb.getdistance(Number(location_compare[idy].latitude), Number(location_compare[idy].longitude), Number(lat), Number(lng))) {
                             for (var idz = location_compare.length; idz > idy; idz--) {
                                 location_compare[idz] = location_compare[idz - 1];
                             }
