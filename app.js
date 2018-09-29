@@ -579,7 +579,7 @@ function manual_seearch(activity_type, lat, lng, user_id, replyToken, callback) 
             }
         }
         logger.info("location_compare結果: " + JSON.stringify(location_compare, null, 2))
-        callback(user_id, replyToken, shuangjious, true)
+        callback(user_id, replyToken, location_compare, true)
     })
 
 }
