@@ -323,7 +323,7 @@ app.post('/', function (request, response) {
         logger.info(JSON.stringify(results));
         logger.info('receive message count: ' + results.length);
         for (var idx = 0; idx < results.length; idx++) {
-            if (results[idx].message != "location") {
+            if (results[idx].message.type != "location") {
                 if (send_location) {
                     linemessage.SendMessage(results[idx].source.userId, "未輸入位置訊息，請重新操作一次", 'linehack2018', results[idx].replyToken, function (result) {
                         if (!result) logger.error(result);
