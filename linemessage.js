@@ -23,13 +23,13 @@ var linemessage = function (logger) {
             callback(false);
         }
     }
-    this.SendMessageAndQuickReply = function (userId, message, password, reply_token,quickReply, callback) {
+    this.SendMessageAndQuickReply = function (userId, message, password, reply_token, quickReply, callback) {
         if (password == 'linehack2018') {
             var data = {
                 'to': userId,
-                'type': "message",
+                'type': "text",
                 'text': message,
-                'quickReply':quickReply
+                'quickReply': quickReply
             };
             logger.info('傳送訊息給 ' + userId);
             ReplyMessage(data, config.channel_access_token, reply_token, function (ret) {
@@ -212,9 +212,9 @@ var linemessage = function (logger) {
             });
         }).end();
     }
-    
+
     // 直接回覆訊息給 LINE 使用者
-    function ReplyMessage (data, channel_access_token, reply_token, callback) {
+    function ReplyMessage(data, channel_access_token, reply_token, callback) {
         data.replyToken = reply_token;
         logger.info(JSON.stringify(data));
         var options = {
@@ -248,8 +248,8 @@ var linemessage = function (logger) {
         req.write(JSON.stringify(data));
         req.end();
     }
-    
-    function PostToLINE (data, channel_access_token, callback) {
+
+    function PostToLINE(data, channel_access_token, callback) {
         logger.info(JSON.stringify(data));
         var options = {
             host: 'api.line.me',
@@ -276,7 +276,7 @@ var linemessage = function (logger) {
         } catch (e) { };
     }
 
-    function IssueAccessToken () {
+    function IssueAccessToken() {
         var https = require('https');
         var options = {
             host: 'api.line.me',

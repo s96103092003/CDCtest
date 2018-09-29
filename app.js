@@ -384,6 +384,7 @@ app.post('/', function (request, response) {
                             }
                         }
                     });
+                    type = "normal";
                 }
             }
             else if (flag == "normal") {
@@ -411,7 +412,18 @@ app.post('/', function (request, response) {
                             if (message.text == "搜尋揪團") {
                                 logger.info("搜尋揪團..............................");
                                 flag = "location";
-                                linemessage.SendMessage(results[idx].source.userId, "請輸入位置資訊", 'linehack2018', results[idx].replyToken, function (result) {
+                                let quickreply = {
+                                    "items": [
+                                        {
+                                            "type": "action",
+                                            "action": {
+                                                "type": "location",
+                                                "label": "location",
+                                            }
+                                        }
+                                    ]
+                                }
+                                linemessage.SendMessageAndQuickReply(results[idx].source.userId, "請輸入位置資訊", 'linehack2018', results[idx].replyToken, function (result) {
                                     if (!result) logger.error(result);
                                     else logger.info(result);
                                 });
