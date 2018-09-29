@@ -27,9 +27,9 @@ var linemessage = function (logger) {
         if (password == 'linehack2018') {
             var data = {
                 'to': userId,
-                'type': "text",
-                'text': message,
-                'quickReply': quickReply
+                'messages': [
+                    { 'type': 'text', 'text': message, 'quickReply': quickReply }
+                ]
             };
             logger.info('傳送訊息給 ' + userId);
             ReplyMessage(data, config.channel_access_token, reply_token, function (ret) {
