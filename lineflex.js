@@ -150,6 +150,7 @@ var lineflex = function (logger) {
 
     this.CreateActivityFlexCarousel = function (activitys) {
         var flexs = [];
+        /*
         for (var index = 0; index < activitys.length; index++) {
             var activity = activitys[index];
             var url = '';
@@ -299,7 +300,38 @@ var lineflex = function (logger) {
         var more_activity_flex = {
             "type": "carousel",
             "contents" : flexs
-        }
+        }*/
+        var more_activity_flex = {
+            "type": "carousel",
+            "contents": [
+              {
+                "type": "bubble",
+                "body": {
+                  "type": "box",
+                  "layout": "vertical",
+                  "contents": [
+                    {
+                      "type": "text",
+                      "text": "First bubble"
+                    }
+                  ]
+                }
+              },
+              {
+                "type": "bubble",
+                "body": {
+                  "type": "box",
+                  "layout": "vertical",
+                  "contents": [
+                    {
+                      "type": "text",
+                      "text": "Second bubble"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
         return more_activity_flex;
     }
 }
