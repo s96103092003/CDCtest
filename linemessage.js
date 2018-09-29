@@ -180,29 +180,6 @@ var linemessage = function (logger) {
             callback(false);
         }
     }
-    this.SendCarouselFlex = function (userId, flex, password, reply_token, callback) {
-        if (password == 'linehack2018') {
-            var data = {
-                'to': userId,
-                'messages': [{
-                    'type': 'flex',
-                    'altText': '請至行動裝置檢視訊息',
-                    'contents': flex
-                }]
-            };
-            logger.info('傳送訊息給 ' + userId);
-            logger.info('FLEX格式 : \n' + JSON.stringify(flex, null, 2));
-            ReplyMessage(data, config.channel_access_token, reply_token, function (ret) {
-                if (ret) {
-                    this.callback(true);
-                } else {
-                    PostToLINE(data, config.channel_access_token, this.callback);
-                }
-            }.bind({ callback: callback }));
-        } else {
-            callback(false);
-        }
-    }
 
     // 取得 LINE 使用者資訊
     this.GetProfile = function (userId, callback) {
