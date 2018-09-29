@@ -460,7 +460,7 @@ function manual_seearch(lat, lng, user_id, replyToken, callback) {
                             }
                             location_compare[idy] = shuangjious[idx];
                             logger.info(idy+" : "+JSON.stringify(location_compare, null, 2))
-                            
+                            break;
                         }
 
                     }
