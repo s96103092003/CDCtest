@@ -9,6 +9,29 @@ log4js_extend(log4js, {
 });
 log4js.configure(__dirname + '/log4js.json');
 var logger = log4js.getLogger('bot');
+//var logger_line_message = log4js.getLogger('line_message');
+//var logger_line_LIFF = log4js.getLogger('line_LIFF');
+var logger_line_message ;
+var logger_line_LIFF ;
+// 連接 mongodb
+var linemongodb = require('./linemongodb');
+var linedb = new linemongodb.linemongodb();
+
+// line Message API
+var linemessageapi = require('./linemessage');
+var linemessage = new linemessageapi.linemessage(logger_line_message);
+
+// line LIFF API
+var lineliffapi = require('./lineliff');
+var lineliff = new lineliffapi.lineliff(logger_line_LIFF);
+
+//line Flex API
+var lineflexapi = require('./lineflex');
+var lineflex = new lineflexapi.lineflex();
+
+// 建立 express service
+var express = requi
+var logger = log4js.getLogger('bot');
 var logger_line_message = log4js.getLogger('line_message');
 var logger_line_LIFF = log4js.getLogger('line_LIFF');
 
