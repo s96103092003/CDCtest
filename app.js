@@ -324,67 +324,68 @@ app.post('/', function (request, response) {
         logger.info('receive message count: ' + results.length);
         for (var idx = 0; idx < results.length; idx++) {
 
-            if (send_location) {
-                if (results[idx].message != "location")
+
+            if (results[idx].message != "location")
+                if (send_location) {
                     linemessage.SendMessage(results[idx].source.userId, "未輸入位置訊息，請重新操作一次", 'linehack2018', results[idx].replyToken, function (result) {
                         if (!result) logger.error(result);
                         else logger.info(result);
                         send_location = false;
                     });
-            }
-            else {
-                var acct = results[idx].source.userId;
-                var reply_token = results[idx].replyToken;
-                logger.info('reply token: ' + results[idx].replyToken);
-                logger.info('createdTime: ' + results[idx].timestamp);
-                logger.info('from: ' + results[idx].source.userId);
-                logger.info('type: ' + results[idx].type);
-                if (results[idx].type == 'follow') {
-                    FollowEvent(acct);
                 }
-                else if (results[idx].type == 'beacon') {    // 接收到使用者的 Beacon 事件
-                    BeanconEvent(results[idx]);
-                } 
-                else if (results[idx].type == 'message') {
-                    linemessage.SendMessage(results[idx].source.userId, 'test', 'linehack2018', results[idx].replyToken, function (result) {
-                        if (!result) logger.error(result);
-                        else logger.info(result);
-                    });
-                    var message = results[idx].message;
-                    logger.info("message: "+ JSON.stringify(message));
-                    switch (message.type) {
-                        case "text":
-                            if (message.text == "搜尋揪團"){
-                                logger.info("搜尋揪團..............................");
-                                send_location = true;
-                                linemessage.SendMessage(results[idx].source.userId, "請輸入位置資訊", 'linehack2018', results[idx].replyToken, function (result) {
-                                    if (!result) logger.error(result);
-                                    else logger.info(result);
-                                });
-                            }
-                            
-                            break;
-                        case "location":
-                            logger.info('緯度: ' + results[idx].message.latitude);
-                            logger.info('經度: ' + results[idx].message.longitude);
-                            logger.info(JSON.stringify(results[idx].type));
-                            if (send_location) {
-                                send_location = false;
-                                manual_seearch(results[idx].message.latitude, results[idx].message.longitude,function(reg){
-                                    if(reg)
-                                        linemessage.SendMessage(results[idx].source.userId, "顯示FLEX", 'linehack2018', results[idx].replyToken, function (result) {
-                                            if (!result) logger.error(result);
-                                            else logger.info(result);
-                                        });
-                                });
-                            }
-                            if (results[idx].postback.data == '') {
-        
-                            }
-                        break;
+                else {
+                    var acct = results[idx].source.userId;
+                    var reply_token = results[idx].replyToken;
+                    logger.info('reply token: ' + results[idx].replyToken);
+                    logger.info('createdTime: ' + results[idx].timestamp);
+                    logger.info('from: ' + results[idx].source.userId);
+                    logger.info('type: ' + results[idx].type);
+                    if (results[idx].type == 'follow') {
+                        FollowEvent(acct);
+                    }
+                    else if (results[idx].type == 'beacon') {    // 接收到使用者的 Beacon 事件
+                        BeanconEvent(results[idx]);
+                    }
+                    else if (results[idx].type == 'message') {
+                        linemessage.SendMessage(results[idx].source.userId, 'test', 'linehack2018', results[idx].replyToken, function (result) {
+                            if (!result) logger.error(result);
+                            else logger.info(result);
+                        });
+                        var message = results[idx].message;
+                        logger.info("message: " + JSON.stringify(message));
+                        switch (message.type) {
+                            case "text":
+                                if (message.text == "搜尋揪團") {
+                                    logger.info("搜尋揪團..............................");
+                                    send_location = true;
+                                    linemessage.SendMessage(results[idx].source.userId, "請輸入位置資訊", 'linehack2018', results[idx].replyToken, function (result) {
+                                        if (!result) logger.error(result);
+                                        else logger.info(result);
+                                    });
+                                }
+
+                                break;
+                            case "location":
+                                logger.info('緯度: ' + results[idx].message.latitude);
+                                logger.info('經度: ' + results[idx].message.longitude);
+                                logger.info(JSON.stringify(results[idx].type));
+                                if (send_location) {
+                                    send_location = false;
+                                    manual_seearch(results[idx].message.latitude, results[idx].message.longitude, function (reg) {
+                                        if (reg)
+                                            linemessage.SendMessage(results[idx].source.userId, "顯示FLEX", 'linehack2018', results[idx].replyToken, function (result) {
+                                                if (!result) logger.error(result);
+                                                else logger.info(result);
+                                            });
+                                    });
+                                }
+                                if (results[idx].postback.data == '') {
+
+                                }
+                                break;
+                        }
                     }
                 }
-            }
         }
     } catch (e) {
     }
@@ -438,12 +439,12 @@ var flex = lineflex.CreateActivityFlex(activity);
 function manual_seearch(lat, lng, callback) {
     //this.getdistance = function (lat1, lng1, lat2, lng2)
     //this.get_shuangjious = function (callback) {
-        logger.info("manual_seearch: ......................................")
+    logger.info("manual_seearch: ......................................")
     var location_compare = [];
     linedb.get_shuangjious(function (shuangjious) {
-        logger.info("shuangjious: "+JSON.stringify(shuangjious, null, 2))
+        logger.info("shuangjious: " + JSON.stringify(shuangjious, null, 2))
         for (var idx = 0; idx < shuangjious.length; idx++) {
-            logger.info("idx距離: "+ linedb.getdistance(shuangjious[idx].latitude, shuangjious[idx].longitude, lat, lng))
+            logger.info("idx距離: " + linedb.getdistance(shuangjious[idx].latitude, shuangjious[idx].longitude, lat, lng))
             if (location_compare.length == 0) {
                 location_compare.push(shuangjious[idx])
             }
@@ -452,7 +453,7 @@ function manual_seearch(lat, lng, callback) {
                     if (linedb.getdistance(shuangjious[idx].latitude, shuangjious[idx].longitude, lat, lng) <=
                         linedb.getdistance(location_compare[idy].latitude, location_compare[idy].longitude, lat, lng)) {
                         for (var idz = location_compare.length; idz > idy; idz--) {
-                            location_compare[idz] = location_compare[idz-1];
+                            location_compare[idz] = location_compare[idz - 1];
                         }
                         location_compare[idy] = location_compare[idx];
                     }
@@ -460,7 +461,7 @@ function manual_seearch(lat, lng, callback) {
                 }
             }
         }
-        logger.info("location_compare: "+JSON.stringify(location_compare,null,2))
+        logger.info("location_compare: " + JSON.stringify(location_compare, null, 2))
         callback(true)
     })
 
