@@ -369,7 +369,7 @@ app.post('/', function (request, response) {
                                             }
                                         });
                                     }
-                                }.bind({ user_id: this.user_id, replyToken: this.replyToken }));
+                                });
 
                             }
                         }
@@ -518,9 +518,10 @@ app.post('/', function (request, response) {
                         logger.info('準備加入活動: ' + action);
                         linedb.get_shuangjioubyshuangjiouid(action, function (err, shuangjious) {
                             logger.info(JSON.stringify(shuangjious))
-                            shuangjious[0].participant.push(user_id);//
-                            linedb.set_participanttbyhuangjiouid(user_id, shuangjious[0].participant, function () {
-                                linemessage.SendMessage(userId, "加入活動成功", "linehack2018", replyToken, function (result) {
+                            shuangjious[0].participant.push(this.user_id);//
+                            linedb.set_participanttbyhuangjiouid(this.user_id, shuangjious[0].participant, function () {
+
+                                linemessage.SendMessage(userId, "加入活動成功", "linehack2018", this.replyToken, function (result) {
                                     if (!result) logger.error(result);
                                     else logger.info(result);
                                 });
