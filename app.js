@@ -514,6 +514,25 @@ app.post('/', function (request, response) {
 
                     } else if (action == 'isactiveactivity') {
                     }
+                    else if (action == 'leaveActivity') {
+                        linedb.get_shuangjious(function (shuangjious) {
+                            for (var i in shuangjious) {
+                                for (var j in shuangjious[i].participant) {
+                                    if (shuangjious[i].participant[j] == this.user_id) {
+                                        shuangjious[i].participant.splice(j, 1)
+                                    }
+                                }
+                                set_participanttbyhuangjiouid(this.user_id, shuangjious[i].shuangjiouid, shuangjious[i].participant,function(){
+
+                                })
+                            }
+                            linemessage.SendMessage(this.user_id, "已退出所有活動", "linehack2018", this.replyToken, function (result) {
+                                if (!result) logger.error(result);
+                                else logger.info(result);
+                            });
+                        }.bind({ user_id: results[idx].source.userId, replyToken: results[idx].replyToken }))
+
+                    }
                     else {
                         logger.info('準備加入活動: ' + action);
                         linedb.get_shuangjioubyshuangjiouid(action, function (err, shuangjious) {
@@ -521,8 +540,19 @@ app.post('/', function (request, response) {
                             shuangjious[0].participant.push(this.user_id);//
                             logger.info(JSON.stringify(shuangjious[0].participant))
                             linedb.set_participanttbyhuangjiouid(this.user_id, this.action, shuangjious[0].participant, function (user_id) {
-
-                                linemessage.SendMessage(user_id, "加入活動成功", "linehack2018", this.replyToken, function (result) {
+                                let quickreply = {
+                                    "items": [
+                                        {
+                                            "type": "action",
+                                            "action": {
+                                                "type": "postback",
+                                                "label": "我要退團",
+                                                "data": "action=leaveActivity"
+                                            }
+                                        }
+                                    ]
+                                }
+                                linemessage.SendMessageAndQuickReply(user_id, "加入活動成功", "linehack2018", this.replyToken, function (result) {
                                     if (!result) logger.error(result);
                                     else logger.info(result);
                                 });
