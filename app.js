@@ -515,6 +515,17 @@ app.post('/', function (request, response) {
                     } else if (action == 'isactiveactivity') {
 
                     }
+                    else {
+                        linedb.get_shuangjioubyshuangjiouid(action, function (err, shuangjious) {
+                            shuangjious[0].participant.push(user_id);
+                            set_participanttbyhuangjiouid(user_id, shuangjious[0].participant, function () {
+                                linemessage.SendMessage(userId, "加入活動成功", "linehack2018", replyToken, function (result) {
+                                    if (!result) logger.error(result);
+                                    else logger.info(result);
+                                });
+                            })
+                        }.bind({ user_id: this.results[idx].source.userId, replyToken: this.results[idx].replyToken }))
+                    }
                 }
             }
         }
@@ -589,7 +600,7 @@ function manual_seearch(activity_type, lat, lng, user_id, replyToken, callback) 
                 }*/
                 if (linedb.getdistance(Number(shuangjious[idx].latitude), Number(shuangjious[idx].longitude), Number(lat), Number(lng)) < 1000) {
                     if (activity_type == "不設限") {
-                        logger.info("activity_type : "+activity_type)
+                        logger.info("activity_type : " + activity_type)
                         if (location_compare.length == 0) {
                             location_compare.push(shuangjious[idx])
                         }
@@ -604,7 +615,7 @@ function manual_seearch(activity_type, lat, lng, user_id, replyToken, callback) 
                                         location_compare[idz] = location_compare[idz - 1];
                                     }
                                     location_compare[idy] = shuangjious[idx];
-                                    logger.info("新增在location_compare: 位置"+idy+".....................")
+                                    logger.info("新增在location_compare: 位置" + idy + ".....................")
                                     logger.info(idy + " : " + JSON.stringify(location_compare, null, 2))
                                     break;
                                 }
@@ -618,7 +629,7 @@ function manual_seearch(activity_type, lat, lng, user_id, replyToken, callback) 
                         }
                     }
                     else {
-                        logger.info("activity_type : "+activity_type)
+                        logger.info("activity_type : " + activity_type)
                         if (shuangjious[idx].type == activity_type) {
                             if (location_compare.length == 0) {
                                 location_compare.push(shuangjious[idx])
@@ -633,7 +644,7 @@ function manual_seearch(activity_type, lat, lng, user_id, replyToken, callback) 
                                             location_compare[idz] = location_compare[idz - 1];
                                         }
                                         location_compare[idy] = shuangjious[idx];
-                                        logger.info("新增在location_compare: 位置"+idy+".....................")
+                                        logger.info("新增在location_compare: 位置" + idy + ".....................")
                                         logger.info(idy + " : " + JSON.stringify(location_compare, null, 2))
                                         break;
                                     }
