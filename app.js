@@ -375,7 +375,7 @@ app.post('/', function (request, response) {
                     user_flag.set(results[idx].source.userId,"location")
                 }
             }
-            else if (user_flag.get(results[idx].source.userId) == "normal") {
+            else {
                 var acct = results[idx].source.userId;
                 var reply_token = results[idx].replyToken;
                 logger.info('reply token: ' + results[idx].replyToken);
