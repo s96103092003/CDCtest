@@ -611,6 +611,7 @@ function manual_seearch(activity_type, lat, lng, user_id, replyToken, callback) 
                                 logger.info("新增在location_compare最後面.....................")
                                 if (idy == location_compare.length - 1) {
                                     location_compare.push(shuangjious[idx])
+                                    break;
                                 }
 
                             }
@@ -639,6 +640,7 @@ function manual_seearch(activity_type, lat, lng, user_id, replyToken, callback) 
                                     if (idy == location_compare.length - 1) {
                                         logger.info("新增在location_compare最後面.....................")
                                         location_compare.push(shuangjious[idx])
+                                        break;
                                     }
                                 }
                             }
