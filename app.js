@@ -335,15 +335,23 @@ app.post('/', function (request, response) {
                     logger.info("get location..........................................");
                     manual_seearch(results[idx].message.text, results[idx].message.latitude, results[idx].message.longitude, results[idx].source.userId, results[idx].replyToken, function (user_id, replyToken, shuangjious, reg) {
                         if (reg) {
-                            let flexs = lineflex.CreateActivityFlexCarousel(shuangjious);
-                            linemessage.SendFlex(user_id, flexs, 'linehack2018', replyToken, function (result) {
-                                if (!result) {
-                                    logger.error('fail: ' + result);
-                                }
-                                else {
-                                    logger.info('success');
-                                }
-                            });
+                            if (shuangjious.length == 0) {
+                                linemessage.SendMessageAndQuickReply(results[idx].source.userId, "請輸入位置資訊", 'linehack2018', results[idx].replyToken, quickreply, function (result) {
+                                    if (!result) logger.error(result);
+                                    else logger.info(result);
+                                });
+                            }
+                            else {
+                                let flexs = lineflex.CreateActivityFlexCarousel(shuangjious);
+                                linemessage.SendFlex(user_id, flexs, 'linehack2018', replyToken, function (result) {
+                                    if (!result) {
+                                        logger.error('fail: ' + result);
+                                    }
+                                    else {
+                                        logger.info('success');
+                                    }
+                                });
+                            }
                         }
                     });
                 }
@@ -372,7 +380,7 @@ app.post('/', function (request, response) {
                         if (!result) logger.error(result);
                         else logger.info(result);
                     });
-                    user_flag.set(results[idx].source.userId,"location")
+                    user_flag.set(results[idx].source.userId, "location")
                 }
             }
             else {
@@ -395,7 +403,7 @@ app.post('/', function (request, response) {
                         case "text":
                             if (message.text == "搜尋揪團") {
                                 logger.info("搜尋揪團..............................");
-                                user_flag.set(results[idx].source.userId,"type")
+                                user_flag.set(results[idx].source.userId, "type")
                                 let quickreply = {
                                     "items": [
                                         {
