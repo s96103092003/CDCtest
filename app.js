@@ -355,7 +355,7 @@ app.post('/', function (request, response) {
                             }
                             else {
                                 let flexs = lineflex.CreateActivityFlexCarousel(shuangjious);
-                                linemessage.SendMessage(results[idx].source.userId, "以下是1公里內最近的5個活動", 'linehack2018', results[idx].replyToken, function (result) {
+                                linemessage.SendMessage(user_id, "以下是1公里內最近的5個活動", 'linehack2018', replyToken, function (result) {
                                     if (!result) logger.error(result);
                                     else {
                                         logger.info(result);
@@ -368,7 +368,7 @@ app.post('/', function (request, response) {
                                             }
                                         });
                                     }
-                                }.bind({user_id: this.results[idx].source.userId, replyToken: this.results[idx].replyToken}));
+                                }.bind({user_id: this.user_id, replyToken: this.replyToken}));
 
                             }
                         }
