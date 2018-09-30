@@ -552,7 +552,7 @@ app.post('/', function (request, response) {
                                         }
                                     ]
                                 }
-                                linemessage.SendMessageAndQuickReply(user_id, "加入活動成功", "linehack2018", this.replyToken, function (result) {
+                                linemessage.SendMessageAndQuickReply(user_id, "加入活動成功", "linehack2018", this.replyToken,quickreply, function (result) {
                                     if (!result) logger.error(result);
                                     else logger.info(result);
                                 });
