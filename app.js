@@ -517,7 +517,7 @@ app.post('/', function (request, response) {
                     else {
                         logger.info('準備加入活動: ' + action);
                         linedb.get_shuangjioubyshuangjiouid(action, function (err, shuangjious) {
-                            shuangjious[0].participant.push(user_id);
+                            shuangjious[0].participant.push(user_id);//
                             set_participanttbyhuangjiouid(user_id, shuangjious[0].participant, function () {
                                 linemessage.SendMessage(userId, "加入活動成功", "linehack2018", replyToken, function (result) {
                                     if (!result) logger.error(result);
