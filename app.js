@@ -513,9 +513,9 @@ app.post('/', function (request, response) {
                     } else if (action == 'searchactivity') {
 
                     } else if (action == 'isactiveactivity') {
-
                     }
                     else {
+                        logger.info('準備加入活動: ' + action);
                         linedb.get_shuangjioubyshuangjiouid(action, function (err, shuangjious) {
                             shuangjious[0].participant.push(user_id);
                             set_participanttbyhuangjiouid(user_id, shuangjious[0].participant, function () {

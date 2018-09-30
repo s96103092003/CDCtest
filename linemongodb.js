@@ -89,7 +89,7 @@ var linemongodb = function () {
     this.set_participanttbyhuangjiouid = function (shuangjiouid, participant, callback) {
         console.log('set_participanttbyhuangjiouid' + shuangjiouid + ' participant=' + JSON.stringify(participant));
 
-        this.ShuangJiou.updateOne({ 'shuangjiouid': shuangjiouid }, { 'participant': participant }, function (err) {
+        this.ShuangJiou.updateOne({ 'shuangjiouid': shuangjiouid }, { $set: { "participant" : participant } }, function (err) {
             if (err) {
                 callback(err);
             }
