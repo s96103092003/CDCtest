@@ -86,7 +86,7 @@ var linemongodb = function () {
         });
     }
     //根據Id更新參加人物資訊
-    this.set_participanttbyhuangjiouid = function (shuangjiouid, participant, callback) {
+    this.set_participanttbyhuangjiouid = function (userid,shuangjiouid, participant, callback) {
         console.log('set_participanttbyhuangjiouid' + shuangjiouid + ' participant=' + JSON.stringify(participant));
 
         this.ShuangJiou.updateOne({ 'shuangjiouid': shuangjiouid }, { $set: { "participant" : participant } }, function (err) {
@@ -95,7 +95,7 @@ var linemongodb = function () {
             }
             else {
                 console.log('participant update successfully');
-                callback(shuangjiouid);
+                callback(userid);
             }
         });
     }

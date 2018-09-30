@@ -522,7 +522,7 @@ app.post('/', function (request, response) {
                             logger.info(JSON.stringify(shuangjious[0].participant))
                             linedb.set_participanttbyhuangjiouid(this.user_id, this.action, shuangjious[0].participant, function (user_id) {
 
-                                linemessage.SendMessage(this.user_id, "加入活動成功", "linehack2018", this.replyToken, function (result) {
+                                linemessage.SendMessage(user_id, "加入活動成功", "linehack2018", this.replyToken, function (result) {
                                     if (!result) logger.error(result);
                                     else logger.info(result);
                                 });
