@@ -347,7 +347,7 @@ app.post('/', function (request, response) {
                         }
                     });
                 }
-                user_flag.set(results[idx].source.userId,"normal")
+                user_flag.delete(results[idx].source.userId)
             }
             else if (user_flag.get(results[idx].source.userId) == "type") {
                 if (results[idx].message.type != "text") {
