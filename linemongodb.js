@@ -94,7 +94,7 @@ var linemongodb = function () {
                 callback(err);
             }
             else {
-                console.log('Host update successfully');
+                console.log('participant update successfully');
                 callback(null);
             }
         });
