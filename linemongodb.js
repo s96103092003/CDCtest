@@ -95,7 +95,7 @@ var linemongodb = function () {
             }
             else {
                 console.log('participant update successfully');
-                callback(null);
+                callback(shuangjiouid);
             }
         });
     }
