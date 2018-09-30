@@ -348,7 +348,7 @@ app.post('/', function (request, response) {
                                         }
                                     ]
                                 }
-                                linemessage.SendMessageAndQuickReply(user_id, "請輸入位置資訊", 'linehack2018', replyToken, quickreply, function (result) {
+                                linemessage.SendMessageAndQuickReply(user_id, "目前沒有活動喔，要不要自己創一個?", 'linehack2018', replyToken, quickreply, function (result) {
                                     if (!result) logger.error(result);
                                     else logger.info(result);
                                 });
@@ -567,6 +567,7 @@ function manual_seearch(activity_type, lat, lng, user_id, replyToken, callback) 
         for (var idx = 0; idx < shuangjious.length; idx++) {
             logger.info(idx + " :距離: " + linedb.getdistance(Number(shuangjious[idx].latitude), Number(shuangjious[idx].longitude), Number(lat), Number(lng)))
             if (shuangjious[idx].latitude != null && shuangjious[idx].longitude != null) {
+                /*
                 if (activity_type != "不設限") {
                     if (linedb.getdistance(Number(shuangjious[idx].latitude), Number(shuangjious[idx].longitude), Number(lat), Number(lng)) < 12000)
                         location_compare.push(shuangjious[idx])
@@ -575,27 +576,52 @@ function manual_seearch(activity_type, lat, lng, user_id, replyToken, callback) 
                     if (shuangjious[idx].type == activity_type)
                         if (linedb.getdistance(Number(shuangjious[idx].latitude), Number(shuangjious[idx].longitude), Number(lat), Number(lng)) < 12000)
                             location_compare.push(shuangjious[idx])
-                }
-                /*排序未完成
-                if (location_compare.length == 0) {
-                    location_compare.push(shuangjious[idx])
-                }
-                else {
-                    for (var idy = 0; idy < location_compare.length; idy++) {
-                        logger.info(idy+" : "+JSON.stringify(location_compare, null, 2))
-                        if (linedb.getdistance(Number(shuangjious[idx].latitude), Number(shuangjious[idx].longitude), Number(lat), Number(lng)) <=
-                            linedb.getdistance(Number(location_compare[idy].latitude), Number(location_compare[idy].longitude), Number(lat), Number(lng))) {
-                            logger.info("爽揪<location_compare")
-                            for (var idz = location_compare.length; idz > idy; idz--) {
-                                location_compare[idz] = location_compare[idz - 1];
-                            }
-                            location_compare[idy] = shuangjious[idx];
-                            logger.info(idy+" : "+JSON.stringify(location_compare, null, 2))
-                            break;
-                        }
-
-                    }
                 }*/
+                if (activity_type != "不設限") {
+                    if (location_compare.length == 0) {
+                        location_compare.push(shuangjious[idx])
+                    }
+                    else {
+                        for (var idy = 0; idy < location_compare.length; idy++) {
+                            logger.info(idy+" : "+JSON.stringify(location_compare, null, 2))
+                            if (linedb.getdistance(Number(shuangjious[idx].latitude), Number(shuangjious[idx].longitude), Number(lat), Number(lng)) <=
+                                linedb.getdistance(Number(location_compare[idy].latitude), Number(location_compare[idy].longitude), Number(lat), Number(lng))) {
+                                logger.info("爽揪<location_compare")
+                                for (var idz = location_compare.length; idz > idy; idz--) {
+                                    location_compare[idz] = location_compare[idz - 1];
+                                }
+                                location_compare[idy] = shuangjious[idx];
+                                logger.info(idy+" : "+JSON.stringify(location_compare, null, 2))
+                                break;
+                            }
+    
+                        }
+                    }
+                }
+                else{
+                    if (location_compare.length == 0) {
+                        location_compare.push(shuangjious[idx])
+                    }
+                    else {
+                        for (var idy = 0; idy < location_compare.length; idy++) {
+                            logger.info(idy+" : "+JSON.stringify(location_compare, null, 2))
+                            if (linedb.getdistance(Number(shuangjious[idx].latitude), Number(shuangjious[idx].longitude), Number(lat), Number(lng)) <=
+                                linedb.getdistance(Number(location_compare[idy].latitude), Number(location_compare[idy].longitude), Number(lat), Number(lng))) {
+                                logger.info("爽揪<location_compare")
+                                for (var idz = location_compare.length; idz > idy; idz--) {
+                                    location_compare[idz] = location_compare[idz - 1];
+                                }
+                                location_compare[idy] = shuangjious[idx];
+                                logger.info(idy+" : "+JSON.stringify(location_compare, null, 2))
+                                break;
+                            }
+                            if(idy == location_compare.length-1){
+                                location_compare.push(shuangjious[idx])
+                            }
+                        }
+                    }
+
+                }
             }
         }
         logger.info("location_compare結果: " + JSON.stringify(location_compare, null, 2))
