@@ -314,7 +314,7 @@ app.get('/image/:picture', function (request, response) {
     }.bind({ req: request, res: response }));
 });
 
-var flag = "normal";
+var user_flag = "normal";
 // 接收來自 LINE 傳送的訊息
 app.post('/', function (request, response) {
     logger.info("POST /");
@@ -402,7 +402,7 @@ app.post('/', function (request, response) {
                                             "type": "action",
                                             "action": {
                                                 "type": "message",
-                                                "label": "eat",
+                                                "label": "飲食",
                                                 "text": "eat"
                                             }
                                         },
@@ -410,7 +410,7 @@ app.post('/', function (request, response) {
                                             "type": "action",
                                             "action": {
                                                 "type": "message",
-                                                "label": "sale",
+                                                "label": "購物",
                                                 "text": "sale"
                                             }
                                         },
@@ -418,7 +418,7 @@ app.post('/', function (request, response) {
                                             "type": "action",
                                             "action": {
                                                 "type": "message",
-                                                "label": "sleep",
+                                                "label": "旅行",
                                                 "text": "sleep"
                                             }
                                         },
