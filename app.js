@@ -314,7 +314,7 @@ app.get('/image/:picture', function (request, response) {
     }.bind({ req: request, res: response }));
 });
 
-var user_flag = "normal";
+var user_flag = Map();
 // 接收來自 LINE 傳送的訊息
 app.post('/', function (request, response) {
     logger.info("POST /");
@@ -324,7 +324,7 @@ app.post('/', function (request, response) {
         logger.info('receive message count: ' + results.length);
         for (var idx = 0; idx < results.length; idx++) {
 
-            if (flag == "location") {
+            if (user_flag.get(results[idx].source.userId) == "location") {
                 if (results[idx].message.type != "location") {
                     linemessage.SendMessage(results[idx].source.userId, "未輸入位置訊息，請重新操作一次", 'linehack2018', results[idx].replyToken, function (result) {
                         if (!result) logger.error(result);
@@ -347,9 +347,9 @@ app.post('/', function (request, response) {
                         }
                     });
                 }
-                flag = "normal";
+                user_flag.set(results[idx].source.userId,"normal")
             }
-            else if (flag == "type") {
+            else if (user_flag.get(results[idx].source.userId) == "type") {
                 if (results[idx].message.type != "text") {
                     linemessage.SendMessage(results[idx].source.userId, "未輸入活動類型，請重新操作一次", 'linehack2018', results[idx].replyToken, function (result) {
                         if (!result) logger.error(result);
@@ -372,10 +372,10 @@ app.post('/', function (request, response) {
                         if (!result) logger.error(result);
                         else logger.info(result);
                     });
-                    flag = "location";
+                    user_flag.set(results[idx].source.userId,"location")
                 }
             }
-            else if (flag == "normal") {
+            else if (user_flag.get(results[idx].source.userId) == "normal") {
                 var acct = results[idx].source.userId;
                 var reply_token = results[idx].replyToken;
                 logger.info('reply token: ' + results[idx].replyToken);
@@ -395,7 +395,7 @@ app.post('/', function (request, response) {
                         case "text":
                             if (message.text == "搜尋揪團") {
                                 logger.info("搜尋揪團..............................");
-                                flag = "type";
+                                user_flag.set(results[idx].source.userId,"type")
                                 let quickreply = {
                                     "items": [
                                         {
