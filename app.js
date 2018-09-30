@@ -315,6 +315,7 @@ app.get('/image/:picture', function (request, response) {
 });
 
 var user_flag = new Map();
+var userActivityType = new Map();
 // 接收來自 LINE 傳送的訊息
 app.post('/', function (request, response) {
     logger.info("POST /");
@@ -333,7 +334,7 @@ app.post('/', function (request, response) {
                 }
                 else {
                     logger.info("get location..........................................");
-                    manual_seearch(results[idx].message.text, results[idx].message.latitude, results[idx].message.longitude, results[idx].source.userId, results[idx].replyToken, function (user_id, replyToken, shuangjious, reg) {
+                    manual_seearch(userActivityType.get(results[idx].source.userId), results[idx].message.latitude, results[idx].message.longitude, results[idx].source.userId, results[idx].replyToken, function (user_id, replyToken, shuangjious, reg) {
                         if (reg) {
                             if (shuangjious.length == 0) {
                                 let quickreply = {
@@ -400,6 +401,7 @@ app.post('/', function (request, response) {
                         else logger.info(result);
                     });
                     user_flag.set(results[idx].source.userId, "location")
+                    userActivityType.set(results[idx].source.userId, results[idx].message.text)
                 }
             }
             else {
