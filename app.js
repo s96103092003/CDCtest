@@ -586,6 +586,7 @@ function manual_seearch(activity_type, lat, lng, user_id, replyToken, callback) 
                 }*/
                 if (linedb.getdistance(Number(shuangjious[idx].latitude), Number(shuangjious[idx].longitude), Number(lat), Number(lng)) < 1000) {
                     if (activity_type == "不設限") {
+                        logger.info("activity_type : "+activity_type)
                         if (location_compare.length == 0) {
                             location_compare.push(shuangjious[idx])
                         }
@@ -600,9 +601,11 @@ function manual_seearch(activity_type, lat, lng, user_id, replyToken, callback) 
                                         location_compare[idz] = location_compare[idz - 1];
                                     }
                                     location_compare[idy] = shuangjious[idx];
+                                    logger.info("新增在location_compare: 位置"+idy+".....................")
                                     logger.info(idy + " : " + JSON.stringify(location_compare, null, 2))
                                     break;
                                 }
+                                logger.info("新增在location_compare最後面.....................")
                                 if (idy == location_compare.length - 1) {
                                     location_compare.push(shuangjious[idx])
                                 }
@@ -611,6 +614,7 @@ function manual_seearch(activity_type, lat, lng, user_id, replyToken, callback) 
                         }
                     }
                     else {
+                        logger.info("activity_type : "+activity_type)
                         if (shuangjious[idx].type == activity_type) {
                             if (location_compare.length == 0) {
                                 location_compare.push(shuangjious[idx])
@@ -625,10 +629,12 @@ function manual_seearch(activity_type, lat, lng, user_id, replyToken, callback) 
                                             location_compare[idz] = location_compare[idz - 1];
                                         }
                                         location_compare[idy] = shuangjious[idx];
+                                        logger.info("新增在location_compare: 位置"+idy+".....................")
                                         logger.info(idy + " : " + JSON.stringify(location_compare, null, 2))
                                         break;
                                     }
                                     if (idy == location_compare.length - 1) {
+                                        logger.info("新增在location_compare最後面.....................")
                                         location_compare.push(shuangjious[idx])
                                     }
                                 }
