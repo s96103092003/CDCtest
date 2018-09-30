@@ -585,7 +585,7 @@ function manual_seearch(activity_type, lat, lng, user_id, replyToken, callback) 
                             location_compare.push(shuangjious[idx])
                 }*/
                 if (linedb.getdistance(Number(shuangjious[idx].latitude), Number(shuangjious[idx].longitude), Number(lat), Number(lng)) < 1000) {
-                    if (activity_type != "不設限") {
+                    if (activity_type == "不設限") {
                         if (location_compare.length == 0) {
                             location_compare.push(shuangjious[idx])
                         }
