@@ -336,6 +336,18 @@ app.post('/', function (request, response) {
                     manual_seearch(results[idx].message.text, results[idx].message.latitude, results[idx].message.longitude, results[idx].source.userId, results[idx].replyToken, function (user_id, replyToken, shuangjious, reg) {
                         if (reg) {
                             if (shuangjious.length == 0) {
+                                let quickreply = {
+                                    "items": [
+                                        {
+                                            "type": "action",
+                                            "action": {
+                                                "type": "postback",
+                                                "label": "創團",
+                                                "data" : "action=createactivity"
+                                            }
+                                        }
+                                    ]
+                                }
                                 linemessage.SendMessageAndQuickReply(user_id, "請輸入位置資訊", 'linehack2018', replyToken, quickreply, function (result) {
                                     if (!result) logger.error(result);
                                     else logger.info(result);

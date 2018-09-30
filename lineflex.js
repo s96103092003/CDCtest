@@ -155,7 +155,7 @@ var lineflex = function (logger) {
             length = 5;
         else
             length = activitys.length;
-        for (var index = 0; index < activitys.length; index++) {
+        for (var index = 0; index < length; index++) {
             var activity = activitys[index];
             var url = '';
             if (activity.type == 'eat')
