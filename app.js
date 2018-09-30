@@ -524,7 +524,8 @@ app.post('/', function (request, response) {
                                     else logger.info(result);
                                 });
                             })
-                        }.bind({ user_id: this.results[idx].source.userId, replyToken: this.results[idx].replyToken }))
+                        })
+                        //.bind({ user_id: this.results[idx].source.userId, replyToken: this.results[idx].replyToken })
                     }
                 }
             }
