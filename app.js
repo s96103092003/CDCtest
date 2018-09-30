@@ -373,6 +373,7 @@ app.post('/', function (request, response) {
 
                             }
                         }
+                        userActivityType.delete(user_id)
                     });
                 }
                 user_flag.delete(results[idx].source.userId)
