@@ -519,14 +519,14 @@ app.post('/', function (request, response) {
                         linedb.get_shuangjioubyshuangjiouid(action, function (err, shuangjious) {
                             logger.info(JSON.stringify(shuangjious))
                             shuangjious[0].participant.push(this.user_id);//
-
+                            logger.info(JSON.stringify(shuangjious[0].participant))
                             linedb.set_participanttbyhuangjiouid(this.user_id, shuangjious[0].participant, function () {
 
                                 linemessage.SendMessage(this.user_id, "加入活動成功", "linehack2018", this.replyToken, function (result) {
                                     if (!result) logger.error(result);
                                     else logger.info(result);
                                 });
-                            })
+                            }.bind({ user_id: results[idx].source.userId, replyToken: results[idx].replyToken }))
                         }.bind({ user_id: results[idx].source.userId, replyToken: results[idx].replyToken }))
                         //
                     }
