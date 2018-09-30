@@ -526,7 +526,7 @@ app.post('/', function (request, response) {
                                     if (!result) logger.error(result);
                                     else logger.info(result);
                                 });
-                            }.bind({ user_id: results[idx].source.userId, replyToken: results[idx].replyToken }))
+                            }.bind({ user_id: this.userId, replyToken: this.replyToken }))
                         }.bind({ user_id: results[idx].source.userId, replyToken: results[idx].replyToken }))
                         //
                     }
