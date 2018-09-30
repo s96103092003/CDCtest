@@ -586,33 +586,13 @@ function manual_seearch(activity_type, lat, lng, user_id, replyToken, callback) 
                 }*/
                 if (activity_type != "不設限") {
                     if (location_compare.length == 0) {
-                        location_compare.push(shuangjious[idx])
+                        if (linedb.getdistance(Number(shuangjious[idx].latitude), Number(shuangjious[idx].longitude), Number(lat), Number(lng)) < 1000)
+                            location_compare.push(shuangjious[idx])
                     }
                     else {
                         for (var idy = 0; idy < location_compare.length; idy++) {
                             logger.info(idy + " : " + JSON.stringify(location_compare, null, 2))
-                            if (linedb.getdistance(Number(shuangjious[idx].latitude), Number(shuangjious[idx].longitude), Number(lat), Number(lng)) <=
-                                linedb.getdistance(Number(location_compare[idy].latitude), Number(location_compare[idy].longitude), Number(lat), Number(lng))) {
-                                logger.info("爽揪<location_compare")
-                                for (var idz = location_compare.length; idz > idy; idz--) {
-                                    location_compare[idz] = location_compare[idz - 1];
-                                }
-                                location_compare[idy] = shuangjious[idx];
-                                logger.info(idy + " : " + JSON.stringify(location_compare, null, 2))
-                                break;
-                            }
-
-                        }
-                    }
-                }
-                else {
-                    if (shuangjious[idx].type == activity_type) {
-                        if (location_compare.length == 0) {
-                            location_compare.push(shuangjious[idx])
-                        }
-                        else {
-                            for (var idy = 0; idy < location_compare.length; idy++) {
-                                logger.info(idy + " : " + JSON.stringify(location_compare, null, 2))
+                            if (linedb.getdistance(Number(shuangjious[idx].latitude), Number(shuangjious[idx].longitude), Number(lat), Number(lng)) < 1000)
                                 if (linedb.getdistance(Number(shuangjious[idx].latitude), Number(shuangjious[idx].longitude), Number(lat), Number(lng)) <=
                                     linedb.getdistance(Number(location_compare[idy].latitude), Number(location_compare[idy].longitude), Number(lat), Number(lng))) {
                                     logger.info("爽揪<location_compare")
@@ -623,10 +603,35 @@ function manual_seearch(activity_type, lat, lng, user_id, replyToken, callback) 
                                     logger.info(idy + " : " + JSON.stringify(location_compare, null, 2))
                                     break;
                                 }
-                                if (idy == location_compare.length - 1) {
-                                    location_compare.push(shuangjious[idx])
+
+                        }
+                    }
+                }
+                else {
+                    if (shuangjious[idx].type == activity_type) {
+                        if (location_compare.length == 0) {
+                            location_compare.push(shuangjious[idx])
+                        }
+                        else {
+                            if (linedb.getdistance(Number(shuangjious[idx].latitude), Number(shuangjious[idx].longitude), Number(lat), Number(lng)) < 1000) {
+                                for (var idy = 0; idy < location_compare.length; idy++) {
+                                    logger.info(idy + " : " + JSON.stringify(location_compare, null, 2))
+                                    if (linedb.getdistance(Number(shuangjious[idx].latitude), Number(shuangjious[idx].longitude), Number(lat), Number(lng)) <=
+                                        linedb.getdistance(Number(location_compare[idy].latitude), Number(location_compare[idy].longitude), Number(lat), Number(lng))) {
+                                        logger.info("爽揪<location_compare")
+                                        for (var idz = location_compare.length; idz > idy; idz--) {
+                                            location_compare[idz] = location_compare[idz - 1];
+                                        }
+                                        location_compare[idy] = shuangjious[idx];
+                                        logger.info(idy + " : " + JSON.stringify(location_compare, null, 2))
+                                        break;
+                                    }
+                                    if (idy == location_compare.length - 1) {
+                                        location_compare.push(shuangjious[idx])
+                                    }
                                 }
                             }
+
                         }
 
                     }
