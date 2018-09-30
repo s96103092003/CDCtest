@@ -522,7 +522,7 @@ app.post('/', function (request, response) {
                                         shuangjious[i].participant.splice(j, 1)
                                     }
                                 }
-                                set_participanttbyhuangjiouid(this.user_id, shuangjious[i].shuangjiouid, shuangjious[i].participant,function(){
+                                linedb.set_participanttbyhuangjiouid(this.user_id, shuangjious[i].shuangjiouid, shuangjious[i].participant,function(){
 
                                 })
                             }
