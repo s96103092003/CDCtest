@@ -1,745 +1,1272 @@
-var users = new Map();  // 紀錄進入 Beacon 範圍的使用者
-
-// Application Log
-var log4js = require('log4js');
-var log4js_extend = require('log4js-extend');
-log4js_extend(log4js, {
-    path: __dirname,
-    format: '(@file:@line:@column)'
-});
-log4js.configure(__dirname + '/log4js.json');
-var logger = log4js.getLogger('bot');
-
-var logger_line_message = log4js.getLogger('line_message');
-var logger_line_LIFF = log4js.getLogger('line_LIFF');
-//var logger_line_message ;
-//var logger_line_LIFF ;
-// 連接 mongodb
-var linemongodb = require('./linemongodb');
-var linedb = new linemongodb.linemongodb();
-
-// line Message API
-var linemessageapi = require('./linemessage');
-var linemessage = new linemessageapi.linemessage(logger_line_message);
-
-// line LIFF API
-var lineliffapi = require('./lineliff');
-var lineliff = new lineliffapi.lineliff(logger_line_LIFF);
-
-//line Flex API
-var lineflexapi = require('./lineflex');
-var lineflex = new lineflexapi.lineflex();
-
 // 建立 express service
-var logger = log4js.getLogger('bot');
-var logger_line_message = log4js.getLogger('line_message');
-var logger_line_LIFF = log4js.getLogger('line_LIFF');
-
-// 連接 mongodb
-var linemongodb = require('./linemongodb');
-var linedb = new linemongodb.linemongodb();
-
-// line Message API
-var linemessageapi = require('./linemessage');
-var linemessage = new linemessageapi.linemessage(logger_line_message);
-
-// line LIFF API
-var lineliffapi = require('./lineliff');
-var lineliff = new lineliffapi.lineliff(logger_line_LIFF);
-
-//line Flex API
-var lineflexapi = require('./lineflex');
-var lineflex = new lineflexapi.lineflex();
-
-// 建立 express service
-var express = require('express');
+var express = require('express');  // var 宣告express物件， require請求
 var app = express();
-var port = process.env.PORT || 443;
+var port = process.env.PORT || 8080;  //run 在8080 port上
 var http = require('http');
 var server = http.Server(app).listen(port);
-var bodyParser = require('body-parser');
-app.use(bodyParser.urlencoded({
+var bodyParser = require('body-parser');  //JSON解析body的資料
+var mysql = require('mysql'); // mysql
+var url = require("url");
+var fs = require('fs');
+var config = fs.readFileSync('./config.json', 'utf8');
+config = JSON.parse(config);
+var jwtDecode = require('jwt-decode');
+var db = require('./taipeidbtest');
+
+app.use(bodyParser.urlencoded({  //app使用bodyParser來做解析
     extended: true
 }));
 app.use(bodyParser.json());
-
-app.use(express.static('public'));
-
-// 讀取組態表
-var fs = require('fs');
-var config = fs.readFileSync(__dirname + '/config.json', 'utf8');
-config = JSON.parse(config);
-
-function user() {
-    this.name = '';
-    this.userid = '';
-    this.image = '';
-    this.location = [];
-}
-
-function location() {
-    this.name = '';
-    this.locationid = '';
-    this.user = [];
-}
-
-function shuangjiou() {
-    this.name = '';
-    this.description = '';
-    this.starttime = '';
-    this.endtime = '';
-    this.type = '';
-    this.host = '';
-    this.location = '';
-    this.number = '';
-    this.participant = [];
-}
-
-function host() {
-    this.shuangjiouname = '';
-    this.name = '';
-    this.userid = '';
-    this.gender = '';
-    this.clothes = '';
-    this.hat = '';
-    this.location = '';
-}
-
 app.all('*', function (req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
     res.header('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type');
     next();
 });
+app.use(express.static('pages/tpe/channelwebs/assets'));
 
-app.get('/api', function (request, response) {
-    response.send('API is running');
+//mysql----------------------------------------------------------------------------------------------------------------
+var connection = mysql.createConnection({
+    host: db.host, //如果database在另一台機器上，要改這裡
+    user: db.user,
+    password: db.password,
+    database: db.database //要抓的database名稱
+});
+connection.connect(function (error) {
+    // mysql
+    if (!!error) {
+        console.log('Database Error');
+        console.log(error);
+    } else {
+        console.log('Database Connected');
+    }
 });
 
-app.get('/index', function (request, response) {
+app.get('/delete', function (request, response) { //顯示所有資料庫
+    connection.query("DELETE FROM subscription_container" /*要抓的table名稱*/, function (error, result) {
+        //callback
+        if (!!error) {
+            console.log('Error in the query');
+            console.log(error);
+            response.send(error)
+        } else {
+            console.log('Successful query');
+            console.log(result);
+            response.send("Successful");
+        }
+    });
+
+});
+app.get('/resultdata', function (request, response) { //顯示所有資料庫
+    connection.query("SELECT * FROM subscription_container" /*要抓的table名稱*/, function (error, result) {
+        //callback
+        if (!!error) {
+            console.log('Error in the query');
+            console.log(error);
+            response.send(error)
+        } else {
+            console.log('Successful query');
+            console.log(result);
+            response.send(result);
+        }
+    });
+    //
+});
+//mysql airBox----------------------------------------------------------------------------------------------------------------
+app.get('/AirBoxData', function (request, response) {
+    console.log('GET /setting request (AirBoxData_V2)');
     request.header("Content-Type", 'text/html');
-    fs.readFile(__dirname + '/pages/index.html', 'utf8', function (err, data) {
-        if (err) {
-            this.res.send(err);
+    var deviceInfoList = [];
+    var TPEschoolsList = [];
+    var rst = [];
+    var airboxData;
+    var taiwanGeocodeTpe = [
+        { k: '6300100', v: '松山區' },
+        { k: '6300200', v: '信義區' },
+        { k: '6300300', v: '大安區' },
+        { k: '6300400', v: '中山區' },
+        { k: '6300500', v: '中正區' },
+        { k: '6300600', v: '大同區' },
+        { k: '6300700', v: '萬華區' },
+        { k: '6300800', v: '文山區' },
+        { k: '6300900', v: '南港區' },
+        { k: '6301000', v: '內湖區' },
+        { k: '6301100', v: '士林區' },
+        { k: '6301200', v: '北投區' },
+    ];
+    fs.readFile('./pages/tpe/channelwebs/air_pollutioninfo/AirBoxData_V2.gz', function (err, data) {
+        if (err) { //如果有錯誤就列印訊息並離開程式
+            console.log('檔案讀取錯誤。');
         }
-        this.res.send(data);
-    }.bind({ req: request, res: response }));
-});
-
-app.get('/api/richmenulist', function (request, response) {
-    linerichmenu.GetAllRichMenu(function (result) {
-        if (result) response.send(result);
-        else response.send(false);
-    });
-});
-
-app.get('/api/richmenu/:richmenuid', function (request, response) {
-    var richmenuid = request.params.richmenuid;
-    linerichmenu.GetRichMenu(richmenuid, function (result) {
-        if (result) response.send(result);
-        else response.send(false);
-    });
-});
-
-app.post('/api/richmenu', function (request, response) {
-    var richmenu = request.body.richmenu;
-    linerichmenu.CreateRichMenu(richmenu, function (result) {
-        if (result) response.send(result);
-        else response.send(false);
-    });
-});
-
-app.put('/api/richmenuimage', function (request, response) {
-    var richmenuId = request.body.richmenuid;
-    var image = request.body.image;
-    fs.readFile(__dirname + '/resource/' + image, 'utf8', function (err, data) {
-        if (err) {
-            this.res.send(err);
-        }
-        linerichmenu.UpdateRichMenuImage(richmenuId, data, function (result) {
-            if (result) this.res.send(true);
-            else this.res.send(false);
-        });
-    }.bind({ req: request, res: response }));
-});
-
-app.delete('/api/richmenu/:richmenu', function (request, response) {
-    var richmuneId = request.params.richmenuid;
-    linerichmenu.DeleteRichMenu(richmuneId, function (result) {
-        if (result) response.send(true);
-        else response.send(false);
-    });
-});
-
-app.put('/api/richmenu/defaultrichmenu', function (request, response) {
-    var richmenuId = request.body.richmenuid;
-    linerichmenu.SetDefaultRichMenu(richmenuId, function (result) {
-        if (result) response.send(true);
-        else response.send(false);
-    });
-});
-
-app.put('/api/richmenu/link', function (request, response) {
-    var userId = request.body.userid;
-    var richmenuId = request.body.richmenuid;
-    linerichmenu.LinkRichMenuToUser(userId, richmenuId, function (result) {
-        if (result) response.send(true);
-        else response.send(false);
-    });
-});
-
-app.get('/api/liff', function (request, response) {
-    lineliff.GetAllLIFF(function (result) {
-        if (result) response.send(result);
-        else response.send(false);
-    });
-});
-
-app.post('/api/liff', function (request, response) {
-    var url = request.body.url;
-    lineliff.AddLIFF(url, function (result) {
-        if (result) response.send(result);
-        else response.send(false);
-    });
-});
-
-app.put('/api/liff', function (request, response) {
-    var LIFF_ID = request.body.liff;
-    var url = request.body.url;
-    lineliff.UpdateLIFF(LIFF_ID, url, function (result) {
-        if (result) response.send(true);
-        else response.send(false);
-    });
-});
-
-app.delete('/api/liff/:liff', function (request, response) {
-    var LIFF_ID = request.params.liff;
-    lineliff.DeleteLIFF(LIFF_ID, function (result) {
-        if (result) response.send(true);
-        else response.send(false);
-    });
-});
-
-app.post('/api/beacon', function (request, response) {
-    var beacon = new location();
-    beacon.name = request.body.name;
-    beacon.locationid = request.body.beacon_id;
-    linedb.create_location(beacon, function (err, hosts) {
-        if (err) {
-            logger.info('create beacon fail: ' + err);
-            response.send('create beacon fail: ' + err);
-        }
-        logger.info('create beacon success');
-        response.send(hosts);
-    });
-});
-
-app.post('/api/shungjiou', function (request, response) {
-    logger.info('POST /api/shungjiou');
-    logger.info(JSON.stringify(request.body));
-    var data = request.body;
-    data.host.userId = data.host.userId.replace('\"', '').replace('\"', '');
-    linedb.get_locationidbyuser(data.host.userId, function (err, locationid) {
-        if (err) this.response.send(err);
         else {
-            var activity = new shuangjiou();
-            activity.name = data.shuangjiou.name;
-            activity.description = data.shuangjiou.description;
-            activity.starttime = Date.now();
-            activity.endtime = data.shuangjiou.endtime;
-            activity.type = data.shuangjiou.type;
-            activity.host = data.host.userId;
-            activity.location = locationid;
-            activity.number = data.shuangjiou.number;
-            linedb.create_shuangjiou(activity, function (err) {
-                if (err)
-                    logger.error('fail: ' + err);
-                else
-                    logger.info('success');
-            });
-
-            var organiser = new host();
-
-            organiser.name = data.host.name;
-            organiser.userid = data.host.userId;
-            organiser.gender = data.host.gender;
-            organiser.clothes = data.host.clothes;
-            organiser.hat = data.host.hat;
-            organiser.location = locationid;
-            linedb.create_host(organiser, function (err) {
-                if (err)
-                    logger.error('fail: ' + err);
-                else
-                    logger.info('success');
-            });
-
-            var flex = lineflex.CreateActivityFlex(activity);
-            logger.info(flex);
-            linedb.get_userbylocationid(locationid, function (err, users) {
-                if (err)
-                    logger.error('fail: ' + err);
-                else {
-                    for (var index = 0; index < users.length; index++) {
-                        linemessage.SendFlex(users[index].userid, flex, 'linehack2018', '', function (result) {
-                            if (!result) {
-                                logger.error('fail: ' + result);
-                                this.response.send(err);
-                            }
-                            else {
-                                logger.info('success');
-                                this.response.send('200');
-                            }
-                        }.bind({ response: this.response }));
-                    }
-                }
-            }.bind({ response: this.response }));
-        }
-    }.bind({ response: response }));
-});
-
-app.get('/api/guest/:userid', function (request, response) {
-    response.send('200');
-});
-
-app.use(express.static('resource'));
-
-app.get('/image/:picture', function (request, response) {
-    var picture = request.params.picture;
-    request.header("Content-Type", 'image/jpeg');
-    fs.readFile(__dirname + '/resource/' + picture, 'utf8', function (err, data) {
-        if (err) {
-            this.res.send(err);
-        }
-        this.res.send(data);
-    }.bind({ req: request, res: response }));
-});
-
-var user_flag = new Map();
-var userActivityType = new Map();
-// 接收來自 LINE 傳送的訊息
-app.post('/', function (request, response) {
-    logger.info("POST /");
-    try {//
-        var results = request.body.events;
-        logger.info(JSON.stringify(results));
-        logger.info('receive message count: ' + results.length);
-        for (var idx = 0; idx < results.length; idx++) {
-
-            if (user_flag.get(results[idx].source.userId) == "location") {
-                if (results[idx].message.type != "location") {
-                    linemessage.SendMessage(results[idx].source.userId, "未輸入位置訊息，請重新操作一次", 'linehack2018', results[idx].replyToken, function (result) {
-                        if (!result) logger.error(result);
-                        else logger.info(result);
-                    });
+            airboxData = JSON.parse(data.toString());
+            fs.readFile('./pages/tpe/channelwebs/air_pollutioninfo/TPEschools.txt', 'utf-8', function (err, data) {
+                if (err) { //如果有錯誤就列印訊息並離開程式
+                    console.log('檔案讀取錯誤。');
                 }
                 else {
-                    logger.info("get location..........................................");
-                    manual_seearch(userActivityType.get(results[idx].source.userId), results[idx].message.latitude, results[idx].message.longitude, results[idx].source.userId, results[idx].replyToken, function (user_id, replyToken, shuangjious, reg) {
-                        if (reg) {
-                            if (shuangjious.length == 0) {
-                                let quickreply = {
-                                    "items": [
-                                        {
-                                            "type": "action",
-                                            "action": {
-                                                "type": "postback",
-                                                "label": "創團",
-                                                "data": "action=createactivity"
-                                            }
-                                        }
-                                    ]
-                                }
-                                linemessage.SendMessageAndQuickReply(user_id, "目前沒有活動喔，要不要自己創一個?", 'linehack2018', replyToken, quickreply, function (result) {
-                                    if (!result) logger.error(result);
-                                    else logger.info(result);
-                                });
-                            }
-                            else {
-                                let flexs = lineflex.CreateActivityFlexCarousel(shuangjious);
-                                linemessage.SendMessage(user_id, "以下是1公里內最近的5個活動", 'linehack2018', replyToken, function (result) {
-                                    if (!result) logger.error(result);
-                                    else {
-                                        logger.info(result);
-                                        linemessage.SendFlex(user_id, flexs, 'linehack2018', replyToken, function (result) {
-                                            if (!result) {
-                                                logger.error('fail: ' + result);
-                                            }
-                                            else {
-                                                logger.info('success');
-                                            }
-                                        });
-                                    }
-                                });
+                    ConvertToTable(data, function (csvBody) {
+                        for (var row = 0; row < csvBody.length; row++) {
 
+                            if (csvBody[row][1] == '國語實小') {
+                                console.log(csvBody[row][1]);
+                                console.log(csvBody[row][1]);
+                                csvBody[row][1] = '國語實驗小學';
                             }
+                            else if (csvBody[row][1] == '私立靜心小學') {
+                                csvBody[row][1] = '私立靜心國民中小學';
+                            }
+                            else if (csvBody[row][1] == '私立華興小學') {
+                                csvBody[row][1] = '華興國小';
+                            }
+                            else if (csvBody[row][1] == '私立薇閣小學') {
+                                csvBody[row][1] = '薇閣國小';
+                            }
+                            else if (csvBody[row][1] == '私立新民小學') {
+                                csvBody[row][1] = '新民國小';
+                            }
+                            else if (csvBody[row][1] == '私立光仁小學') {
+                                csvBody[row][1] = '光仁國小';
+                            }
+                            else if (csvBody[row][1] == '市大附小') {
+                                csvBody[row][1] = '台北市立大學附設實驗國小';
+                            }
+                            else if (csvBody[row][1] == '私立復興實驗高中') {
+                                csvBody[row][1] = '私立復興實驗中學';
+                            }
+                            TPEschoolsList[row] = { schoolName: '', deviceDist: '', gps: { lat: '', lng: '' } };
+                            TPEschoolsList[row]['schoolName'] = csvBody[row][1];
+                            TPEschoolsList[row]['schoolDist'] = String(csvBody[row][3]).substr(3, 3);
+                            TPEschoolsList[row]['gps']['lat'] = parseFloat(csvBody[row][5]);
+                            TPEschoolsList[row]['gps']['lng'] = parseFloat(csvBody[row][6]);
                         }
-                        userActivityType.delete(user_id)
                     });
                 }
-                user_flag.delete(results[idx].source.userId)
-            }
-            else if (user_flag.get(results[idx].source.userId) == "type") {
-                if (results[idx].message.type != "text") {
-                    linemessage.SendMessage(results[idx].source.userId, "未輸入活動類型，請重新操作一次", 'linehack2018', results[idx].replyToken, function (result) {
-                        if (!result) logger.error(result);
-                        else logger.info(result);
-                    });
-                }
-                else {
-                    let quickreply = {
-                        "items": [
-                            {
-                                "type": "action",
-                                "action": {
-                                    "type": "location",
-                                    "label": "location",
+                fs.readFile('./pages/tpe/channelwebs/air_pollutioninfo/AirBoxDevicesList.txt', 'utf-8', function (err, data) {
+                    if (err) { //如果有錯誤就列印訊息並離開程式
+                        console.log('檔案讀取錯誤。');
+                    }
+                    else {
+                        ConvertToTable(data, function (csvBody) {
+                            for (var row = 0; row < csvBody.length; row++) {
+                                deviceInfoList[row] = { deviceId: '', deviceDist: '', 'gps': { lat: '', lng: '' } }
+                                deviceInfoList[row]['deviceId'] = csvBody[row][0];
+                                deviceInfoList[row]['devicePos'] = csvBody[row][1];
+                            }
+
+                        });
+
+                        for (var i = 0; i < deviceInfoList.length; i++) {
+                            TPEschoolsList.forEach(function (scl) {
+                                if (String(deviceInfoList[i]['devicePos']).indexOf(scl['schoolName']) > -1) {
+                                    deviceInfoList[i]['deviceDist'] = scl['schoolDist'];
+                                    deviceInfoList[i]['gps']['lat'] = scl['gps']['lat'];
+                                    deviceInfoList[i]['gps']['lng'] = scl['gps']['lng'];
+                                }
+                            })
+                        }
+                        airboxData['entries'] = airboxData['entries'].sort(function (a, b) {
+                            //小到大排序
+                            return a['time'] > b['time'] ? 1 : -1;
+                        });
+                        console.log(JSON.stringify(airboxData['entries'][0]));
+                        for (var i = 0, j = 0; i < deviceInfoList.length; i++) {
+                            rst[j] = { deviceName: '', deviceDist: '', gps: { lat: '', lng: '' }, recoreTime: '', pm25: '' };
+                            rst[j]['deviceName'] = deviceInfoList[i]['devicePos'];
+                            rst[j]['deviceDist'] = deviceInfoList[i]['deviceDist'];
+                            rst[j]['gps'] = deviceInfoList[i]['gps'];
+                            airboxData['entries'].forEach(function (abd) {
+                                if (abd['device_id'] == deviceInfoList[i]['deviceId']) {
+                                    rst[j]['recoreTime'] = abd['time'];
+                                    rst[j]['pm25'] = abd['s_d0'];
+                                }
+                            });
+                            j++;
+                        }//
+                        taiwanGeocodeTpe.forEach(function (row) {
+                            var toSave = [];
+                            var datatoDB = { result: '' };
+                            var j = 0;
+                            for (var i = 0; i < rst.length; i++) {
+                                if (row.v == rst[i]['deviceDist'] && rst[i]['pm25'] != "") {
+                                    toSave[j] = rst[i];
+                                    j++;
                                 }
                             }
-                        ]
+                            datatoDB['result'] = toSave;
+                            var datasetId = 'airbox'
+                            var info = JSON.stringify(datatoDB);
+                            var areaCode = row.k;
+                            var tblName = 'dataset_to_display';
+                            saveToDB(datasetId, areaCode, info, tblName);
+                        });
+                        response.send(JSON.stringify(rst));
                     }
-                    linemessage.SendMessageAndQuickReply(results[idx].source.userId, "請輸入位置資訊", 'linehack2018', results[idx].replyToken, quickreply, function (result) {
-                        if (!result) logger.error(result);
-                        else logger.info(result);
-                    });
-                    user_flag.set(results[idx].source.userId, "location")
-                    userActivityType.set(results[idx].source.userId, results[idx].message.text)
-                }
+                });
+            });
+        }
+    });
+});////////////////
+function saveToDB(did, ac, info, tn) {
+    console.log("saveToDB: " + tn);
+    console.log("info " + info);
+    connection.query("SELECT * FROM " + tn + " WHERE (id = '" + did + "' AND area_code = '" + ac + "')", function (error, result) {
+        if (error) {
+            console.log(error)
+        };
+        var sql;
+        var MysqlFormat = new Date().toISOString().
+            replace(/T/, ' ').      // replace T with a space
+            replace(/\..+/, '');
+        console.log("MysqlFormat: " + MysqlFormat);
+        if (result == '') {
+            sql = "INSERT INTO " + tn + " VALUES ('" + did + "','" + ac + "','" + info + "','" + MysqlFormat + "','" + MysqlFormat + "')";
+        } else {
+            sql = "UPDATE " + tn + " SET info_to_show = '" + info + "' , changed_at = '" + MysqlFormat + "' WHERE (id = '" + did + "' AND area_code = '" + ac + "')";
+        }
+        connection.query(sql, function (error, result) {
+            console.log(sql);
+            if (error) {
+                console.log(error);
             }
             else {
-                var acct = results[idx].source.userId;
-                var reply_token = results[idx].replyToken;
-                logger.info('reply token: ' + results[idx].replyToken);
-                logger.info('createdTime: ' + results[idx].timestamp);
-                logger.info('from: ' + results[idx].source.userId);
-                logger.info('type: ' + results[idx].type);
-                if (results[idx].type == 'follow') {
-                    FollowEvent(acct);
-                }
-                else if (results[idx].type == 'beacon') {    // 接收到使用者的 Beacon 事件
-                    BeanconEvent(results[idx]);
-                }
-                else if (results[idx].type == 'message') {
-                    var message = results[idx].message;
-                    logger.info("message: " + JSON.stringify(message));
-                    switch (message.type) {//
-                        case "text":
-                            if (message.text == "搜尋揪團") {
-                                logger.info("搜尋揪團..............................");
-                                user_flag.set(results[idx].source.userId, "type")
-                                let quickreply = {
-                                    "items": [
-                                        {
-                                            "type": "action",
-                                            "action": {
-                                                "type": "message",
-                                                "label": "飲食",
-                                                "text": "eat"
-                                            }
-                                        },
-                                        {
-                                            "type": "action",
-                                            "action": {
-                                                "type": "message",
-                                                "label": "購物",
-                                                "text": "sale"
-                                            }
-                                        },
-                                        {
-                                            "type": "action",
-                                            "action": {
-                                                "type": "message",
-                                                "label": "旅行",
-                                                "text": "sleep"
-                                            }
-                                        },
-                                        {
-                                            "type": "action",
-                                            "action": {
-                                                "type": "message",
-                                                "label": "不設限",
-                                                "text": "不設限"
-                                            }
-                                        }
-                                    ]
-                                }
-                                linemessage.SendMessageAndQuickReply(results[idx].source.userId, "請選擇活動類別", 'linehack2018', results[idx].replyToken, quickreply, function (result) {
-                                    if (!result) logger.error(result);
-                                    else logger.info(result);
-                                });
-
-                            }
-
-                            break;
-                        case "location":
-                            logger.info('緯度: ' + results[idx].message.latitude);
-                            logger.info('經度: ' + results[idx].message.longitude);
-                            logger.info(JSON.stringify(results[idx].type));
-                            if (results[idx].postback.data == '') {
-
-                            }
-                            break;
-                    }
-                }
-                else if (results[idx].type == 'postback') {
-                    var action = results[idx].postback.data.split('=')[1];
-                    logger.info('回傳使用者執行動作: ' + action);
-                    if (action == 'createactivity') {
-                        var activity = new shuangjiou();
-                        if (tentative_activity.has(results[idx].source.userId)) {
-                            linemessage.SendMessage(results[idx].source.userId, "不好意思，您還有一個活動還未結束，請結束後在建立新的活動", "linehack2018", results[idx].replyToken, function (result) {
-                                if (!result) logger.error(result);
-                                else logger.info(result);
-                            });
-                        } else {
-                            activity.shuangjiouid = guid();
-                            tentative_activity.set(results[idx].source.userId, activity);
-                            var imagemap = [
-                                {
-                                    "type": "uri",
-                                    "linkUri": "line://nv/location",
-                                    "area": {
-                                        "x": 0,
-                                        "y": 0,
-                                        "width": 1040,
-                                        "height": 1040
-                                    }
-                                }
-                            ]
-                            linemessage.SendImagemap(results[idx].source.userId, "https://linehack2018.azurewebsites.net/image/location.jpg", "This is an imagemap", imagemap, 'linehack2018', results[idx].replyToken, function (result) {
-                                if (!result) logger.error(result);
-                                else logger.info(result);
-                            });
-                        }
-                    } else if (action == 'searchactivity') {
-
-                    } else if (action == 'isactiveactivity') {
-                    }
-                    else if (action == 'leaveActivity') {
-                        linedb.get_shuangjious(function (shuangjious) {
-                            for (var i in shuangjious) {
-                                for (var j in shuangjious[i].participant) {
-                                    if (shuangjious[i].participant[j] == this.user_id) {
-                                        shuangjious[i].participant.splice(j, 1)
-                                    }
-                                }
-                                linedb.set_participanttbyhuangjiouid(this.user_id, shuangjious[i].shuangjiouid, shuangjious[i].participant,function(){
-
-                                })
-                            }
-                            linemessage.SendMessage(this.user_id, "已退出所有活動", "linehack2018", this.replyToken, function (result) {
-                                if (!result) logger.error(result);
-                                else logger.info(result);
-                            });
-                        }.bind({ user_id: results[idx].source.userId, replyToken: results[idx].replyToken }))
-
-                    }
-                    else {
-                        logger.info('準備加入活動: ' + action);
-                        linedb.get_shuangjioubyshuangjiouid(action, function (err, shuangjious) {
-                            logger.info(JSON.stringify(shuangjious))
-                            shuangjious[0].participant.push(this.user_id);//
-                            logger.info(JSON.stringify(shuangjious[0].participant))
-                            linedb.set_participanttbyhuangjiouid(this.user_id, this.action, shuangjious[0].participant, function (user_id) {
-                                let quickreply = {
-                                    "items": [
-                                        {
-                                            "type": "action",
-                                            "action": {
-                                                "type": "postback",
-                                                "label": "我要退團",
-                                                "data": "action=leaveActivity"
-                                            }
-                                        }
-                                    ]
-                                }
-                                linemessage.SendMessageAndQuickReply(user_id, "加入活動成功", "linehack2018", this.replyToken,quickreply, function (result) {
-                                    if (!result) logger.error(result);
-                                    else logger.info(result);
-                                });
-                            }.bind({ replyToken: this.replyToken }))
-                        }.bind({ user_id: results[idx].source.userId, replyToken: results[idx].replyToken, action: action }))
-                        //
-                    }
-                }
+                console.log(result.affectedRows + " record(s) updated/insert");
             }
-        }
-    } catch (e) {
+        });
+    });
+
+}
+function ConvertToTable(data, callBack) {
+    data = data.toString();
+    var table = new Array();
+    var rows = new Array();
+    rows = data.split("\r\n");
+    for (var i = 1; i < rows.length; i++) {
+        table.push(rows[i].split(","));
     }
-    response.send('');
+    callBack(table);
+}//
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+app.get("/login/:page", function (request, response) {
+    var page = request.params.page;
+    //下面的跳轉網頁會跳轉到line登入的頁面，同時會在那邊進行登入 然後跳轉到conig的redirect_uri
+    if (page == 'airbox') {
+        response.redirect('https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=' + config.channel_id + '&redirect_uri=' + config.redirect_uri + 'air_pollutioninfo' + '&state=reportAuth&scope=openid%20profile&nonce=myapp');
+    }
+    else if (page == 'ncdr') {
+        response.redirect('https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=' + config.channel_id + '&redirect_uri=' + config.redirect_uri + 'flood_control' + '&state=reportAuth&scope=openid%20profile&nonce=myapp');
+    }
+
+});
+var choose = 0; //判斷空氣盒子和防汛
+app.get('/air_pollutioninfo', function (request, response) {
+    console.log('GET /setting request (空氣盒子)');
+    choose = 1;
+    //pathname 會包含state跟code  其中的code會是我們所需要的Authorization code然後state會是你在上面login跳轉網頁的url所設定的state state本身應該是用來防止攻擊驗證是不是本身的訊息的
+    var pathname = url.parse(request.url).query;
+    console.log("pathname: " + pathname);
+    //獲得user_profile並解碼
+
+    if (String(pathname).indexOf("error_description") < 0) {
+        var mid;
+        GetUserProfile(choose, pathname, function (data) {
+            if (data != false) {
+                var profile = JSON.parse(data);
+                console.log("profile: " + JSON.stringify(profile));
+                var decode = jwtDecode(profile.id_token);
+                console.log("decode: " + JSON.stringify(decode));
+                mid = decode.sub;
+                var profile_data = {
+                    'memberId': decode.sub,
+                    'displayName': decode.name,
+                    'pictureUrl': decode.picture,
+                    'statusMessage': 'statusMsg',
+                    //'access_token': profile.access_token,
+                }//
+                console.log(profile_data);
+                //addMember(decode.sub, decode.name, decode.picture, "statusMsg");
+                request.header("Content-Type", 'text/html');
+                fs.readFile('./pages/tpe/channelwebs/air_pollutioninfo/index.htm', 'utf8', function (err, data) {
+                    if (err) {
+                        this.res.send(err);
+                    }
+                    console.log("123: " + mid);
+                    data = data + '<script type="text/javascript"> var mid = "' + mid + '"; </script>';
+                    this.res.send(data);
+                }.bind({ req: request, res: response }));
+            }
+        });
+    }
+    else {
+        console.log("false");
+        response.send("<h1>無法取得權限<h1>");
+        /*fs.readFile('./pages/tpe/channelwebs/air_pollutioninfo/index.htm', 'utf8', function (err, data) {
+            if (err) {
+                this.res.send(err);
+            }
+            //data = data + '<script language="Javascript">history.go(-2);</script>';
+            this.res.send("");
+        }.bind({ req: request, res: response }));*/
+    }
+    //
+
+});//
+app.get('/air_pollutioninfo' + '/air_map', function (request, response) {
+    console.log('GET /setting request (GoogleMap)');
+    request.header("Content-Type", 'text/html');
+    fs.readFile(__dirname + '/pages/tpe/channelwebs/air_pollutioninfo/air_map.htm', 'utf8', function (err, data) {
+        if (err) {
+            this.res.send(err);
+        }
+        this.res.send(data);
+    }.bind({ req: request, res: response }));
+});//
+app.get('/air_pollutioninfo' + '/active_suggestion', function (request, response) {
+    console.log('GET /setting request (activeSuggestion)');
+    request.header("Content-Type", 'text/html');
+    fs.readFile('./pages/tpe/channelwebs/air_pollutioninfo/active_suggestion.htm', 'utf8', function (err, data) {
+        if (err) {
+            this.res.send(err);
+        }
+        this.res.send(data);
+    }.bind({ req: request, res: response }));
+});
+app.get('/air_pollutioninfo' + '/setup_airbox_subinfo', function (request, response) {
+    console.log('GET /setting request (setupAirboxSubInfo)');
+
+    request.header("Content-Type", 'text/html');
+    //var fs = require('fs');
+    fs.readFile('./pages/tpe/channelwebs/air_pollutioninfo/setup_airbox_subinfo.htm', 'utf8', function (err, data) {
+        if (err) {
+            this.res.send(err);
+        }
+        this.res.send(data);
+    }.bind({ req: request, res: response }));
 });
 
-/*
-[
-    {
-        "type": "message",
-        "replyToken": "9f79aff27d9c420a92c5608084e98d44",
-        "source":
-        {
-            "userId": "U04bcc969c65df0e5bba8110c7ae4e3d1",
-            "type": "user"
-        },
-        "timestamp": 1538196800660,
-        "message":
-        {
-            "type": "sticker",
-            "id": "8642656052320",
-            "stickerId": "179",
-            "packageId": "2"
-        }
+/////////////////////////////////////////////////////////////////////
+app.get('/flood_control', function (request, response) {
+    console.log('GET /setting request floodControl');
+    choose = 2;
+    //pathname 會包含state跟code  其中的code會是我們所需要的Authorization code然後state會是你在上面login跳轉網頁的url所設定的state state本身應該是用來防止攻擊驗證是不是本身的訊息的
+    var pathname = url.parse(request.url).query;
+    console.log(pathname);
+    //獲得user_profile並解碼
+    if (String(pathname).indexOf("error_description") < 0) {
+        var mid;
+        GetUserProfile(choose, pathname, function (data) {
+            if (data) {
+                var profile = JSON.parse(data);
+                console.log("profile: " + JSON.stringify(profile));
+                var decode = jwtDecode(profile.id_token);
+                console.log("decode: " + JSON.stringify(decode));
+                mid = decode.sub;
+                var profile_data = {
+                    'memberId': decode.sub,
+                    'displayName': decode.name,
+                    'pictureUrl': decode.picture,
+                    'statusMessage': 'statusMsg',
+                    //'access_token': profile.access_token,
+                }
+                console.log(profile_data);
+                //addMember(decode.sub, decode.name, decode.picture, "statusMsg");
+            }
+            request.header("Content-Type", 'text/html');
+            fs.readFile(__dirname + '/pages/tpe/channelwebs/flood_control/index.htm', 'utf8', function (err, data) {
+                if (err) {
+                    this.res.send(err);
+                }
+                console.log("mid: " + mid);
+                data = data + '<script type="text/javascript"> var mid = "' + mid + '"; </script>';
+                this.res.send(data);
+            }.bind({ req: request, res: response }));
+        });
+
     }
-]*/
-//this.SendCarousel = function (userId, columns, password, reply_token, callback) {
-/*
+    else {
+        console.log("false");
+        response.send("<h1>無法取得權限<h1>");
+    }
+    //
+});
+app.get('/flood_control' + '/EOC', function (request, response) {
+    console.log('GET /setting request (EOC)');
+    request.header("Content-Type", 'text/html');
+    fs.readFile(__dirname + '/pages/tpe/channelwebs/flood_control/EOC.htm', 'utf8', function (err, data) {
+        if (err) {
+            this.res.send(err);
+        }
+        this.res.send(data);
+    }.bind({ req: request, res: response }));
+});
+app.get('/flood_control' + '/NCDRSubLists', function (request, response) {
+    console.log('GET /setting request (NCDRSubLists)');
+    request.header("Content-Type", 'text/html');
+    fs.readFile(__dirname + '/pages/tpe/channelwebs/flood_control/NCDRSubLists.htm', 'utf8', function (err, data) {
+        if (err) {
+            this.res.send(err);
+        }
+        this.res.send(data);
+    }.bind({ req: request, res: response }));
+});
+app.get('/flood_control' + '/NCDRFlood', function (request, response) {
+    console.log('GET /setting request (NCDRFlood)');
+    request.header("Content-Type", 'text/html');
+    fs.readFile(__dirname + '/pages/tpe/channelwebs/flood_control/NCDRFlood.htm', 'utf8', function (err, data) {
+        if (err) {
+            this.res.send(err);
+        }
+        this.res.send(data);
+    }.bind({ req: request, res: response }));
+});
+/////////////////////////////////////////////////////////////////////////////////////////
+app.use(express.static('pages/tpe'));
+/////////////////////////////////////////////////////////////////////////////////////////
 
-var flex = lineflex.CreateActivityFlex(activity);
-            logger.info(flex);
-            linedb.get_userbylocationid(locationid, function (err, users) {
-                if (err)
-                    logger.error('fail: ' + err);
-                else {
-                    for (var index = 0; index < users.length; index++) {
-                        linemessage.SendFlex(users[index].userid, flex, 'linehack2018', '', function (result) {
-                            if (!result) {
-                                logger.error('fail: ' + result);
-                                this.response.send(err);
-                            }
-                            else {
-                                logger.info('success');
-                                this.response.send('200');
-                            }
-                        }.bind({ response: this.response }));
-                    }
-                }
-            }.bind({ response: this.response }));
-*/
-function manual_seearch(activity_type, lat, lng, user_id, replyToken, callback) {
-    //this.getdistance = function (lat1, lng1, lat2, lng2)
-    //this.get_shuangjious = function (callback) {
-    logger.info("manual_seearch: ......................................")
-    var location_compare = [];
-    linedb.get_shuangjious(function (shuangjious) {
-        logger.info("shuangjious: " + JSON.stringify(shuangjious, null, 2))
-        for (var idx = 0; idx < shuangjious.length; idx++) {
-            logger.info(idx + " :距離: " + linedb.getdistance(Number(shuangjious[idx].latitude), Number(shuangjious[idx].longitude), Number(lat), Number(lng)))
-            if (shuangjious[idx].latitude != null && shuangjious[idx].longitude != null) {
-                /*
-                if (activity_type != "不設限") {
-                    if (linedb.getdistance(Number(shuangjious[idx].latitude), Number(shuangjious[idx].longitude), Number(lat), Number(lng)) < 12000)
-                        location_compare.push(shuangjious[idx])
-                }
-                else {
-                    if (shuangjious[idx].type == activity_type)
-                        if (linedb.getdistance(Number(shuangjious[idx].latitude), Number(shuangjious[idx].longitude), Number(lat), Number(lng)) < 12000)
-                            location_compare.push(shuangjious[idx])
-                }*/
-                if (linedb.getdistance(Number(shuangjious[idx].latitude), Number(shuangjious[idx].longitude), Number(lat), Number(lng)) < 1000) {
-                    if (activity_type == "不設限") {
-                        logger.info("activity_type : " + activity_type)
-                        if (location_compare.length == 0) {
-                            location_compare.push(shuangjious[idx])
-                        }
-                        else {
-                            for (var idy = 0; idy < location_compare.length; idy++) {
-                                logger.info(idy + " : " + JSON.stringify(location_compare, null, 2))
+function GetUserProfile(choose, pathname, callback) {
+    var code, state, friendship_status_changed;
+    console.log("pathname: " + pathname);
+    if (String(pathname).indexOf("friendship_status_changed") > 0) {
+        friendship_status_changed = String(pathname).split("=")[1].split("&")[0];
+        code = String(pathname).split("=")[2].split("&")[0];
+        state = String(pathname).split("=")[3];
+        console.log("friendship_status_changed: " + friendship_status_changed);
+        console.log("code: " + code);
+        console.log("state: " + state);
+    }
+    else {
+        code = String(pathname).split("=")[1].split("&")[0];
+        state = String(pathname).split("=")[2];
+        console.log("code: " + code);
+        console.log("state: " + state);
+    }
+    if (choose == 1) {
+        var data = {
+            grant_type: "authorization_code",
+            code: code,
+            redirect_uri: config.redirect_uri + 'air_pollutioninfo',
+            client_id: config.channel_id,
+            client_secret: config.channel_secret
+        }
+    } else {
+        var data = {
+            grant_type: "authorization_code",
+            code: code,
+            redirect_uri: config.redirect_uri + 'flood_control',
+            client_id: config.channel_id,
+            client_secret: config.channel_secret
+        }
 
-                                if (linedb.getdistance(Number(shuangjious[idx].latitude), Number(shuangjious[idx].longitude), Number(lat), Number(lng)) <=
-                                    linedb.getdistance(Number(location_compare[idy].latitude), Number(location_compare[idy].longitude), Number(lat), Number(lng))) {
-                                    logger.info("爽揪<location_compare")
-                                    for (var idz = location_compare.length; idz > idy; idz--) {
-                                        location_compare[idz] = location_compare[idz - 1];
-                                    }
-                                    location_compare[idy] = shuangjious[idx];
-                                    logger.info("新增在location_compare: 位置" + idy + ".....................")
-                                    logger.info(idy + " : " + JSON.stringify(location_compare, null, 2))
-                                    break;
-                                }
-                                logger.info("新增在location_compare最後面.....................")
-                                if (idy == location_compare.length - 1) {
-                                    location_compare.push(shuangjious[idx])
-                                    break;
-                                }
+    }
+    var postdata = "grant_type=" + data.grant_type + "&code=" + data.code + "&redirect_uri=" + data.redirect_uri + "&client_id=" + data.client_id + "&client_secret=" + data.client_secret;
+    var options = {
+        host: 'api.line.me',
+        port: '443',
+        path: '/oauth2/v2.1/token',
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+            'Content-Length': Buffer.byteLength(postdata)
+        }
+    };
+    var https = require('https');
+    var req = https.request(options, function (res) {
+        var access;
+        res.setEncoding('utf8');
+        res.on('data', function (chunk) {
+            console.log('Response: ' + chunk);
+            if (access == true) {
+                callback(chunk);
+            }
+            else callback(access);
+        });
+        res.on('end', function () {
+        });
+        console.log('Reply message status code: ' + res.statusCode);
+        if (res.statusCode == 200) {
+            console.log('Reply message success');
+            access = true;
+        } else {
+            console.log('Reply message failure');
+            access = false;
+        }
+    });
+    req.write(postdata);
+    req.end();
+};
 
-                            }
-                        }
-                    }
-                    else {
-                        logger.info("activity_type : " + activity_type)
-                        if (shuangjious[idx].type == activity_type) {
-                            if (location_compare.length == 0) {
-                                location_compare.push(shuangjious[idx])
-                            }
-                            else {
-                                for (var idy = 0; idy < location_compare.length; idy++) {
-                                    logger.info(idy + " : " + JSON.stringify(location_compare, null, 2))
-                                    if (linedb.getdistance(Number(shuangjious[idx].latitude), Number(shuangjious[idx].longitude), Number(lat), Number(lng)) <=
-                                        linedb.getdistance(Number(location_compare[idy].latitude), Number(location_compare[idy].longitude), Number(lat), Number(lng))) {
-                                        logger.info("爽揪<location_compare")
-                                        for (var idz = location_compare.length; idz > idy; idz--) {
-                                            location_compare[idz] = location_compare[idz - 1];
-                                        }
-                                        location_compare[idy] = shuangjious[idx];
-                                        logger.info("新增在location_compare: 位置" + idy + ".....................")
-                                        logger.info(idy + " : " + JSON.stringify(location_compare, null, 2))
-                                        break;
-                                    }
-                                    if (idy == location_compare.length - 1) {
-                                        logger.info("新增在location_compare最後面.....................")
-                                        location_compare.push(shuangjious[idx])
-                                        break;
-                                    }
-                                }
-                            }
-
-                        }
-
-                    }
-                }
+function addMember(mid, displayName, picUrl, statusMsg) {
+    connection.query("INSERT INTO member VALUES ('" + mid + "','" + displayName + "','" + picUrl + "','" + statusMsg + "')", function (error, result) {
+        var rst = {
+            'result': '',
+            'errorMessage': ''
+        };
+        //callback//
+        if (error) {
+            console.log('Error in the query');
+            console.log(error);
+            rst = {
+                'result': 'false',
+                'errorMessage': 'add member failed!'
+            };
+            return rst;
+        } else {
+            console.log('Successful query');
+            console.log(result);
+            rst = {
+                'result': 'true',
+                'errorMessage': 'success'
+            };
+            return rst;
+        }
+    });
+}
+//////////////////restfulapi
+app.get('/restfulapi/v1/listDatasetInfoToShow/', function (request, response) {
+    console.log("listDatasetInfoToShow_query: " + JSON.stringify(request.query));
+    var authToken = request.query.authToken;
+    var datasetId = request.query.datasetId;
+    var areaCode = request.query.areaCode;
+    var rst_false = {
+        result: '',
+        errorMessage: ''
+    };
+    if (authToken == undefined) {
+        console.log("No authorization key");
+        rst_false = {
+            result: false,
+            errorMessage: 'No authorization key'
+        };
+        response.send(JSON.stringify(rst_false));
+    }
+    if (datasetId == undefined) {
+        console.log("No dataset id");
+        rst_false = {
+            result: false,
+            errorMessage: 'No dataset id'
+        };
+        response.send(JSON.stringify(rst_false));
+    }
+    if (areaCode == undefined) {
+        console.log("No areaCode id");
+        rst_false = {
+            result: false,
+            errorMessage: 'No areaCode id'
+        };
+        response.send(JSON.stringify(rst_false));
+    }
+    if (authToken != config.AUTH_TOKEN) {
+        console.log("Authorization fail");
+        rst_false = {
+            result: false,
+            errorMessage: 'Authorization fail'
+        };
+        response.send(JSON.stringify(rst_false));
+    }
+    listDatasetInfoToShow(datasetId, areaCode, function (data) {
+        console.log("listDatasetInfoToShow_sendData: " + JSON.stringify(data));
+        response.send(data);
+    });
+});
+function listDatasetInfoToShow(did, area, callback) {
+    console.log(did + " AND " + area);
+    connection.query("SELECT info_to_show FROM dataset_to_display WHERE (id = '" + did + "' AND area_code = '" + area + "')", function (error, result) {
+        var rst_false = {
+            result: '',
+            errorMessage: ''
+        };
+        var rst_true = {
+            result: '',
+            errorMessage: '',
+            data: ''
+        };
+        if (error) {
+            console.log(error);
+        } else {
+            if (result == '') {
+                console.log('Error in the query');
+                rst_false = {
+                    result: false,
+                    errorMessage: 'no subscription yet'
+                };
+                callback(rst_false);
+            }
+            else {
+                console.log('Successful query');
+                rst_true = {
+                    'result': true,
+                    'errorMessage': 'success',
+                    'data': JSON.stringify(result)
+                };
+                callback(rst_true);
             }
         }
-        logger.info("location_compare結果: " + JSON.stringify(location_compare, null, 2))
-        callback(user_id, replyToken, location_compare, true)
-    })
-
+    });
 }
-function FollowEvent(acct) {
-    logger.info('----------[Follow]---------');
-    var new_user = new user();
-    linemessage.GetProfile(acct, function (user) {
-        this.new_user.name = user.displayName;
-        this.new_user.userid = user.userId;
-        this.new_user.image = user.pictureUrl;
-        linedb.create_user(this.new_user, function (err) {
-            if (err) logger.error('fail' + err);
-            else logger.info('success');
-        });
-    }.bind({ new_user: new_user }));
-}
-
-function BeanconEvent(event) {
-    logger.info('----------[Beacon]---------');
-    logger.info('source: ' + JSON.stringify(event.source));
-    logger.info('beacon: ' + JSON.stringify(event.beacon));
-    logger.info('beacon type: ' + event.beacon.type);
-    switch (event.beacon.type) {
-        case "enter":
-            var update_user = new user();
-            linemessage.GetProfile(event.source.userId, function (user) {
-                this.update_user.name = user.displayName;
-                this.update_user.userid = user.userId;
-                this.update_user.image = user.pictureUrl;
-                this.update_user.location.push(event.beacon.hwid);
-                linedb.set_userbyuserid(this.update_user.userid, this.update_user, function (err) {
-                    if (err) logger.error('fail' + err);
-                    else logger.info('success');
-                });
-            }.bind({ update_user: update_user }));
-            linedb.enter_usertolocation(event.source.userId, event.beacon.hwid, function (err) {
-                if (err) logger.error(err);
-            });
-            break;
+app.get('/restfulapi/v1/listSubscriptionContainer/', function (request, response) {
+    console.log("listSubscriptionContainer_query: " + JSON.stringify(request.query));
+    var authToken = request.query.authToken;
+    var datasetId = request.query.datasetId;
+    var memberId = request.query.memberId;
+    var rst_false = {
+        result: '',
+        errorMessage: ''
+    };
+    if (authToken == undefined) {
+        console.log("No authorization key");
+        rst_false = {
+            result: false,
+            errorMessage: 'No authorization key'
+        };
+        response.send(JSON.stringify(rst_false));
     }
-}
+    if (datasetId == undefined) {
+        console.log("No dataset id");
+        rst_false = {
+            result: false,
+            errorMessage: 'No dataset id'
+        };
+        response.send(JSON.stringify(rst_false));
+    }
+    if (memberId == undefined) {
+        console.log("No memberId id");
+        rst_false = {
+            result: false,
+            errorMessage: 'No memberId id'
+        };
+        response.send(JSON.stringify(rst_false));
+    }
+    if (authToken != config.AUTH_TOKEN) {
+        console.log("Authorization fail");
+        rst_false = {
+            result: false,
+            errorMessage: 'Authorization fail'
+        };
+        response.send(JSON.stringify(rst_false));
+    }
 
-function CreateShuangjiou(user) {
+    listSubscriptionContainer(memberId, datasetId, function (data) {
+        console.log("listSubscriptionContainer_sendData: " + JSON.stringify(data));
+        response.send(data);
+    });
+});
+function listSubscriptionContainer(mid, did, callback) {
+    console.log(mid + " AND " + did);
+    connection.query("SELECT * FROM subscription_container WHERE (mid = '" + mid + "' AND dataset_id = '" + did + "')", function (error, result) {
+        var rst_false = {
+            result: '',
+            errorMessage: ''
+        };
+        var rst_true = {
+            result: '',
+            errorMessage: '',
+            data: ''
+        };
+        if (error) {
+            console.log(error);
+        } else {
+            if (result == '') {
+                console.log('Error in the query');
+                rst_false = {
+                    result: false,
+                    errorMessage: 'no subscription yet'
+                };
+                callback(rst_false);
+            }
+            else {
+                console.log('Successful query');
+                rst_true = {
+                    'result': true,
+                    'errorMessage': 'already subscribed',
+                    'data': JSON.stringify(result)
+                };
+                callback(rst_true);
+            }
+        }
+    });
+};//
+app.post('/restfulapi/v1/addSubscriptionContainer/', function (request, response) {
+    console.log("addSubscriptionContainer_query: " + JSON.stringify(request.body));
+    var authToken = request.body.authToken;
+    var memberId = request.body.memberId;
+    var datasetId = request.body.datasetId;
+    var subscribeDetail = request.body.subscribeDetail;
+    var rst_false = {
+        result: '',
+        errorMessage: ''
+    };
+    if (authToken == undefined) {
+        console.log("No authorization key");
+        rst_false = {
+            result: false,
+            errorMessage: 'No authorization key'
+        };
+        response.send(JSON.stringify(rst_false));
+    }
+    if (datasetId == undefined) {
+        console.log("No dataset id");
+        rst_false = {
+            result: false,
+            errorMessage: 'No dataset id'
+        };
+        response.send(JSON.stringify(rst_false));
+    }
+    if (memberId == undefined) {
+        console.log("No member id");
+        rst_false = {
+            result: false,
+            errorMessage: 'No member id'
+        };
+        response.send(JSON.stringify(rst_false));
+    }
+    if (authToken != config.AUTH_TOKEN) {
+        console.log("Authorization fail");
+        rst_false = {
+            result: false,
+            errorMessage: 'Authorization fail'
+        };
+        response.send(JSON.stringify(rst_false));
+    }
+    addSubscriptionContainer(memberId, datasetId, subscribeDetail, function (data) {
+        console.log("addSubscriptionContainer_sendData: " + JSON.stringify(data));
+        response.send(data);
+    });
+});
+function addSubscriptionContainer(mid, did, sdetail, callback) {
+    var MysqlFormat = new Date().toISOString().
+        replace(/T/, ' ').      // replace T with a space
+        replace(/\..+/, '');
+    console.log(mid + " AND " + did + " AND " + sdetail);
+    connection.query("INSERT INTO subscription_container VALUES ('" + mid + "','" + did + "','" + sdetail + "','0','" + MysqlFormat + "','0')", function (error, result) {
+        var rst_false = {
+            result: '',
+            errorMessage: ''
+        };
+        var rst_true = {
+            result: '',
+            errorMessage: '',
+            data: ''
+        };
+        if (error) {
+            console.log(error);
+        } else {
+            if (result == '') {
+                console.log('Error in the query');
+                rst_false = {
+                    result: false,
+                    errorMessage: 'errorMessage'
+                };
+                callback(rst_false);
+            }
+            else {
+                console.log('Successful query');
+                rst_true = {
+                    'result': true,
+                    'errorMessage': 'success',
+                    'data': JSON.stringify(result)
+                };
+                callback(rst_true);
+            }
+        }
+    });
+};
+//
+app.put('/restfulapi/v1/updateSubscriptionContainer/', function (request, response) {
+    console.log("updateSubscriptionContainer_query: " + JSON.stringify(request.body));
+    var authToken = request.body.authToken;
+    var memberId = request.body.memberId;
+    var datasetId = request.body.datasetId;
+    var subscribeDetail = request.body.subscribeDetail;
+    var todo = request.body.todo;
+    var rst_false = {
+        result: '',
+        errorMessage: ''
+    };
+    if (authToken == undefined) {
+        console.log("No authorization key");
+        rst_false = {
+            result: false,
+            errorMessage: 'No authorization key'
+        };
+        response.send(JSON.stringify(rst_false));
+    }
+    if (datasetId == undefined) {
+        console.log("No dataset id");
+        rst_false = {
+            result: false,
+            errorMessage: 'No dataset id'
+        };
+        response.send(JSON.stringify(rst_false));
+    }
+    if (memberId == undefined) {
+        console.log("No member id");
+        rst_false = {
+            result: false,
+            errorMessage: 'No member id'
+        };
+        response.send(JSON.stringify(rst_false));
+    }//
+    if (authToken != config.AUTH_TOKEN) {
+        console.log("Authorization fail");
+        rst_false = {
+            result: false,
+            errorMessage: 'Authorization fail'
+        };
+        response.send(JSON.stringify(rst_false));
+    }
+    updateSubscriptionContainer(memberId, datasetId, subscribeDetail, todo, function (data) {
+        console.log("updateSubscriptionContainerr_sendData: " + JSON.stringify(data));
+        response.send(data);
+    });
+});////
+function updateSubscriptionContainer(mid, did, dataToUpdate, todo, callback) {
+    var origRaw, origData, origArea;
+    if (todo != undefined) {
+        var MysqlFormat = new Date().toISOString().
+            replace(/T/, ' ').      // replace T with a space
+            replace(/\..+/, '');
+        listSubscriptionContainer(mid, did, function (origRaw) {
+            switch (todo) {
+                case 'cancelArea':
+                    // cancel ncdr area
+                    console.log("cancelArea");
+                    console.log("listSubscriptionContainer_sendData: " + JSON.stringify(origRaw));
+                    origData = JSON.parse(origRaw['data']);
+                    console.log("origData: " + JSON.stringify(origData));
+                    origArea = JSON.parse(origData[0]['detail']);
+                    console.log("origArea: " + JSON.stringify(origArea));
+                    dataToUpdate = JSON.parse(dataToUpdate);
+                    console.log("dataToUpdate: " + JSON.stringify(dataToUpdate));
 
+                    origArea['area'].forEach(function (v, k) {//
+                        console.log("v: " + JSON.stringify(v) + " k: " + k);
+                        if (v == dataToUpdate['area'][0]) {
+                            console.log("find equal");
+                            origArea['area'].splice(k, 1);
+                        }
+                    });// 
+                    console.log("origArea['area']: " + JSON.stringify(origArea['area']) + "length: " + origArea['area'].length);
+                    var newArea = origArea['area'];
+                    console.log("newArea: " + JSON.stringify(newArea) + "length: " + newArea.length);
+                    dataToUpdate['area'] = newArea;
+                    console.log("dataToUpdate['area']: " + JSON.stringify(dataToUpdate['area']) + "dataToUpdate['area']: " + dataToUpdate['area'].length);
+                    if (dataToUpdate['area'].length == 0) {
+                        deleteSubscriptionContainer(mid, did, function (data) {
+                            console.log("updateSubscriptionContainerr_sendData1: " + JSON.stringify(data));
+                            callback(data);
+                        });
+                        return;
+                    }
+                    dataToUpdate = JSON.stringify(dataToUpdate);//
+                    break;
+                case 'addArea':
+                    // add ncdr area
+                    console.log("addArea");
+                    console.log("listSubscriptionContainer_sendData: " + JSON.stringify(origRaw));
+                    origData = JSON.parse(origRaw['data']);
+                    console.log("origData: " + JSON.stringify(origData));
+                    origArea = JSON.parse(origData[0]['detail']);
+                    console.log("origArea: " + JSON.stringify(origArea));
+                    dataToUpdate = JSON.parse(dataToUpdate);
+
+                    origArea['area'].push(dataToUpdate['area'][0]);
+                    dataToUpdate['area'] = origArea['area'];
+                    dataToUpdate = JSON.stringify(dataToUpdate);
+                    console.log("dataToUpdate: " + JSON.stringify(dataToUpdate));
+                    break;
+                case 'addAirboxSubArea':
+                    console.log("addAirboxSubArea");
+                    console.log("listSubscriptionContainer_sendData: " + JSON.stringify(origRaw));
+                    origData = JSON.parse(origRaw['data']);
+                    console.log("origData: " + JSON.stringify(origData));
+
+                    origArea = JSON.parse(origData[0]['detail']);
+                    console.log("origArea: " + JSON.stringify(origArea));
+
+                    dataToUpdate = JSON.parse(dataToUpdate);
+                    console.log("dataToUpdate: " + JSON.stringify(dataToUpdate));
+                    origArea.push(dataToUpdate);
+                    dataToUpdate = JSON.stringify(origArea);
+                    console.log("dataToUpdate: " + JSON.stringify(dataToUpdate));
+                    break;
+                case 'updateAirboxSubArea':
+                    console.log("updateAirboxSubArea");
+                    console.log("listSubscriptionContainer_sendData: " + JSON.stringify(origRaw));
+
+                    origData = JSON.parse(origRaw['data']);
+                    console.log("origData: " + JSON.stringify(origData));
+
+                    origArea = JSON.parse(origData[0]['detail']);
+                    console.log("origArea: " + JSON.stringify(origArea));
+
+                    dataToUpdate = JSON.parse(dataToUpdate);
+                    console.log("dataToUpdate: " + JSON.stringify(dataToUpdate));
+                    origArea.forEach(function (v, k) {//
+                        console.log("v: " + JSON.stringify(v) + " k: " + k);
+                        if (v['area'] === dataToUpdate['area']) {
+                            origArea[k]['timeToPush'] = dataToUpdate['timeToPush'];
+                        }
+                    });
+                    dataToUpdate = JSON.stringify(origArea);
+                    console.log("dataToUpdate: " + JSON.stringify(dataToUpdate));
+                    //console.log(mid + " AND " + did);
+                    break;
+                case 'cancelAirboxSubArea'://
+                    console.log("cancelAirboxSubArea");
+                    console.log("listSubscriptionContainer_sendData: " + JSON.stringify(origRaw));
+
+                    origData = JSON.parse(origRaw['data']);
+                    console.log("origData: " + JSON.stringify(origData));
+
+                    origArea = JSON.parse(origData[0]['detail']);
+                    console.log("origArea: " + JSON.stringify(origArea));
+
+                    dataToUpdate = JSON.parse(dataToUpdate);
+                    console.log("dataToUpdate: " + JSON.stringify(dataToUpdate));
+                    var index;
+                    origArea.forEach(function (v, k) {//
+                        console.log("v: " + JSON.stringify(v) + " k: " + k);
+                        if (v['area'] === dataToUpdate['area']) {
+                            origArea.splice(k, 1);
+                        }
+                    });//   
+                    var newArea = origArea;
+                    if (origArea.length == 0) {
+                        deleteSubscriptionContainer(mid, did, function (data) {
+                            console.log("updateSubscriptionContainerr_sendData2: " + JSON.stringify(data));
+                            callback(data);
+                        });
+                        return;
+                    }
+                    dataToUpdate = JSON.stringify(newArea);
+                    break;//////
+                // case 'pushNotification':
+                //     $query = "UPDATE `subscription_container` SET `last_pushed_at` = NOW(), `is_pushed` = 1 WHERE `mid` = :mid AND `dataset_id` = :did;";
+                //     break;
+                // case 'parseNotification':
+                //     $query = "UPDATE `subscription_container` SET `last_pushed_at` = NOW(), `is_pushed` = 0 WHERE `mid` = :mid AND `dataset_id` = :did;";
+                //     break;
+                default:
+                    break;
+            }
+            connection.query("UPDATE subscription_container SET detail = '" + dataToUpdate + "' , changed_at = '" + MysqlFormat + "' WHERE (dataset_id = '" + did + "' AND mid = '" + mid + "')", function (error, result) {
+                var rst_false = {
+                    result: '',
+                    errorMessage: ''
+                };
+                var rst_true = {
+                    result: '',
+                    errorMessage: '',
+                    data: ''
+                };
+                if (error) {
+                    console.log(error);
+                } else {
+                    if (result == '') {
+                        console.log('Update failed');
+                        rst_false = {
+                            result: false,
+                            errorMessage: 'Update failed'
+                        };
+                        callback(rst_false);
+                    }
+                    else {
+                        console.log('subscription container updated');
+                        rst_true = {
+                            'result': true,
+                            'errorMessage': 'subscription container updated',
+                            'data': JSON.stringify(result)
+                        };
+                        callback(rst_true);
+                    }
+                }
+            });
+        });
+    }
+};
+app.get('/restfulapi/v1/listDataset/', function (request, response) {
+    console.log("listDataset: " + JSON.stringify(request.query));
+    var authToken = request.query.authToken;
+    var datasetId = request.query.datasetId;
+    var memberId = request.query.memberId;
+    var areaCode = request.query.areaCode;
+    var rst_false = {
+        result: '',
+        errorMessage: ''
+    };
+    if (authToken == undefined) {
+        console.log("No authorization key");
+        rst_false = {
+            result: false,
+            errorMessage: 'No authorization key'
+        };
+        response.send(JSON.stringify(rst_false));
+    }
+    if (datasetId == undefined) {
+        console.log("No dataset id");
+        rst_false = {
+            result: false,
+            errorMessage: 'No dataset id'
+        };
+        response.send(JSON.stringify(rst_false));
+    }
+    if (memberId == undefined) {
+        console.log("No memberId id");
+        rst_false = {
+            result: false,
+            errorMessage: 'No memberId id'
+        };
+        response.send(JSON.stringify(rst_false));
+    }
+    if (authToken != config.AUTH_TOKEN) {
+        console.log("Authorization fail");
+        rst_false = {
+            result: false,
+            errorMessage: 'Authorization fail'
+        };
+        response.send(JSON.stringify(rst_false));
+    }
+    listDataset(datasetId, areaCode, function (data) {
+        console.log("listDataset_sendData: " + JSON.stringify(data));
+        response.send(data);
+    });
+});
+function listDataset(did, area, callback) {
+    console.log(did + " AND " + area);
+    connection.query("SELECT * FROM dataset_to_display WHERE (id = '" + did + "' AND area_code = '" + area + "')", function (error, result) {
+        var rst_false = {
+            result: '',
+            errorMessage: ''
+        };
+        var rst_true = {
+            result: '',
+            errorMessage: '',
+            data: ''
+        };//
+        if (error) {
+            console.log(error);
+        } else {
+            if (result == '') {
+                console.log('Error in the query');
+                rst_false = {
+                    result: false,
+                    errorMessage: 'no subscription yet'
+                };
+                callback(rst_false);
+            }
+            else {
+                console.log('Successful query');
+                rst_true = {
+                    'result': true,
+                    'errorMessage': 'success',
+                    'data': JSON.stringify(result)
+                };
+                callback(rst_true);
+            }
+        }
+    });
+}//
+app.get('/restfulapi/v1/listPDatasetInfoToShow/', function (request, response) {
+    console.log("listPDatasetInfoToShow: " + JSON.stringify(request.query));
+    var authToken = request.query.authToken;
+    var datasetId = request.query.datasetId;
+    var areaCode = request.query.areaCode;
+    var rst_false = {
+        result: '',
+        errorMessage: ''
+    };
+    if (authToken == undefined) {
+        console.log("No authorization key");
+        rst_false = {
+            result: false,
+            errorMessage: 'No authorization key'
+        };
+        response.send(JSON.stringify(rst_false));
+    }
+    if (datasetId == undefined) {
+        console.log("No dataset id");
+        rst_false = {
+            result: false,
+            errorMessage: 'No dataset id'
+        };
+        response.send(JSON.stringify(rst_false));
+    }
+    if (authToken != config.AUTH_TOKEN) {
+        console.log("Authorization fail");
+        rst_false = {
+            result: false,
+            errorMessage: 'Authorization fail'
+        };
+        response.send(JSON.stringify(rst_false));
+    }
+    listPDatasetInfoToShow(datasetId, areaCode, function (data) {
+        console.log("listPDatasetInfoToShow_sendData: " + JSON.stringify(data));
+        response.send(data);
+    });
+});
+function listPDatasetInfoToShow(did, area, callback) {
+    console.log(did + " AND " + area);
+    connection.query("SELECT info_to_show FROM dataset_to_push WHERE (id = '" + did + "' AND area_code = '" + area + "' AND (UNIX_TIMESTAMP(" + Date.now() + ")-UNIX_TIMESTAMP(`changed_at`) < 86400 ))", function (error, result) {
+        var rst_false = {
+            result: '',
+            errorMessage: ''
+        };
+        var rst_true = {
+            result: '',
+            errorMessage: '',
+            data: ''
+        };//
+        if (error) {
+            console.log(error);
+        } else {
+            if (result == '') {
+                console.log('Error in the query');
+                rst_false = {
+                    result: false,
+                    errorMessage: 'no subscription yet'
+                };
+                callback(rst_false);
+            }
+            else {
+                console.log('Successful query');
+                rst_true = {
+                    'result': true,
+                    'errorMessage': 'success',
+                    'data': JSON.stringify(result)
+                };
+                callback(rst_true);
+            }
+        }
+    });
+}//
+app.delete('/restfulapi/v1/deleteSubscriptionContainer/', function (request, response) {
+    console.log("deleteSubscriptionContainer: " + JSON.stringify(request.body));
+    var authToken = request.body.authToken;
+    var datasetId = request.body.datasetId;
+    var memberId = request.body.memberId;
+    var rst_false = {
+        result: '',
+        errorMessage: ''
+    };
+    if (authToken == undefined) {
+        console.log("No authorization key");
+        rst_false = {
+            result: false,
+            errorMessage: 'No authorization key'
+        };
+        response.send(JSON.stringify(rst_false));
+    }
+    if (datasetId == undefined) {
+        console.log("No dataset id");
+        rst_false = {
+            result: false,
+            errorMessage: 'No dataset id'
+        };
+        response.send(JSON.stringify(rst_false));
+    }
+    if (memberId == undefined) {
+        console.log("No memberId id");
+        rst_false = {
+            result: false,
+            errorMessage: 'No memberId id'
+        };
+        response.send(JSON.stringify(rst_false));
+    }
+    if (authToken != config.AUTH_TOKEN) {
+        console.log("Authorization fail");
+        rst_false = {
+            result: false,
+            errorMessage: 'Authorization fail'
+        };
+        response.send(JSON.stringify(rst_false));
+    }
+    deleteSubscriptionContainer(memberId, datasetId, function (data) {
+        console.log("deleteSubscriptionContainer_sendData: " + JSON.stringify(data));
+        response.send(data);
+    });
+});
+function deleteSubscriptionContainer(mid, did, callback) {
+    connection.query("DELETE FROM subscription_container WHERE mid = '" + mid + "' AND dataset_id = '" + did + "'", function (error, result) {
+        var rst_false = {
+            result: '',
+            errorMessage: ''
+        };
+        var rst_true = {
+            result: '',
+            errorMessage: '',
+            data: ''
+        };
+        if (error) {
+            console.log(error);
+        } else {
+            if (result == '') {
+                console.log('Invalid input');
+                rst_false = {
+                    result: false,
+                    errorMessage: 'Invalid input'
+                };
+                callback(rst_false);
+            }
+            else {
+                console.log('subscription container deleted');
+                rst_true = {
+                    'result': true,
+                    'errorMessage': 'subscription container deleted',
+                    'data': JSON.stringify(result)
+                };
+                callback(rst_true);
+            }
+        }
+    });
 }
+function SendUsers() {
+    connection.query("SELECT mid FROM member", function (error, result) {
+        //callback
+        if (!!error) {
+            console.log('Error in the query');
+            console.log(error);
+            response.send(error)
+        } else {
+            console.log('Successful query');
+            for (i = 0; i < result.length; i++) {
+                SendMessage(result[i].mid, '要發送的訊息');
+            }
+        }
+    });
+};
+
+//push message
+function SendMessage(userId, message) {
+    var data = {
+        'to': userId,
+        'messages': [
+            { 'type': 'text', 'text': message }
+        ]
+    };
+    console.log('傳送訊息給 ' + userId);
+    PostToLINE(data, config.channel_access_token);
+}
+//
+function PostToLINE(data, channel_access_token) {
+    console.log(JSON.stringify(data));
+    var options = {
+        host: 'api.line.me',
+        port: '443',
+        path: '/v2/bot/message/push',
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Content-Length': Buffer.byteLength(JSON.stringify(data)),
+            'Authorization': 'Bearer <' + channel_access_token + '>'
+        }
+    };
+    var https = require('https');
+    var req = https.request(options, function (res) {
+        res.setEncoding('utf8');
+        res.on('data', function (chunk) {
+            console.log('Response: ' + chunk);
+        });
+    });
+    req.write(JSON.stringify(data));
+    req.end();
+};
