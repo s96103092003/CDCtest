@@ -4,9 +4,6 @@ var app = express();
 var port = process.env.PORT;
 var server = http.Server(app).listen(port);
 var fs = require("fs");
-app.use(bodyParser.urlencoded({
-    extended: true
-}));
 //app.use('/tmp', express.static(__dirname + '/tmp'));
 var fs = require('fs');
 var config = fs.readFileSync(__dirname + '/config.json', 'utf8');
