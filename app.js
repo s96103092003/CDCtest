@@ -13,10 +13,10 @@ var linemessage = new linemessageapi.linemessage();
 app.post("/", function (request, response) {
 
     console.log("Get LINE Message");
+    console.log(JSON.stringify(request.body))
     var results = request.body.events;
     console.log(JSON.stringify(results));
     console.log('receive message count: ' + results.length);
-
     for (var idx = 0; idx < results.length; idx++) {
         switch (userMessage.events[0].message.type) {
             case "text":
