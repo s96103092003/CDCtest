@@ -13,7 +13,7 @@ var linemessage = new linemessageapi.linemessage();
 app.post("/", function (request, response) {
 
     console.log("Get LINE Message");
-    console.log(JSON.stringify(request.body))
+    console.log(JSON.stringify(request))
     var results = request.body.events;
     console.log(JSON.stringify(results));
     console.log('receive message count: ' + results.length);
@@ -78,80 +78,6 @@ function GetContent(data, channel_access_token) {//OK
     }); qe
     req.end();
 }
-
-function ReplyMessage(data, channel_access_token, reply_token, callback) {
-    data.replyToken = reply_token;
-    console.log(JSON.stringify(data));
-    var options = {
-        host: 'api.line.me',
-        port: '443',
-        path: '/v2/bot/message/reply',
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Content-Length': Buffer.byteLength(JSON.stringify(data)),
-            'Authorization': 'Bearer <' + channel_access_token + '>'
-        }
-    };
-    var https = require('https');
-    var req = https.request(options, function (res) {
-        res.setEncoding('utf8');
-        res.on('data', function (chunk) {
-            console.log('Response: ' + chunk);
-        });
-        res.on('end', function () {
-        });
-        console.log('Reply message status code: ' + res.statusCode);
-        if (res.statusCode == 200) {
-            console.log('Reply message success');
-            callback(true);
-        } else {
-            console.log('Reply message failure');
-            callback(false);
-        }
-    });
-    req.write(JSON.stringify(data));
-    req.end();
-}
-
-function PostToLINE(data, channel_access_token, callback) {
-    console.log(JSON.stringify(data));
-    var options = {
-        host: 'api.line.me',
-        port: '443',
-        path: '/v2/bot/message/push',
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Content-Length': Buffer.byteLength(JSON.stringify(data)),
-            'Authorization': 'Bearer <' + channel_access_token + '>'
-        }
-    };
-    var https = require('https');
-    var req = https.request(options, function (res) {
-        res.setEncoding('utf8');
-        res.on('data', function (chunk) {
-            console.log('Response: ' + chunk);
-        });
-        res.on('end', function () {
-        });
-    });
-    req.write(JSON.stringify(data));
-    req.end();
-    try {
-        callback(true);
-    } catch (e) { };
-}
-
-
-app.get('/tmp/:filename', function (request, response) {
-    var filename = request.params.filename;
-    var stream = require('fs').createReadStream('/tmp/' + filename);
-    stream.pipe(response);
-    response.clearCookie()
-});
-
-
 //APP
 app.get("/api", function (req, res) {
     res.send("API is running");
