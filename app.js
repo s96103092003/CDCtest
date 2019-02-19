@@ -3,13 +3,11 @@ var express = require("express");
 var app = express();
 var port = process.env.PORT;
 var server = http.Server(app).listen(port);
-var bodyParser = require("body-parser");
 var fs = require("fs");
 app.use(bodyParser.urlencoded({
     extended: true
 }));
 //app.use('/tmp', express.static(__dirname + '/tmp'));
-app.use(bodyParser.json());
 var fs = require('fs');
 var config = fs.readFileSync(__dirname + '/config.json', 'utf8');
 config = JSON.parse(config);
