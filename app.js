@@ -14,7 +14,7 @@ config = JSON.parse(config);
 var linemessageapi = require('./linemessage');
 var linemessage = new linemessageapi.linemessage();
 app.post("/", function (request, response) {
-
+///
     console.log("Get LINE Message");
     var results = request.body.events;
     console.log(JSON.stringify(results));
