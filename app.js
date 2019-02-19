@@ -20,7 +20,7 @@ app.post("/", function (request, response) {
     console.log(JSON.stringify(results));
     console.log('receive message count: ' + results.length);
     for (var idx = 0; idx < results.length; idx++) {
-        switch (userMessage.events[0].message.type) {
+        switch (results[idx].message.type) {
             case "text":
                 linemessage.SendMessage(results[idx].source.userId, results[idx].message.text, 'linehack2018',results[idx].replyToken,function (result) {
                     if (!result) console.log(result);
