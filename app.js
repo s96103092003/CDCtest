@@ -5,14 +5,14 @@ var port = process.env.PORT;
 var server = http.Server(app).listen(port);
 var fs = require("fs");
 var bodyParser = require('body-parser');
-app.use(bodyParser.urlencoded({
-    extended: true
-}));
-app.use(bodyParser.json());
 var config = fs.readFileSync(__dirname + '/config.json', 'utf8');
 config = JSON.parse(config);
 var linemessageapi = require('./linemessage');
 var linemessage = new linemessageapi.linemessage();
+app.use(bodyParser.urlencoded({
+    extended: true
+}));
+app.use(bodyParser.json());
 app.post("/", function (request, response) {
 ///
     console.log("Get LINE Message");
