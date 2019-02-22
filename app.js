@@ -14,8 +14,13 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 app.use(bodyParser.json());
+var reservationCircle = ["預約", "選日期或醫生"]
+var dataCircle = ["輸入日期","輸入時段"];
+var dataCircle = ["醫生姓名","輸入日期時段"];
+
+var userStage = new Map();
 app.post("/", function (request, response) {
-///
+    ///
     console.log("Get LINE Message");
     var results = request.body.events;
     console.log(JSON.stringify(results));
@@ -23,11 +28,17 @@ app.post("/", function (request, response) {
     for (var idx = 0; idx < results.length; idx++) {
         switch (results[idx].message.type) {
             case "text":
-                linemessage.SendMessage(results[idx].source.userId, results[idx].message.text, 'linehack2018',results[idx].replyToken,function (result) {
-                    if (!result) console.log(result);
-                    else console.log(result);
-                })
-                break;
+                switch (results[idx].message.text) {
+                    case "預約":
+                        userStage.set(results[idx].source.userId, "預約");
+                    default:
+                        linemessage.SendMessage(results[idx].source.userId, results[idx].message.text, 'linehack2018', results[idx].replyToken, function (result) {
+                            if (!result) console.log(result);
+                            else console.log(result);
+                        })
+                }
+                if (userStage.get(results[idx].source.userId))
+                    break;
 
         }
 
@@ -44,7 +55,7 @@ app.post("/", function (request, response) {
 
 });
 
-function GetContent(data, channel_access_token) {//OK
+function GetContent(data, channel_access_token) { //OK
     var options = {
         host: 'api.line.me',
         port: '443',
@@ -78,16 +89,11 @@ function GetContent(data, channel_access_token) {//OK
                 console.log(e);
             }
         });
-    }); qe
+    });
+    qe
     req.end();
 }
 //APP
 app.get("/api", function (req, res) {
     res.send("API is running");
 });
-
-
-
-
-
-
