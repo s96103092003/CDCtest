@@ -1,14 +1,8 @@
 var http = require("http");
-<<<<<<< HEAD
 var https = require('https');
 var express = require("express");
 var app = express();
 var port = 80//process.env.PORT;
-=======
-var express = require("express");
-var app = express();
-var port = process.env.PORT;
->>>>>>> c0d47fd076e8dae3bab502fced5b813056293f64
 var server = http.Server(app).listen(port);
 var fs = require("fs");
 var bodyParser = require('body-parser');
