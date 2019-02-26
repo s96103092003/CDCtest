@@ -59,7 +59,7 @@ app.post("/", function (request, response) {
                 var userText = results[idx].message.text;
                 console.log("userStage: " + userStage.get(results[idx].source.userId))
                 console.log("userData: " + userData.get(results[idx].source.userId))
-                if (userText.indexOf("預約") != -1 || userText.indexOf("掛號") != -1 || userStage.get(results[idx].source.userId) == "預約") {
+                if (userText.indexOf("預約") != -1 || userText.indexOf("掛號") != -1 || userStage.get(results[idx].source.userId) == "預約" ) {
                     if (userStage.get(results[idx].source.userId) == null) {
                         userStage.set(results[idx].source.userId, "預約")
                     }
@@ -177,9 +177,10 @@ function resProcess(userId, replyToken) {
         text = "請問要預約幾月幾日呢?"
     } else if (ResProcess.time == null) {
         text = "請問要預約上午、下午還是晚上時段呢?"
-    } else if (ResProcess.name == null) {
-        text = "有指定的醫師嗎?"
-    } else if (ResProcess.doctorName != null) {
+    } //else if (ResProcess.doctorName == null) {
+       // text = "有指定的醫師嗎?"
+    //} 
+    else if (ResProcess.doctorName != null) {
         text = "預約完成查詢結果"
         userStage.set(results[idx].source.userId, null)
     }
