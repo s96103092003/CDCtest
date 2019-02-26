@@ -180,8 +180,8 @@ function resProcessMessage(userId, replyToken) {
     } //else if (ResProcess.doctorName == null) {
     // text = "有指定的醫師嗎?"
     //} 
-    else if (ResProcess.doctorName != null) {
-        text = "預約完成查詢結果"
+    else {
+        text = "預約完成"
         userStage.set(userId, null)
         userData.set(userId, null)
     }
