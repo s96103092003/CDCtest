@@ -8,21 +8,11 @@
   },
   "author": "",
   "dependencies": {
+    "express": "^4.16.3",
     "http": "0.0.0",
     "https": "^1.0.0",
     "log4js": "^1.1.1",
     "log4js-extend": "^0.1.2",
-    "body-parser": "latest",
-    "express": "latest",
-    "fs": "0.0.1-security",
-    "js-levenshtein": "latest",
-    "jwt-simple": "^0.5.5",
-    "node-gyp": "^3.8.0",
-    "pinyin": "latest",
-    "querystring": "^0.2.0",
-    "rebuild": "^0.1.2",
-    "request": "^2.88.0",
-    "sha256": "^0.2.0",
-    "url": "latest"
+    "body-parser": "latest"
   }
 }

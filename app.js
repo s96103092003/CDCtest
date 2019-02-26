@@ -18,6 +18,7 @@ var reservationCircle = ["預約", "選日期或醫生"]
 var dataCircle = ["輸入日期", "輸入時段"];
 var dataCircle = ["醫生姓名", "輸入日期時段"];
 var dataSeg = [];
+var state = [];
 
 var userStage = new Map();
 app.post("/", function (request, response) {
@@ -46,8 +47,6 @@ app.post("/", function (request, response) {
 
     }
     console.log(JSON.stringify(userMessage.events[0]));
-
-
     var data = {
         'to': userMessage.events[0].source.userID,
         'replyToken': userMessage.events[0].replyToken
