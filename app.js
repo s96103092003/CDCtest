@@ -64,7 +64,7 @@ app.post("/", function (request, response) {
                         userStage.set(results[idx].source.userId, "預約")
                     }
                     ResProcessCheck(results[idx].source.userId, userText, function () {
-                        resProcess(results[idx].source.userId, results[idx].replyToken)
+                        resProcessMessage(results[idx].source.userId, results[idx].replyToken)
                     })
 
                 } else { //
@@ -167,10 +167,11 @@ function ResProcessCheck(userId, userText, callback) {
     callback();
 }
 
-function resProcess(userId, replyToken) {
+function resProcessMessage(userId, replyToken) {
     console.log("into resProcess")
     var text = "";
     var ResProcess = userData.get(userId);
+    console.log("resProcess "+JSON.stringify(ResProcess))
     if (ResProcess.object == null) {
         text = "請問要預約的科系是什麼?"
     } else if (ResProcess.date == null) {
