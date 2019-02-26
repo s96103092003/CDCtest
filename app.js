@@ -112,7 +112,7 @@ function ResProcessCheck(userId, userText, callback) {
 
     for (var data in doctorNames) {
         for (var i in data) {
-            if (userText.indexOf(data[i])) {
+            if (userText.indexOf(data[i])!=-1) {
                 ResProcess.doctorName = data[0];
                 find = true;
                 break;
@@ -125,7 +125,7 @@ function ResProcessCheck(userId, userText, callback) {
     }
     for (var data in dataSeg) {
         for (var i in data) {
-            if (userText.indexOf(data[i])) {
+            if (userText.indexOf(data[i])!=-1) {
                 ResProcess.date = data[0];
                 find = true;
                 break;
@@ -138,7 +138,7 @@ function ResProcessCheck(userId, userText, callback) {
     }
     for (var data in objectSeg) {
         for (var i in data) {
-            if (userText.indexOf(data[i])) {
+            if (userText.indexOf(data[i])!=-1) {
                 ResProcess.object = data[0];
                 find = true;
                 break;
@@ -151,7 +151,7 @@ function ResProcessCheck(userId, userText, callback) {
     }
     for (var data in timeSeg) {
         for (var i in data) {
-            if (userText.indexOf(data[i])) {
+            if (userText.indexOf(data[i])!=-1) {
                 ResProcess.time = data[0];
                 find = true;
                 break;
