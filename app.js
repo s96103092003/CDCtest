@@ -183,6 +183,7 @@ function resProcess(userId, replyToken) {
     else if (ResProcess.doctorName != "null") {
         text = "預約完成查詢結果"
         userStage.set(userId, null)
+        userData.set(userId, null)
     }
     linemessage.SendMessage(userId, text, 'linehack2018', replyToken, function (result) {
         if (!result) console.log(result);
