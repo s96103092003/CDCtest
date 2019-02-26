@@ -29,7 +29,6 @@ for (var i = 1; i <= 12; i++) {
     }
     dataSeg.push(buf);
 }
-console.log(JSON.stringify(dataSeg, null, 2));
 var timeSeg = [
     ["上午", "早上"],
     ["下午", "中午"],
