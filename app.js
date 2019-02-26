@@ -17,6 +17,7 @@ app.use(bodyParser.json());
 var reservationCircle = ["預約", "選日期或醫生"]
 var dataCircle = ["輸入日期", "輸入時段"];
 var dataCircle = ["醫生姓名", "輸入日期時段"];
+var dataSeg = [];
 
 var userStage = new Map();
 app.post("/", function (request, response) {
