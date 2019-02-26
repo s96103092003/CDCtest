@@ -25,7 +25,7 @@ var analyzer = Jieba({
 analyzer.dict('dict.txt', function (err) {
     if (err) console.log(err)
 });
-
+//
 analyzer.cut("我要預定一月一號", {
     mode: Jieba.mode.SEARCH,
     HMM: true
