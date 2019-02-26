@@ -14,13 +14,49 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 app.use(bodyParser.json());
-var reservationCircle = ["預約", "選日期或醫生"]
-var dataCircle = ["輸入日期", "輸入時段"];
-var dataCircle = ["醫生姓名", "輸入日期時段"];
+var doctorNames = [
+    ["林醫師", "林醫生"],
+    ["劉醫師", "劉醫生"],
+    ["陳醫師", "陳醫生"],
+    ["楊醫師", "楊醫生"]
+];
 var dataSeg = [];
-var state = [];
+for (var i = 1; i <= 12; i++) {
+    var buf = []
+    for (var j = 1; j <= 31; j++) {
+        buf.push(i + "月" + j + "日");
+        buf.push(i + "月" + j + "號");
+    }
+    dataSeg.push(buf);
+}
+console.log(JSON.stringify(dataSeg, null, 2));
+var timeSeg = [
+    ["上午", "早上"],
+    ["下午", "中午"],
+    ["晚上", "傍晚"]
+];
+var objectSeg = [
+    ["內科", "內科系"],
+    ["外科", "外科系"],
+    ["婦產科", "婦科", "婦科系"],
+    ["小兒科", "兒科", "兒科系"]
+];
 
+var Stage = null;
 var userStage = new Map();
+var text = new Map();
+text.set("1", {
+    index: 1,
+    index1: 2
+})
+console.log(text.get("1"))
+text.get("1").index1 = 3;
+console.log(text.get("1"))
+text.set("1", {
+    index: 1,
+    index1: 4
+})
+console.log(text.get("1"))
 app.post("/", function (request, response) {
     ///
     console.log("Get LINE Message");
@@ -30,69 +66,127 @@ app.post("/", function (request, response) {
     for (var idx = 0; idx < results.length; idx++) {
         switch (results[idx].message.type) {
             case "text":
-                switch (results[idx].message.text) {
-                    case "預約":
-                        userStage.set(results[idx].source.userId, "預約");
-                    default:
-                        linemessage.SendMessage(results[idx].source.userId, results[idx].message.text, 'linehack2018', results[idx].replyToken, function (result) {
-                            if (!result) console.log(result);
-                            else console.log(result);
-                        })
+                var userText = results[idx].message.text;
+                if (userText.indexOf("預約") != -1 || userText.indexOf("掛號") != -1 || userStage.get(results[idx].source.userId).stage == "預約") {
+                    ResProcessCheck(results[idx].source.userId, function () {
+                        resProcess(results[idx].source.userId, results[idx].replyToken)
+                    })
                 }
-                if (userStage.get(results[idx].source.userId))
-                    break;
+            default:
+                if (userStage.get(results[idx].source.userId) == "預約") {
+                    linemessage.SendMessage(results[idx].source.userId, "你還沒完成預約流程喔", 'linehack2018', results[idx].source.replyToken, function (result) {
+                        if (!result) console.log(result);
+                        else console.log(result);
+                    })
+                } else if (userStage.get(results[idx].source.userId) == null) {
+                    linemessage.SendMessage(results[idx].source.userId, userText, 'linehack2018', results[idx].source.replyToken, function (result) {
+                        if (!result) console.log(result);
+                        else console.log(result);
+                    })
+                }
 
         }
-
-
+        if (userStage.get(results[idx].source.userId))
+            break;
     }
-    console.log(JSON.stringify(userMessage.events[0]));
-    var data = {
-        'to': userMessage.events[0].source.userID,
-        'replyToken': userMessage.events[0].replyToken
-    };
-
-
 });
 
-function GetContent(data, channel_access_token) { //OK
-    var options = {
-        host: 'api.line.me',
-        port: '443',
-        path: '/v2/bot/message/' + data.events[0].message.id + '/content',
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Authorization': 'Bearer <' + channel_access_token + '>'
-        }
-    };
-    var https = require('https');
-    var req = https.request(options, function (res) {
-        res.setEncoding("binary");
-        console.log('STATUS: ' + res.statusCode);
-        console.log('HEADERS: ' + JSON.stringify(res.headers));
-        res.body = '';
-        res.on('data', function (chunk) {
-            console.log('get response data');
-
-            res.body = res.body + chunk;
-        });
-        res.on('end', function () {
-            res.body = require('btoa')(res.body);
-            try {
-                fs.writeFile("/tmp/123.jpg", res.body, 'base64', function (err) {
-                    if (err) throw err;
-                });
-                console.log('response end');
-                // 將 res.body 寫入檔案
-            } catch (e) {
-                console.log(e);
+function ResProcessCheck(userId) {
+    var find = false;
+    var ResProcess;
+    if (userStage.get(userId) == null) {
+        console.log("ResProcessCheck userStage null")
+        ResProcess = {
+            stage: "預約",
+            data: {
+                object: null,
+                date: null, //日期
+                time: null, //時段 0,1,2
+                doctorName: null
             }
-        });
-    });
-    qe
-    req.end();
+
+        };
+    } else {
+        console.log("ResProcessCheck userStage hasValue")
+        ResProcess = userStage.get(userId);
+    }
+
+    for (var data in doctorNames) {
+        for (var i in data) {
+            if (userText.indexOf(data[i])) {
+                ResProcess.doctorName = data[0];
+                find = true;
+                break;
+            }
+        }
+        if (find) {
+            find = false;
+            break;
+        }
+    }
+    for (var data in dataSeg) {
+        for (var i in data) {
+            if (userText.indexOf(data[i])) {
+                ResProcess.date = data[0];
+                find = true;
+                break;
+            }
+        }
+        if (find) {
+            find = false;
+            break;
+        }
+    }
+    for (var data in objectSeg) {
+        for (var i in data) {
+            if (userText.indexOf(data[i])) {
+                ResProcess.date = data[0];
+                find = true;
+                break;
+            }
+        }
+        if (find) {
+            find = false;
+            break;
+        }
+    }
+    for (var data in timeSeg) {
+        for (var i in data) {
+            if (userText.indexOf(data[i])) {
+                ResProcess.date = data[0];
+                find = true;
+                break;
+            }
+        }
+        if (find) {
+            find = false;
+            break;
+        }
+    }
+    userStage.set(userId, ResProcess)
 }
+
+function resProcess(userId, replyToken) {
+    var text = "";
+    if (ResProcess.object == null) {
+        text = "請問要預約的科系是什麼?"
+    } else if (ResProcess.date == null) {
+        text = "請問要預約幾月幾日呢?"
+    } else if (ResProcess.time == null) {
+        text = "請問要預約上午、下午還是晚上時段呢?"
+    } else if (ResProcess.name == null) {
+        text = "有指定的醫師嗎?"
+    } else if (ResProcess.doctorName != null) {
+        text = "預約完成查詢結果"
+        userStage.set(results[idx].source.userId, null)
+    }
+    linemessage.SendMessage(userId, text, 'linehack2018', replyToken, function (result) {
+        if (!result) console.log(result);
+        else console.log(result);
+    })
+}
+
+
 //APP
 app.get("/api", function (req, res) {
     res.send("API is running");
