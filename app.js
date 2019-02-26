@@ -109,16 +109,10 @@ function ResProcessCheck(userId, userText, callback) {
         console.log("ResProcessCheck userData hasValue")
         ResProcess = userData.get(userId);
     }
-    for (var data in doctorNames) {
-        for (var i in data) {
-            console.log(data[i])
-        }
-        
-    }
-    for (var data in doctorNames) {
-        for (var i in data) {
-            if (userText.indexOf(data[i]) != -1) {
-                ResProcess.doctorName = data[0];
+    for (var i = 0; i < doctorNames.length; i++) {
+        for (var j = 0; j < doctorNames[i].length; j++) {
+            if (userText.indexOf(doctorNames[i][j]) != -1) {
+                ResProcess.doctorName = doctorNames[i][0];
                 find = true;
                 break;
             }
@@ -128,10 +122,10 @@ function ResProcessCheck(userId, userText, callback) {
             break;
         }
     }
-    for (var data in dataSeg) {
-        for (var i in data) {
-            if (userText.indexOf(data[i]) != -1) {
-                ResProcess.date = data[0];
+    for (var i = 0; i < dataSeg.length; i++) {
+        for (var j = 0; j < dataSeg[i].length; j++) {
+            if (userText.indexOf(dataSeg[i][j]) != -1) {
+                ResProcess.date = dataSeg[i][0];
                 find = true;
                 break;
             }
@@ -141,10 +135,10 @@ function ResProcessCheck(userId, userText, callback) {
             break;
         }
     }
-    for (var data in objectSeg) {
-        for (var i in data) {
-            if (userText.indexOf(data[i]) != -1) {
-                ResProcess.object = data[0];
+    for (var i = 0; i < objectSeg.length; i++) {
+        for (var j = 0; j < objectSeg[i].length; j++) {
+            if (userText.indexOf(objectSeg[i][j]) != -1) {
+                ResProcess.object = objectSeg[i][0];
                 find = true;
                 break;
             }
@@ -154,10 +148,10 @@ function ResProcessCheck(userId, userText, callback) {
             break;
         }
     }
-    for (var data in timeSeg) {
-        for (var i in data) {
-            if (userText.indexOf(data[i]) != -1) {
-                ResProcess.time = data[0];
+    for (var i = 0; i < timeSeg.length; i++) {
+        for (var j = 0; j < timeSeg[i].length; j++) {
+            if (userText.indexOf(timeSeg[i][j]) != -1) {
+                ResProcess.time = timeSeg[i][0];
                 find = true;
                 break;
             }
@@ -176,7 +170,7 @@ function resProcessMessage(userId, replyToken) {
     console.log("into resProcess")
     var text = "";
     var ResProcess = userData.get(userId);
-    console.log("resProcess "+JSON.stringify(ResProcess))
+    console.log("resProcess " + JSON.stringify(ResProcess))
     if (ResProcess.object == null) {
         text = "請問要預約的科系是什麼?"
     } else if (ResProcess.date == null) {
