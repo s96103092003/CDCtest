@@ -98,7 +98,7 @@ function ResProcessCheck(userId, userText, callback) {
     var find = false;
     var ResProcess;
     if (userData.get(userId) == null) {
-        console.log("ResProcessData userStage null")
+        console.log("ResProcessCheck userData null")
         ResProcess = {
             object: null,
             date: null, //日期
@@ -106,7 +106,7 @@ function ResProcessCheck(userId, userText, callback) {
             doctorName: null
         };
     } else {
-        console.log("ResProcessData userStage hasValue")
+        console.log("ResProcessCheck userData hasValue")
         ResProcess = userData.get(userId);
     }
 
@@ -182,7 +182,7 @@ function resProcess(userId, replyToken) {
     //} 
     else if (ResProcess.doctorName != null) {
         text = "預約完成查詢結果"
-        userStage.set(results[idx].source.userId, null)
+        userStage.set(userId, null)
     }
     linemessage.SendMessage(userId, text, 'linehack2018', replyToken, function (result) {
         if (!result) console.log(result);
