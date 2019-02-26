@@ -100,10 +100,10 @@ function ResProcessCheck(userId, userText, callback) {
     if (userData.get(userId) == null) {
         console.log("ResProcessCheck userData null")
         ResProcess = {
-            object: null,
-            date: null, //日期
-            time: null, //時段 0,1,2
-            doctorName: null
+            object: "",
+            date: "", //日期
+            time: "", //時段 0,1,2
+            doctorName: ""
         };
     } else {
         console.log("ResProcessCheck userData hasValue")
@@ -171,16 +171,16 @@ function resProcess(userId, replyToken) {
     console.log("into resProcess")
     var text = "";
     var ResProcess = userData.get(userId);
-    if (ResProcess.object == null) {
+    if (ResProcess.object == "") {
         text = "請問要預約的科系是什麼?"
-    } else if (ResProcess.date == null) {
+    } else if (ResProcess.date == "") {
         text = "請問要預約幾月幾日呢?"
-    } else if (ResProcess.time == null) {
+    } else if (ResProcess.time == "") {
         text = "請問要預約上午、下午還是晚上時段呢?"
     } //else if (ResProcess.doctorName == null) {
        // text = "有指定的醫師嗎?"
     //} 
-    else if (ResProcess.doctorName != null) {
+    else if (ResProcess.doctorName != "") {
         text = "預約完成查詢結果"
         userStage.set(userId, null)
     }
