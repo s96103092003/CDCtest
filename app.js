@@ -43,6 +43,7 @@ var objectSeg = [
 
 var Stage = null;
 var userStage = new Map();
+var userData = new Map();
 var text = new Map();
 
 app.post("/", function (request, response) {
@@ -56,15 +57,23 @@ app.post("/", function (request, response) {
         switch (results[idx].message.type) {
             case "text":
                 var userText = results[idx].message.text;
-                if (userText.indexOf("預約") != -1 || userText.indexOf("掛號") != -1 || userStage.get(results[idx].source.userId).stage == "預約") {
-                    ResProcessCheck(results[idx].source.userId, userText, function () {
-                        resProcess(results[idx].source.userId, results[idx].replyToken)
-                    })
-                } else {//
-                    linemessage.SendMessage(results[idx].source.userId, userText, 'linehack2018', results[idx].source.replyToken, function (result) {
-                        if (!result) console.log(result);
-                        else console.log(result);
-                    })
+                if (userText.indexOf("預約") != -1 || userText.indexOf("掛號") != -1) {
+                    if (userStage.get(results[idx].source.userId) == null) {
+                        userStage.set(results[idx].source.userId, "預約")
+                    }
+                    if (userStage.get(results[idx].source.userId) == "預約") {
+                        ResProcessCheck(results[idx].source.userId, userText, function () {
+                            resProcess(results[idx].source.userId, results[idx].replyToken)
+                        })
+                    }
+
+                } else { //
+                    if (userStage.get(results[idx].source.userId) == null) {
+                        linemessage.SendMessage(results[idx].source.userId, "看不懂喔", 'linehack2018', results[idx].source.replyToken, function (result) {
+                            if (!result) console.log(result);
+                            else console.log(result);
+                        })
+                    }
                 }
             default:
                 if (userStage.get(results[idx].source.userId) == "預約") {
@@ -86,21 +95,17 @@ function ResProcessCheck(userId, userText, callback) {
     console.log("into ResProcessCheck")
     var find = false;
     var ResProcess;
-    if (userStage.get(userId) == null) {
+    if (userData.get(userId) == null) {
         console.log("ResProcessCheck userStage null")
         ResProcess = {
-            stage: "預約",
-            data: {
-                object: null,
-                date: null, //日期
-                time: null, //時段 0,1,2
-                doctorName: null
-            }
-
+            object: null,
+            date: null, //日期
+            time: null, //時段 0,1,2
+            doctorName: null
         };
     } else {
         console.log("ResProcessCheck userStage hasValue")
-        ResProcess = userStage.get(userId);
+        ResProcess = userData.get(userId);
     }
 
     for (var data in doctorNames) {
@@ -155,12 +160,13 @@ function ResProcessCheck(userId, userText, callback) {
             break;
         }
     }
-    userStage.set(userId, ResProcess)
+    userData.set(userId, ResProcess)
 }
 
 function resProcess(userId, replyToken) {
     console.log("into resProcess")
     var text = "";
+    var ResProcess = userData.get(userId);
     if (ResProcess.object == null) {
         text = "請問要預約的科系是什麼?"
     } else if (ResProcess.date == null) {
