@@ -139,7 +139,7 @@ function ResProcessCheck(userId, userText, callback) {
     for (var data in objectSeg) {
         for (var i in data) {
             if (userText.indexOf(data[i])) {
-                ResProcess.date = data[0];
+                ResProcess.object = data[0];
                 find = true;
                 break;
             }
@@ -152,7 +152,7 @@ function ResProcessCheck(userId, userText, callback) {
     for (var data in timeSeg) {
         for (var i in data) {
             if (userText.indexOf(data[i])) {
-                ResProcess.date = data[0];
+                ResProcess.time = data[0];
                 find = true;
                 break;
             }
