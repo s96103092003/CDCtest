@@ -78,14 +78,12 @@ app.post("/", function (request, response) {
                         else console.log(result);
                     })
                 }
-
         }
-        if (userStage.get(results[idx].source.userId))
-            break;
     }
 });
 
 function ResProcessCheck(userId, userText, callback) {
+    console.log("into ResProcessCheck")
     var find = false;
     var ResProcess;
     if (userStage.get(userId) == null) {
@@ -161,6 +159,7 @@ function ResProcessCheck(userId, userText, callback) {
 }
 
 function resProcess(userId, replyToken) {
+    console.log("into resProcess")
     var text = "";
     if (ResProcess.object == null) {
         text = "請問要預約的科系是什麼?"
