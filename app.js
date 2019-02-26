@@ -57,17 +57,16 @@ app.post("/", function (request, response) {
         switch (results[idx].message.type) {
             case "text":
                 var userText = results[idx].message.text;
-                console.log("userStage: "+ userStage.get(results[idx].source.userId))
-                console.log("userData: "+ userData.get(results[idx].source.userId))
-                if (userText.indexOf("預約") != -1 || userText.indexOf("掛號") != -1) {
+                console.log("userStage: " + userStage.get(results[idx].source.userId))
+                console.log("userData: " + userData.get(results[idx].source.userId))
+                if (userText.indexOf("預約") != -1 || userText.indexOf("掛號") != -1 || userStage.get(results[idx].source.userId) == "預約") {
                     if (userStage.get(results[idx].source.userId) == null) {
                         userStage.set(results[idx].source.userId, "預約")
                     }
-                    if (userStage.get(results[idx].source.userId) == "預約") {
-                        ResProcessCheck(results[idx].source.userId, userText, function () {
-                            resProcess(results[idx].source.userId, results[idx].replyToken)
-                        })
-                    }
+                    ResProcessCheck(results[idx].source.userId, userText, function () {
+                        resProcess(results[idx].source.userId, results[idx].replyToken)
+                    })
+
                 } else { //
                     if (userStage.get(results[idx].source.userId) == null) {
                         linemessage.SendMessage(results[idx].source.userId, "看不懂喔", 'linehack2018', results[idx].source.replyToken, function (result) {
