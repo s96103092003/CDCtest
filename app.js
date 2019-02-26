@@ -57,6 +57,8 @@ app.post("/", function (request, response) {
         switch (results[idx].message.type) {
             case "text":
                 var userText = results[idx].message.text;
+                console.log("userStage: "+ userStage.get(results[idx].source.userId))
+                console.log("userData: "+ userData.get(results[idx].source.userId))
                 if (userText.indexOf("預約") != -1 || userText.indexOf("掛號") != -1) {
                     if (userStage.get(results[idx].source.userId) == null) {
                         userStage.set(results[idx].source.userId, "預約")
@@ -66,7 +68,6 @@ app.post("/", function (request, response) {
                             resProcess(results[idx].source.userId, results[idx].replyToken)
                         })
                     }
-
                 } else { //
                     if (userStage.get(results[idx].source.userId) == null) {
                         linemessage.SendMessage(results[idx].source.userId, "看不懂喔", 'linehack2018', results[idx].source.replyToken, function (result) {
@@ -75,6 +76,7 @@ app.post("/", function (request, response) {
                         })
                     }
                 }
+                break;
             default:
                 if (userStage.get(results[idx].source.userId) == "預約") {
                     linemessage.SendMessage(results[idx].source.userId, "你還沒完成預約流程喔", 'linehack2018', results[idx].source.replyToken, function (result) {
@@ -87,6 +89,7 @@ app.post("/", function (request, response) {
                         else console.log(result);
                     })
                 }
+                break;
         }
     }
 });
