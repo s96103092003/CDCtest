@@ -60,7 +60,7 @@ app.post("/", function (request, response) {
                     ResProcessCheck(results[idx].source.userId, userText, function () {
                         resProcess(results[idx].source.userId, results[idx].replyToken)
                     })
-                } else {
+                } else {//
                     linemessage.SendMessage(results[idx].source.userId, userText, 'linehack2018', results[idx].source.replyToken, function (result) {
                         if (!result) console.log(result);
                         else console.log(result);
