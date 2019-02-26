@@ -45,18 +45,7 @@ var objectSeg = [
 var Stage = null;
 var userStage = new Map();
 var text = new Map();
-text.set("1", {
-    index: 1,
-    index1: 2
-})
-console.log(text.get("1"))
-text.get("1").index1 = 3;
-console.log(text.get("1"))
-text.set("1", {
-    index: 1,
-    index1: 4
-})
-console.log(text.get("1"))
+
 app.post("/", function (request, response) {
     ///
     console.log("Get LINE Message");
@@ -64,12 +53,18 @@ app.post("/", function (request, response) {
     console.log(JSON.stringify(results));
     console.log('receive message count: ' + results.length);
     for (var idx = 0; idx < results.length; idx++) {
+        
         switch (results[idx].message.type) {
             case "text":
-                var userText = results[idx].message.text;
+            var userText = results[idx].message.text;
                 if (userText.indexOf("預約") != -1 || userText.indexOf("掛號") != -1 || userStage.get(results[idx].source.userId).stage == "預約") {
                     ResProcessCheck(results[idx].source.userId, function () {
                         resProcess(results[idx].source.userId, results[idx].replyToken)
+                    })
+                } else {
+                    linemessage.SendMessage(results[idx].source.userId, userText, 'linehack2018', results[idx].source.replyToken, function (result) {
+                        if (!result) console.log(result);
+                        else console.log(result);
                     })
                 }
             default:
@@ -79,7 +74,7 @@ app.post("/", function (request, response) {
                         else console.log(result);
                     })
                 } else if (userStage.get(results[idx].source.userId) == null) {
-                    linemessage.SendMessage(results[idx].source.userId, userText, 'linehack2018', results[idx].source.replyToken, function (result) {
+                    linemessage.SendMessage(results[idx].source.userId, "看不懂喔", 'linehack2018', results[idx].source.replyToken, function (result) {
                         if (!result) console.log(result);
                         else console.log(result);
                     })
