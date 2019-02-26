@@ -52,12 +52,12 @@ app.post("/", function (request, response) {
     console.log(JSON.stringify(results));
     console.log('receive message count: ' + results.length);
     for (var idx = 0; idx < results.length; idx++) {
-        
+
         switch (results[idx].message.type) {
             case "text":
-            var userText = results[idx].message.text;
+                var userText = results[idx].message.text;
                 if (userText.indexOf("預約") != -1 || userText.indexOf("掛號") != -1 || userStage.get(results[idx].source.userId).stage == "預約") {
-                    ResProcessCheck(results[idx].source.userId, function () {
+                    ResProcessCheck(results[idx].source.userId, userText, function () {
                         resProcess(results[idx].source.userId, results[idx].replyToken)
                     })
                 } else {
@@ -85,7 +85,7 @@ app.post("/", function (request, response) {
     }
 });
 
-function ResProcessCheck(userId) {
+function ResProcessCheck(userId, userText, callback) {
     var find = false;
     var ResProcess;
     if (userStage.get(userId) == null) {
