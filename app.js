@@ -100,10 +100,10 @@ function ResProcessCheck(userId, userText, callback) {
     if (userData.get(userId) == null) {
         console.log("ResProcessCheck userData null")
         ResProcess = {
-            object: "",
-            date: "", //日期
-            time: "", //時段 0,1,2
-            doctorName: ""
+            object: String,
+            date: String, //日期
+            time: String, //時段 0,1,2
+            doctorName: String
         };
     } else {
         console.log("ResProcessCheck userData hasValue")
