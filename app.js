@@ -109,7 +109,12 @@ function ResProcessCheck(userId, userText, callback) {
         console.log("ResProcessCheck userData hasValue")
         ResProcess = userData.get(userId);
     }
-
+    for (var data in doctorNames) {
+        for (var i in data) {
+            console.log(data[i])
+        }
+        
+    }
     for (var data in doctorNames) {
         for (var i in data) {
             if (userText.indexOf(data[i]) != -1) {
