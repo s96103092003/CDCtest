@@ -18,28 +18,6 @@ var reservationCircle = ["預約", "選日期或醫生"]
 var dataCircle = ["輸入日期", "輸入時段"];
 var dataCircle = ["醫生姓名", "輸入日期時段"];
 
-var Jieba = require('node-jieba');
-var analyzer = Jieba({
-    debug: false
-});
-analyzer.dict('dict.txt', function (err) {
-    if (err) console.log(err)
-});
-//
-analyzer.cut("我要預定一月一號", {
-    mode: Jieba.mode.SEARCH,
-    HMM: true
-}, function (err, result) {
-    if (err) console.log(err)
-    console.log(JSON.stringify(result))
-});
-analyzer.pseg("我要預定一月一號", {
-    mode: Jieba.mode.SEARCH,
-    HMM: true
-}, function (err, result) {
-    if (err) console.log(err)
-    console.log(JSON.stringify(result))
-});
 var userStage = new Map();
 app.post("/", function (request, response) {
     ///
