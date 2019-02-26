@@ -98,7 +98,7 @@ function ResProcessCheck(userId, userText, callback) {
     var find = false;
     var ResProcess;
     if (userData.get(userId) == null) {
-        console.log("ResProcessCheck userStage null")
+        console.log("ResProcessData userStage null")
         ResProcess = {
             object: null,
             date: null, //日期
@@ -106,7 +106,7 @@ function ResProcessCheck(userId, userText, callback) {
             doctorName: null
         };
     } else {
-        console.log("ResProcessCheck userStage hasValue")
+        console.log("ResProcessData userStage hasValue")
         ResProcess = userData.get(userId);
     }
 
@@ -162,7 +162,9 @@ function ResProcessCheck(userId, userText, callback) {
             break;
         }
     }
+    console.log("after check: " + JSON.stringify(ResProcess))
     userData.set(userId, ResProcess)
+    callback();
 }
 
 function resProcess(userId, replyToken) {
