@@ -34,14 +34,17 @@ app.post("/", function (request, response) {
     var data = {
         'to': userMessage.events[0].source.userId,
         'replyToken': userMessage.events[0].replyToken,
-        'messages': {}
+        'messages': []
     };
 
     switch (userMessage.events[0].message.type) {
         case "text":
             var msg = userMessage.events[0].message.text;
-            data.messages.type = 'text'
-            data.messages.text = msg
+            var buf = {
+                type : 'text',
+                text : msg
+            }
+            data.messages.push(buf)
             console.log(msg);
             break;
 
