@@ -12,46 +12,51 @@ app.use(bodyParser.urlencoded({
 app.use(bodyParser.json());
 var config = fs.readFileSync(__dirname + '/config.json', 'utf8');
 config = JSON.parse(config);
-  /*  {"type":"follow",
-    "replyToken":"c24acf8f5dae4993b25eb5974a07cbdb",
-    "source":{
-        "userId":"Uc1c123646251df321f1a139eddb2a3f2",
-        "type":"user"
-        },
-    "timestamp":1500003748184}*/
+/*  {"type":"follow",
+  "replyToken":"c24acf8f5dae4993b25eb5974a07cbdb",
+  "source":{
+      "userId":"Uc1c123646251df321f1a139eddb2a3f2",
+      "type":"user"
+      },
+  "timestamp":1500003748184}*/
 //接收LINE訊息
-app.post("/", function (request, response){
+app.post("/", function (request, response) {
 
     console.log("Get LINE Message");
     var userMessage = request.body;
-   
+
     console.log(JSON.stringify(userMessage.events[0]));
 
     var SearchList = new Array();
     SearchList[0] = "@打招呼";
     var channel_access_token = config.channel_access_token;
-    
-   
 
-    var data={'to': userMessage.events[0].source.userID,
-            'replyToken': userMessage.events[0].replyToken};
 
-    switch(userMessage.events[0].message.type){
+
+    var data = {
+        'to': userMessage.events[0].source.userID,
+        'replyToken': userMessage.events[0].replyToken,
+        'messages' : {}
+    };
+
+    switch (userMessage.events[0].message.type) {
         case "text":
-            var msg = userMessage.events[0].message.text; 
+            var msg = userMessage.events[0].message.text;
+            data.messages.type = 'text'
+            data.messages.text = msg
             console.log(msg);
             break;
- 
+
     }
     ReplyMessage(data, channel_access_token, data.replyToken, function (ret) {
         if (!ret)
-            PostToLINE(data, channel_access_token, this.callback);// reply_token 已過期，改用 PUSH_MESSAGE                   
+            PostToLINE(data, channel_access_token, this.callback); // reply_token 已過期，改用 PUSH_MESSAGE                   
     });
-    
+
 
 });
 
-function GetContent(data, channel_access_token){//OK
+function GetContent(data, channel_access_token) { //OK
     var options = {
         host: 'api.line.me',
         port: '443',
@@ -70,27 +75,28 @@ function GetContent(data, channel_access_token){//OK
         res.body = '';
         res.on('data', function (chunk) {
             console.log('get response data');
-            
+
             res.body = res.body + chunk;
         });
         res.on('end', function () {
-            res.body  = require('btoa')(res.body);      
-            try {  
-                fs.writeFile("/tmp/123.jpg", res.body, 'base64', function(err){
+            res.body = require('btoa')(res.body);
+            try {
+                fs.writeFile("/tmp/123.jpg", res.body, 'base64', function (err) {
                     if (err) throw err;
-                });     
+                });
                 console.log('response end');
-                    // 將 res.body 寫入檔案
+                // 將 res.body 寫入檔案
             } catch (e) {
                 console.log(e);
             }
-        });    
-    }); qe
+        });
+    });
+    qe
     req.end();
 }
 
 function ReplyMessage(data, channel_access_token, reply_token, callback) {
-    data.replyToken = reply_token;
+
     console.log(JSON.stringify(data));
     var options = {
         host: 'api.line.me',
@@ -109,8 +115,7 @@ function ReplyMessage(data, channel_access_token, reply_token, callback) {
         res.on('data', function (chunk) {
             console.log('Response: ' + chunk);
         });
-        res.on('end', function () {
-        });
+        res.on('end', function () {});
         console.log('Reply message status code: ' + res.statusCode);
         if (res.statusCode == 200) {
             console.log('Reply message success');
@@ -143,8 +148,7 @@ function PostToLINE(data, channel_access_token, callback) {
         res.on('data', function (chunk) {
             console.log('Response: ' + chunk);
         });
-        res.on('end', function () {
-        });
+        res.on('end', function () {});
     });
     req.write(JSON.stringify(data));
     req.end();
@@ -163,7 +167,7 @@ app.get('/tmp/:filename', function (request, response) {
 
 
 //APP
-app.get("/api", function(req,res){
+app.get("/api", function (req, res) {
     res.send("API is running");
 });
 
@@ -171,7 +175,7 @@ app.get("/api", function(req,res){
 
 
 
-    
+
 
 
 /*var http = require("http");
