@@ -56,11 +56,10 @@ app.post("/", function (request, response) {
 
 
 });
-app.get('/download/content/:channel_id/:message_id', function (request, response) {
+app.get('/download/content/:message_id', function (request, response) {
     try {
-        var channel_id = request.params.channel_id;
+        var channel_id = config.channel_id;
         var message_id = request.params.message_id;
-        var account = accounts.get(channel_id);
         var https = require('https');
         var options = {
             host: 'api.line.me',
@@ -68,7 +67,7 @@ app.get('/download/content/:channel_id/:message_id', function (request, response
             path: '/v2/bot/message/' + message_id + '/content',
             method: 'GET',
             headers: {
-                'Authorization': 'Bearer <' + account.channel_access_token + '>'
+                'Authorization': 'Bearer <' + config.channel_access_token + '>'
             }
         };
 
