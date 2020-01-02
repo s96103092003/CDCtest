@@ -56,7 +56,49 @@ app.post("/", function (request, response) {
 
 
 });
+app.get('/download/content/:channel_id/:message_id', function (request, response) {
+    try {
+        var channel_id = request.params.channel_id;
+        var message_id = request.params.message_id;
+        var account = accounts.get(channel_id);
+        var https = require('https');
+        var options = {
+            host: 'api.line.me',
+            port: '443',
+            path: '/v2/bot/message/' + message_id + '/content',
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer <' + account.channel_access_token + '>'
+            }
+        };
 
+        var req = https.request(options, function (res) {
+            console.log('STATUS: ' + res.statusCode);
+            console.log('HEADERS: ' + JSON.stringify(res.headers));
+            res.body = '';
+
+            this.response.setHeader('Content-Length', res.headers['content-length']);
+            this.response.setHeader('Content-Type', res.headers['content-type']);
+
+            res.on('data', function (chunk) {
+                console.log('get response data');
+                res.body = res.body + chunk;
+                this.response.write(chunk);
+            }.bind({ response: this.response }));
+            res.on('end', function () {
+                try {
+                    console.log('response end');
+                    this.response.end();
+                } catch (e) {
+                    logger.error(e);
+                }
+            }.bind({ response: this.response }));
+        }.bind({ response: response }));
+        req.end();
+    } catch (e) {
+        logger.error(e);
+    }
+});
 function GetContent(data, channel_access_token) { //OK
     var options = {
         host: 'api.line.me',
@@ -69,6 +111,7 @@ function GetContent(data, channel_access_token) { //OK
         }
     };
     var https = require('https');
+    
     var req = https.request(options, function (res) {
         res.setEncoding("binary");
         console.log('STATUS: ' + res.statusCode);
@@ -79,7 +122,9 @@ function GetContent(data, channel_access_token) { //OK
 
             res.body = res.body + chunk;
         });
+          
         res.on('end', function () {
+          
             res.body = require('btoa')(res.body);
             try {
                 fs.writeFile("/tmp/123.jpg", res.body, 'base64', function (err) {
@@ -90,6 +135,7 @@ function GetContent(data, channel_access_token) { //OK
             } catch (e) {
                 console.log(e);
             }
+
         });
     });
     req.end();
