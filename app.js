@@ -96,7 +96,7 @@ function GetContent(data, channel_access_token) { //OK
 }
 
 function ReplyMessage(data, channel_access_token, reply_token, callback) {
-
+    console.log("ReplyMessage" )
     console.log(JSON.stringify(data));
     var options = {
         host: 'api.line.me',
@@ -130,6 +130,7 @@ function ReplyMessage(data, channel_access_token, reply_token, callback) {
 }
 
 function PostToLINE(data, channel_access_token, callback) {
+    console.log("PostToLINE" )
     console.log(JSON.stringify(data));
     var options = {
         host: 'api.line.me',
