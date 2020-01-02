@@ -31,12 +31,10 @@ app.post("/", function (request, response) {
     SearchList[0] = "@打招呼";
     var channel_access_token = config.channel_access_token;
 
-
-
     var data = {
-        'to': userMessage.events[0].source.userID,
+        'to': userMessage.events[0].source.userId,
         'replyToken': userMessage.events[0].replyToken,
-        'messages' : {}
+        'messages': {}
     };
 
     switch (userMessage.events[0].message.type) {
@@ -91,12 +89,11 @@ function GetContent(data, channel_access_token) { //OK
             }
         });
     });
-    qe
     req.end();
 }
 
 function ReplyMessage(data, channel_access_token, reply_token, callback) {
-    console.log("ReplyMessage" )
+    console.log("ReplyMessage")
     console.log(JSON.stringify(data));
     var options = {
         host: 'api.line.me',
@@ -130,7 +127,7 @@ function ReplyMessage(data, channel_access_token, reply_token, callback) {
 }
 
 function PostToLINE(data, channel_access_token, callback) {
-    console.log("PostToLINE" )
+    console.log("PostToLINE")
     console.log(JSON.stringify(data));
     var options = {
         host: 'api.line.me',
