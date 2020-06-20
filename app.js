@@ -25,15 +25,14 @@ app.get("/", function (req, res) {
     console.log("get webhook verify_token");
     console.log("req.url : "+ req.url)
     var arg = url.parse(req.url).query;
-    console.log("req.url arg: "+ JSON.stringify(arg, null, 2))
-    console.log(JSON.stringify(querystring.parse(arg)))
+    console.log("req.url arg: "+ JSON.stringify(querystring.parse(arg)))
     var mode = querystring.parse(arg)["hub.mode"];
     var verify_token = querystring.parse(arg)["hub.verify_token"];
     var challenge = querystring.parse(arg)["hub.challenge"];
     if(config.AUTH_TOKEN == verify_token)
-        res.statusCode(200).end()
+        res.status(200).end()
     else
-        res.statusCode(404).end()
+        res.status(404).end()
 })
 //接收LINE訊息
 app.post("/", function (req, res) {
@@ -43,10 +42,8 @@ app.post("/", function (req, res) {
     console.log(JSON.stringify(userMessage));
     console.log(JSON.stringify(userMessage.events[0]));
 
-    var SearchList = new Array();
-    SearchList[0] = "@打招呼";
     var channel_access_token = config.channel_access_token;
-    res.statusCode(200).end()
+    res.status(200).end()
 /*
     var data = {
         "messaging_type": "<MESSAGING_TYPE>",
