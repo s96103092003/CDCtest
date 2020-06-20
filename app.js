@@ -80,16 +80,16 @@ app.post("/", function (req, res) {
             let sender_psid = webhook_event.sender.id;
             // 判斷訊息是屬於 message 還是 postback
             // 判斷訊息是屬於 message 還是 postback」意思是發送者是否是透過機器人提供的選擇做回覆，如果「是」就是 postback；「不是」就屬於 message
-            /*if (webhook_event.message) {
+            if (webhook_event.message) {
                 let reply = ReplyMessage(sender_psid, webhook_event.message, function(flag){});
             } else if (webhook_event.postback) {
                 let postback =  PostBackToMessage(sender_psid, webhook_event.postback, function(flag){});
-            }*/
-            if (webhook_event.message) {
+            }
+            /*if (webhook_event.message) {
                 handleMessage(sender_psid, webhook_event.message);        
             } else if (webhook_event.postback) {
                 handlePostback(sender_psid, webhook_event.postback);
-            }
+            }*/
         });
         res.status(200).send('EVENT_RECEIVED');
     } else {
