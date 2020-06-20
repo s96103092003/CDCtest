@@ -324,8 +324,8 @@ function callSendAPI(sender_psid, response) {
       "message": response
     }
     request({
-        "uri": "https://graph.facebook.com/v2.6/me/messages",
-        "qs": { "access_token": PAGE_ACCESS_TOKEN },
+        "uri": "https://graph.facebook.com/v7.0/me/messages",
+        "qs": { "access_token": config.channel_access_token },
         "method": "POST",
         "json": request_body
     }, (err, res, body) => {
