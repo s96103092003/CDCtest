@@ -79,9 +79,9 @@ app.post("/", function (req, res) {
             // 判斷訊息是屬於 message 還是 postback
             // 判斷訊息是屬於 message 還是 postback」意思是發送者是否是透過機器人提供的選擇做回覆，如果「是」就是 postback；「不是」就屬於 message
             if (webhook_event.message) {
-                ReplyMessage(sender_psid, webhook_event.message);
+                let reply = ReplyMessage(sender_psid, webhook_event.message, function(flag){});
             } else if (webhook_event.postback) {
-                PostBackToMessage(sender_psid, webhook_event.postback);
+                let postback =  PostBackToMessage(sender_psid, webhook_event.postback, function(flag){});
             }
 
         });
