@@ -243,13 +243,13 @@ function ReplyMessage(sender_psid, received_message, callback) {
         path: '/v7.0/me/messages?access_token=' + config.channel_access_token,
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json; charset=UTF-8',
+            'Content-Type': 'application/json;',
             'Content-Length': Buffer.byteLength(JSON.stringify(data)),
         }
     };
     var https = require('https');
     var req = https.request(options, function (res) {
-        res.setEncoding('UTF-8');
+        res.setEncoding('utf8');
         res.on('data', function (chunk) {
             console.log('Response: ' + chunk);
         });
@@ -263,7 +263,7 @@ function ReplyMessage(sender_psid, received_message, callback) {
             callback(false);
         }
     });
-    req.write(utf8.encode(JSON.stringify(data)));
+    req.write(JSON.stringify(data));
     req.end();
 }
 
@@ -298,19 +298,19 @@ function PostBackToMessage(sender_psid, received_postback, callback) {
         path: '/v7.0/me/messages?access_token=' + config.channel_access_token,
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json; charset=UTF-8',
+            'Content-Type': 'application/json;',
             'Content-Length': Buffer.byteLength(JSON.stringify(data)),
         }
     };
     var https = require('https');
     var req = https.request(options, function (res) {
-        res.setEncoding('UTF-8');
+        res.setEncoding('utf8');
         res.on('data', function (chunk) {
             console.log('Response: ' + chunk);
         });
         res.on('end', function () {});
     });
-    req.write(utf8.encode(JSON.stringify(data)));
+    req.write(JSON.stringify(data));
     req.end();
     try {
         callback(true);
