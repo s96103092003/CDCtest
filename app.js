@@ -234,7 +234,7 @@ function ReplyMessage(sender_psid, received_message, callback) {
     var options = {
         host: 'graph.facebook.com',
         port: '443',
-        path: '/v7.0/me/messages?access_token=' + access_token,
+        path: '/v7.0/me/messages?access_token=' + config.channel_access_token,
         method: 'POST',
         headers: {
             'Content-Type': 'application/json; charset=UTF-8',
@@ -289,7 +289,7 @@ function PostBackToMessage(sender_psid, received_postback, callback) {
     var options = {
         host: 'graph.facebook.com',
         port: '443',
-        path: '/v7.0/me/messages?access_token=' + access_token,
+        path: '/v7.0/me/messages?access_token=' + config.channel_access_token,
         method: 'POST',
         headers: {
             'Content-Type': 'application/json; charset=UTF-8',
