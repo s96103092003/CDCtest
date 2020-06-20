@@ -217,7 +217,7 @@ function callSendAPI(sender_psid, response) {
       "recipient": {
         "id": sender_psid
       },
-      "message": response
+      "message": response,
     }
     request({
         "uri": "https://graph.facebook.com/v7.0/me/messages",
@@ -238,7 +238,20 @@ function handleMessage(sender_psid, received_message) {
     if (received_message.text) {    
       // 回傳的文字訊息
       response = {
-        "text": `You sent the message: "${received_message.text}". Now send me an image!`
+        "text": `You sent the message: "${received_message.text}".`,
+        "quick_replies":[
+            {
+              "content_type":"text",
+              "title":"Red",
+              "payload":"<POSTBACK_PAYLOAD>",
+              //"image_url":"http://example.com/img/red.png"
+            },{
+              "content_type":"text",
+              "title":"Green",
+              "payload":"<POSTBACK_PAYLOAD>",
+              //"image_url":"http://example.com/img/green.png"
+            }
+          ]
       }
     }  
     // 機器人發送回應
