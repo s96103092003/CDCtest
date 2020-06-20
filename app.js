@@ -79,12 +79,16 @@ app.post("/", function (req, res) {
             let sender_psid = webhook_event.sender.id;
             // 判斷訊息是屬於 message 還是 postback
             // 判斷訊息是屬於 message 還是 postback」意思是發送者是否是透過機器人提供的選擇做回覆，如果「是」就是 postback；「不是」就屬於 message
-            if (webhook_event.message) {
+            /*if (webhook_event.message) {
                 let reply = ReplyMessage(sender_psid, webhook_event.message, function(flag){});
             } else if (webhook_event.postback) {
                 let postback =  PostBackToMessage(sender_psid, webhook_event.postback, function(flag){});
+            }*/
+            if (webhook_event.message) {
+                handleMessage(sender_psid, webhook_event.message);        
+            } else if (webhook_event.postback) {
+                handlePostback(sender_psid, webhook_event.postback);
             }
-
         });
         res.status(200).send('EVENT_RECEIVED');
     } else {
@@ -311,8 +315,51 @@ function PostBackToMessage(sender_psid, received_postback, callback) {
         callback(true);
     } catch (e) {};
 }
-
-
+function callSendAPI(sender_psid, response) {
+    let request_body = {
+      "recipient": {
+        "id": sender_psid
+      },
+      "message": response
+    }
+    request({
+        "uri": "https://graph.facebook.com/v2.6/me/messages",
+        "qs": { "access_token": PAGE_ACCESS_TOKEN },
+        "method": "POST",
+        "json": request_body
+    }, (err, res, body) => {
+        if (!err) {
+            // console.log('---> message sent!')
+        } else {
+            console.error("Unable to send message:" + err);
+        }
+    }); 
+}
+function handleMessage(sender_psid, received_message) {
+    let response;
+    // 判斷訊息是否包含文字
+    if (received_message.text) {    
+      // 回傳的文字訊息
+      response = {
+        "text": `You sent the message: "${received_message.text}". Now send me an image!`
+      }
+    }  
+    // 機器人發送回應
+    callSendAPI(sender_psid, response);    
+  }
+function handlePostback(sender_psid, received_postback) {
+    let response;
+    // 取得發送者回覆內容
+    let payload = received_postback.payload;
+    // 判斷回覆的內容，對應機器人回應的訊息
+    if (payload === 'yes') {
+      response = { "text": "Thanks!" }
+    } else if (payload === 'no') {
+      response = { "text": "Oops, try sending another image." }
+    }
+    // 機器人發送回應
+    callSendAPI(sender_psid, response);
+  }
 app.get('/tmp/:filename', function (request, response) {
     var filename = request.params.filename;
     var stream = require('fs').createReadStream('/tmp/' + filename);
