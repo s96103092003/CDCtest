@@ -23,63 +23,102 @@ config = JSON.parse(config);
   "timestamp":1500003748184}*/
 app.get("/", function (req, res) {
     console.log("get webhook verify_token");
-    console.log("req.url : "+ req.url)
+    console.log("req.url : " + req.url)
     var arg = url.parse(req.url).query;
     var a = req.query['hub.mode'];
-    console.log("a : "+a)
-    console.log("req.url arg: "+ JSON.stringify(querystring.parse(arg)))
+    console.log("a : " + a)
+    console.log("req.url arg: " + JSON.stringify(querystring.parse(arg)))
     var mode = querystring.parse(arg)["hub.mode"];
     var verify_token = querystring.parse(arg)["hub.verify_token"];
     var challenge = querystring.parse(arg)["hub.challenge"];
-    console.log(config.AUTH_TOKEN + "  "+ verify_token)
-    if(mode === 'subscribe' && config.AUTH_TOKEN === verify_token){
+    console.log(config.AUTH_TOKEN + "  " + verify_token)
+    if (mode === 'subscribe' && config.AUTH_TOKEN === verify_token) {
         console.log("verify success")
         res.status(200).send(challenge)
-    }    
-    else{
+    } else {
         console.log("verify error")
         res.sendStatus(403)
     }
 
 })
+/*
+{
+  "object":"page",
+  "entry":[
+    {
+      "id":"<PAGE_ID>",
+      "time":1458692752478,
+      "messaging":[
+        {
+          "sender":{
+            "id":"<PSID>"
+          },
+          "recipient":{
+            "id":"<PAGE_ID>"
+          },
+
+          ...
+        }
+      ]
+    }
+  ]
+}
+*/
 //接收LINE訊息
 app.post("/", function (req, res) {
 
     console.log("Get Manager Message");
     var userMessage = req.body;
     console.log(JSON.stringify(userMessage));
-    console.log(JSON.stringify(userMessage.events[0]));
 
-    var channel_access_token = config.channel_access_token;
-    res.status(200).end()
-/*
-    var data = {
-        "messaging_type": "<MESSAGING_TYPE>",
-        "recipient": {
-            "id": "<PSID>"
-        },
-        "message": {
-            "text": "hello, world!"
-        }
-    }
-
-    switch (userMessage.events[0].message.type) {
-        case "text":
-            var msg = userMessage.events[0].message.text;
-            var buf = {
-                type: 'text',
-                text: msg
+    if (userMessage.object === 'page') {
+        userMessage.entry.forEach(function (entry) {
+            let webhook_event = entry.messaging[0];
+            console.log(webhook_event);
+            let sender_psid = webhook_event.sender.id;
+            // 判斷訊息是屬於 message 還是 postback
+            // 判斷訊息是屬於 message 還是 postback」意思是發送者是否是透過機器人提供的選擇做回覆，如果「是」就是 postback；「不是」就屬於 message
+            if (webhook_event.message) {
+                ReplyMessage(sender_psid, webhook_event.message);
+            } else if (webhook_event.postback) {
+                PostBackToMessage(sender_psid, webhook_event.postback);
             }
-            data.messages.push(buf)
-            console.log(msg);
-            break;
 
+        });
+        res.status(200).send('EVENT_RECEIVED');
+    } else {
+        res.sendStatus(404);
     }
-    ReplyMessage(data, channel_access_token, data.replyToken, function (ret) {
-        if (!ret)
-            PostToLINE(data, channel_access_token, this.callback); // reply_token 已過期，改用 PUSH_MESSAGE                   
-    });
-*/
+
+    //var channel_access_token = config.channel_access_token;
+    /*
+        var data = {
+            "messaging_type": "<MESSAGING_TYPE>",
+            "recipient": {
+                "id": "<PSID>"
+            },
+            "message": {
+                "text": "hello, world!"
+            }
+        }
+
+        switch (userMessage.events[0].message.type) {
+            case "text":
+                var msg = userMessage.events[0].message.text;
+                var buf = {
+                    type: 'text',
+                    text: msg
+                }
+                data.messages.push(buf)
+                console.log(msg);
+                break;
+
+        }
+        ReplyMessage(data, channel_access_token, data.replyToken, function (ret) {
+            if (!ret)
+                PostToLINE(data, channel_access_token, this.callback); // reply_token 已過期，改用 PUSH_MESSAGE                   
+        });
+    */
 
 });
 app.get('/download/content/:message_id', function (request, response) {
@@ -173,20 +212,35 @@ function GetContent(data, channel_access_token) { //OK
     req.end();
 }
 
-function ReplyMessage(data, access_token, reply_token, callback) {
+function ReplyMessage(sender_psid, received_message, callback) {
     console.log("ReplyMessage")
+    let response
+    if (received_message.text) {
+        // 回傳的文字訊息
+        response = {
+            "text": `You sent the message: "${received_message.text}"`
+        }
+    }
+    var data = {
+        "messaging_type": "UPDATE",
+        "recipient": {
+            "id": sender_psid
+        },
+        "message": {
+            "text": response
+        }
+    }
     console.log(JSON.stringify(data));
-    https: ///
-        var options = {
-            host: 'graph.facebook.com',
-            port: '443',
-            path: '/v7.0/me/messages?access_token=' + access_token,
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json; charset=UTF-8',
-                'Content-Length': Buffer.byteLength(JSON.stringify(data)),
-            }
-        };
+    var options = {
+        host: 'graph.facebook.com',
+        port: '443',
+        path: '/v7.0/me/messages?access_token=' + access_token,
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Content-Length': Buffer.byteLength(JSON.stringify(data)),
+        }
+    };
     var https = require('https');
     var req = https.request(options, function (res) {
         res.setEncoding('utf8');
@@ -207,18 +261,39 @@ function ReplyMessage(data, access_token, reply_token, callback) {
     req.end();
 }
 
-/*function PostToLINE(data, channel_access_token, callback) {
+function PostBackToMessage(sender_psid, received_postback, callback) {
     console.log("PostToLINE")
+    let response;
+    // 取得發送者回覆內容
+    let payload = received_postback.payload;
+    // 判斷回覆的內容，對應機器人回應的訊息
+    if (payload === 'yes') {
+        response = {
+            "text": "YES"
+        }
+    } else if (payload === 'no') {
+        response = {
+            "text": "NO"
+        }
+    }
+    var data = {
+        "messaging_type": "UPDATE",
+        "recipient": {
+            "id": sender_psid
+        },
+        "message": {
+            "text": response
+        }
+    }
     console.log(JSON.stringify(data));
     var options = {
-        host: 'api.line.me',
+        host: 'graph.facebook.com',
         port: '443',
-        path: '/v2/bot/message/push',
+        path: '/v7.0/me/messages?access_token=' + access_token,
         method: 'POST',
         headers: {
             'Content-Type': 'application/json; charset=UTF-8',
             'Content-Length': Buffer.byteLength(JSON.stringify(data)),
-            'Authorization': 'Bearer <' + channel_access_token + '>'
         }
     };
     var https = require('https');
@@ -234,7 +309,7 @@ function ReplyMessage(data, access_token, reply_token, callback) {
     try {
         callback(true);
     } catch (e) {};
-}*/
+}
 
 
 app.get('/tmp/:filename', function (request, response) {
