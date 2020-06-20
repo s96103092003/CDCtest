@@ -29,10 +29,16 @@ app.get("/", function (req, res) {
     var mode = querystring.parse(arg)["hub.mode"];
     var verify_token = querystring.parse(arg)["hub.verify_token"];
     var challenge = querystring.parse(arg)["hub.challenge"];
-    if(config.AUTH_TOKEN == verify_token)
+    console.log(config.AUTH_TOKEN + "  "+ verify_token)
+    if(config.AUTH_TOKEN == verify_token){
+        console.log("verify success")
         res.status(200).end()
-    else
+    }    
+    else{
+        console.log("verify error")
         res.status(404).end()
+    }
+
 })
 //接收LINE訊息
 app.post("/", function (req, res) {
