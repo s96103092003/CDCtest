@@ -243,7 +243,7 @@ function ReplyMessage(sender_psid, received_message, callback) {
     };
     var https = require('https');
     var req = https.request(options, function (res) {
-        res.setEncoding('utf8');
+        res.setEncoding('utf-8');
         res.on('data', function (chunk) {
             console.log('Response: ' + chunk);
         });
@@ -298,7 +298,7 @@ function PostBackToMessage(sender_psid, received_postback, callback) {
     };
     var https = require('https');
     var req = https.request(options, function (res) {
-        res.setEncoding('utf8');
+        res.setEncoding('utf-8');
         res.on('data', function (chunk) {
             console.log('Response: ' + chunk);
         });
