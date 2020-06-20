@@ -7,6 +7,7 @@ var bodyParser = require("body-parser");
 var querystring = require("querystring");
 var url = require("url");
 var fs = require("fs");
+var utf8 = require("utf8");
 app.use(bodyParser.urlencoded({
     extended: true
 }));
@@ -257,7 +258,7 @@ function ReplyMessage(sender_psid, received_message, callback) {
             callback(false);
         }
     });
-    req.write(JSON.stringify(data));
+    req.write(utf8.encode(JSON.stringify(data)));
     req.end();
 }
 
@@ -304,7 +305,7 @@ function PostBackToMessage(sender_psid, received_postback, callback) {
         });
         res.on('end', function () {});
     });
-    req.write(JSON.stringify(data));
+    req.write(utf8.encode(JSON.stringify(data)));
     req.end();
     try {
         callback(true);

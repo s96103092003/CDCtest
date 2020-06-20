@@ -15,6 +15,8 @@
     "log4js-extend": "^0.1.2",
     "body-parser": "latest",
     "url": "latest",
-    "querystring": "latest"
+    "querystring": "latest",
+    "utf8": "latest"
+ 
   }
 }
