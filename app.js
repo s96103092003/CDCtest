@@ -32,7 +32,7 @@ app.get("/", function (req, res) {
     console.log(config.AUTH_TOKEN + "  "+ verify_token)
     if(config.AUTH_TOKEN == verify_token){
         console.log("verify success")
-        res.status(200).end()
+        res.status(200).send(challenge).end()
     }    
     else{
         console.log("verify error")
