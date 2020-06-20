@@ -27,9 +27,9 @@ app.get("/", function (req, res) {
     var arg = url.parse(req.url).query;
     console.log("req.url arg: "+ JSON.stringify(arg, null, 2))
     console.log(JSON.stringify(querystring.parse(arg)))
-    var mode = querystring.parse(arg).hub.mode;
-    var verify_token = querystring.parse(arg).hub.verify_token;
-    var challenge = querystring.parse(arg).hub.challenge;
+    var mode = querystring.parse(arg)["hub.mode"];
+    var verify_token = querystring.parse(arg)["hub.verify_token"];
+    var challenge = querystring.parse(arg)["hub.challenge"];
     if(config.AUTH_TOKEN == verify_token)
         res.statusCode(200).end()
     else
