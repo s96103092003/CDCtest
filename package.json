@@ -16,7 +16,7 @@
     "body-parser": "latest",
     "url": "latest",
     "querystring": "latest",
-    "utf8": "latest"
- 
+    "utf8": "latest",
+    "request": "latest"
   }
 }
