@@ -21,7 +21,7 @@ config = JSON.parse(config);
       "type":"user"
       },
   "timestamp":1500003748184}*/
-app.get("/webhook", function (req, res) {
+app.get("/", function (req, res) {
     console.log("get webhook verify_token");
     console.log("req.url : "+ req.url)
     var arg = url.parse(req.url).query;
