@@ -4,6 +4,8 @@ var app = express();
 var port = process.env.PORT;
 var server = http.Server(app).listen(port);
 var bodyParser = require("body-parser");
+var querystring = require("querystring");
+var url = require("url");
 var fs = require("fs");
 app.use(bodyParser.urlencoded({
     extended: true
@@ -19,30 +21,48 @@ config = JSON.parse(config);
       "type":"user"
       },
   "timestamp":1500003748184}*/
+app.get("/", function (req, res) {
+    console.log("get webhook verify_token");
+    console.log("req.url : "+ req.url)
+    var arg = url.parse(req.url).query;
+    console.log("req.url arg: "+ JSON.stringify(arg, null, 2))
+    var mode = querystring.parse(arg).hub.mode;
+    var verify_token = querystring.parse(arg).hub.verify_token;
+    var challenge = querystring.parse(arg).hub.challenge;
+    if(config.AUTH_TOKEN == verify_token)
+        res.statusCode(200).end()
+    else
+        res.statusCode(404).end()
+})
 //接收LINE訊息
-app.post("/", function (request, response) {
+app.post("/", function (req, res) {
 
-    console.log("Get LINE Message");
-    var userMessage = request.body;
-
+    console.log("Get Manager Message");
+    var userMessage = req.body;
+    console.log(JSON.stringify(userMessage));
     console.log(JSON.stringify(userMessage.events[0]));
 
     var SearchList = new Array();
     SearchList[0] = "@打招呼";
     var channel_access_token = config.channel_access_token;
-
+    res.statusCode(200).end()
+/*
     var data = {
-        'to': userMessage.events[0].source.userId,
-        'replyToken': userMessage.events[0].replyToken,
-        'messages': []
-    };
+        "messaging_type": "<MESSAGING_TYPE>",
+        "recipient": {
+            "id": "<PSID>"
+        },
+        "message": {
+            "text": "hello, world!"
+        }
+    }
 
     switch (userMessage.events[0].message.type) {
         case "text":
             var msg = userMessage.events[0].message.text;
             var buf = {
-                type : 'text',
-                text : msg
+                type: 'text',
+                text: msg
             }
             data.messages.push(buf)
             console.log(msg);
@@ -53,7 +73,7 @@ app.post("/", function (request, response) {
         if (!ret)
             PostToLINE(data, channel_access_token, this.callback); // reply_token 已過期，改用 PUSH_MESSAGE                   
     });
-
+*/
 
 });
 app.get('/download/content/:message_id', function (request, response) {
@@ -83,7 +103,9 @@ app.get('/download/content/:message_id', function (request, response) {
                 console.log('get response data');
                 res.body = res.body + chunk;
                 this.response.write(chunk);
-            }.bind({ response: this.response }));
+            }.bind({
+                response: this.response
+            }));
             res.on('end', function () {
                 try {
                     console.log('response end');
@@ -91,13 +113,18 @@ app.get('/download/content/:message_id', function (request, response) {
                 } catch (e) {
                     logger.error(e);
                 }
-            }.bind({ response: this.response }));
-        }.bind({ response: response }));
+            }.bind({
+                response: this.response
+            }));
+        }.bind({
+            response: response
+        }));
         req.end();
     } catch (e) {
         logger.error(e);
     }
 });
+
 function GetContent(data, channel_access_token) { //OK
     var options = {
         host: 'api.line.me',
@@ -110,7 +137,7 @@ function GetContent(data, channel_access_token) { //OK
         }
     };
     var https = require('https');
-    
+
     var req = https.request(options, function (res) {
         res.setEncoding("binary");
         console.log('STATUS: ' + res.statusCode);
@@ -121,9 +148,9 @@ function GetContent(data, channel_access_token) { //OK
 
             res.body = res.body + chunk;
         });
-          
+
         res.on('end', function () {
-          
+
             res.body = require('btoa')(res.body);
             try {
                 fs.writeFile("/tmp/123.jpg", res.body, 'base64', function (err) {
@@ -140,20 +167,20 @@ function GetContent(data, channel_access_token) { //OK
     req.end();
 }
 
-function ReplyMessage(data, channel_access_token, reply_token, callback) {
+function ReplyMessage(data, access_token, reply_token, callback) {
     console.log("ReplyMessage")
     console.log(JSON.stringify(data));
-    var options = {
-        host: 'api.line.me',
-        port: '443',
-        path: '/v2/bot/message/reply',
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Content-Length': Buffer.byteLength(JSON.stringify(data)),
-            'Authorization': 'Bearer <' + channel_access_token + '>'
-        }
-    };
+    https: ///
+        var options = {
+            host: 'graph.facebook.com',
+            port: '443',
+            path: '/v7.0/me/messages?access_token=' + access_token,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json; charset=UTF-8',
+                'Content-Length': Buffer.byteLength(JSON.stringify(data)),
+            }
+        };
     var https = require('https');
     var req = https.request(options, function (res) {
         res.setEncoding('utf8');
@@ -174,7 +201,7 @@ function ReplyMessage(data, channel_access_token, reply_token, callback) {
     req.end();
 }
 
-function PostToLINE(data, channel_access_token, callback) {
+/*function PostToLINE(data, channel_access_token, callback) {
     console.log("PostToLINE")
     console.log(JSON.stringify(data));
     var options = {
@@ -201,7 +228,7 @@ function PostToLINE(data, channel_access_token, callback) {
     try {
         callback(true);
     } catch (e) {};
-}
+}*/
 
 
 app.get('/tmp/:filename', function (request, response) {

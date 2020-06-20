@@ -13,6 +13,8 @@
     "https": "^1.0.0",
     "log4js": "^1.1.1",
     "log4js-extend": "^0.1.2",
-    "body-parser": "latest"
+    "body-parser": "latest",
+    "url": "latest",
+    "querystring": "latest"
   }
 }

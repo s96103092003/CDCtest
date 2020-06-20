@@ -1,7 +1,7 @@
 {
-    "channel_id": "1596933869",
-    "channel_secret": "b6ef4c97466b183cf76f198f9c9f7ef1",
+    "channel_id": "555386825366717",
+    "channel_secret": "be9b7342d788abdd74cd58f407954f96",
     "redirect_uri": "https://s96103092003.herokuapp.com/",
-    "channel_access_token": "yHeoGNC/JKjX3Fc1LVrQSf3jTXpvF+zn4rId5lZaqbgoAmIHTW0cmG35VlLmHzJ6KUkuoPokEvsQe3pVBDM5xLZUPWdtmTn0MyLof3OGx5VQ0hlj6PhDN2ds2In7MvTXKtd/17iO9gmOUi4M5Qt1FwdB04t89/1O/w1cDnyilFU=",
-    "AUTH_TOKEN": ""
+    "channel_access_token": "EAAH5HxJwXL0BAJoUwyyUF6nFtw4V7OSGUo10xtvQtdoHj8EZAydA5mUKZArRBy3eBmhPvNKXpV0xKpMDDy1cDVyqsZCbWl1b8PSmdMKdDa81KWb6IZAUtuVbeGaNZADASxcgwJcJWvCP3ICgY9ZBqZCiSzrd57jZBo8WaXQwBZALqN1j4x8Im52DLJXyljoLXw9MZD",
+    "AUTH_TOKEN": "yiweiTest"
 }
