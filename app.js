@@ -81,15 +81,10 @@ app.post("/", function (req, res) {
             // 判斷訊息是屬於 message 還是 postback
             // 判斷訊息是屬於 message 還是 postback」意思是發送者是否是透過機器人提供的選擇做回覆，如果「是」就是 postback；「不是」就屬於 message
             if (webhook_event.message) {
-                let reply = ReplyMessage(sender_psid, webhook_event.message, function(flag){});
-            } else if (webhook_event.postback) {
-                let postback =  PostBackToMessage(sender_psid, webhook_event.postback, function(flag){});
-            }
-            /*if (webhook_event.message) {
                 handleMessage(sender_psid, webhook_event.message);        
             } else if (webhook_event.postback) {
                 handlePostback(sender_psid, webhook_event.postback);
-            }*/
+            }
         });
         res.status(200).send('EVENT_RECEIVED');
     } else {
@@ -216,105 +211,6 @@ function GetContent(data, channel_access_token) { //OK
         });
     });
     req.end();
-}
-
-function ReplyMessage(sender_psid, received_message, callback) {
-    console.log("ReplyMessage")
-    let response
-    if (received_message.text) {
-        // 回傳的文字訊息
-        response = {
-            "text": `You sent the message: "${received_message.text}"`
-        }
-    }
-    var data = {
-        "messaging_type": "UPDATE",
-        "recipient": {
-            "id": sender_psid
-        },
-        "message": {
-            "text": response
-        }
-    }
-    console.log(JSON.stringify(data));
-    var options = {
-        host: 'graph.facebook.com',
-        port: '443',
-        path: '/v7.0/me/messages?access_token=' + config.channel_access_token,
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json;',
-            'Content-Length': Buffer.byteLength(JSON.stringify(data)),
-        }
-    };
-    var https = require('https');
-    var req = https.request(options, function (res) {
-        res.setEncoding('utf8');
-        res.on('data', function (chunk) {
-            console.log('Response: ' + chunk);
-        });
-        res.on('end', function () {});
-        console.log('Reply message status code: ' + res.statusCode);
-        if (res.statusCode == 200) {
-            console.log('Reply message success');
-            callback(true);
-        } else {
-            console.log('Reply message failure');
-            callback(false);
-        }
-    });
-    req.write(JSON.stringify(data));
-    req.end();
-}
-
-function PostBackToMessage(sender_psid, received_postback, callback) {
-    console.log("PostToLINE")
-    let response;
-    // 取得發送者回覆內容
-    let payload = received_postback.payload;
-    // 判斷回覆的內容，對應機器人回應的訊息
-    if (payload === 'yes') {
-        response = {
-            "text": "YES"
-        }
-    } else if (payload === 'no') {
-        response = {
-            "text": "NO"
-        }
-    }
-    var data = {
-        "messaging_type": "UPDATE",
-        "recipient": {
-            "id": sender_psid
-        },
-        "message": {
-            "text": response
-        }
-    }
-    console.log(JSON.stringify(data));
-    var options = {
-        host: 'graph.facebook.com',
-        port: '443',
-        path: '/v7.0/me/messages?access_token=' + config.channel_access_token,
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json;',
-            'Content-Length': Buffer.byteLength(JSON.stringify(data)),
-        }
-    };
-    var https = require('https');
-    var req = https.request(options, function (res) {
-        res.setEncoding('utf8');
-        res.on('data', function (chunk) {
-            console.log('Response: ' + chunk);
-        });
-        res.on('end', function () {});
-    });
-    req.write(JSON.stringify(data));
-    req.end();
-    try {
-        callback(true);
-    } catch (e) {};
 }
 function callSendAPI(sender_psid, response) {
     let request_body = {
