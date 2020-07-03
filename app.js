@@ -148,17 +148,39 @@ app.post("/", function (req, res) {
     */
 
 });
-app.get('/getPersonas/:user_id', function (request, response) {
+app.get('/getPersonas', function (request, response) {
     //https://graph.facebook.com/<PERSONA_ID>?access_token=<PAGE_ACCESS_TOKEN>
     //https://graph.facebook.com/me/personas;?access_token=<PAGE_ACCESS_TOKEN>
-    console.log("getPersonas : " + user_id)
     var user_id = request.params.user_id;
     var url = "";
     console.log("getPersonas : " + user_id)
-    if (user_id == null || user_id == undefined || user_id == "")
-        url = "https://graph.facebook.com/me/personas;"
-    else
-        url = "https://graph.facebook.com/"
+    url = "https://graph.facebook.com/me/personas;"
+    request({
+        "uri": url,
+        "qs": {
+            "access_token": config.channel_access_token
+        },
+        "method": "GET",
+        //"json": request_body
+    }, (err, res, body) => {
+        if (!err) {
+
+            console.log('---> message sent!')
+            console.log(JSON.stringify(res, null, 2))
+        } else {
+            console.error("Unable to send message:" + err);
+        }
+    });
+
+})
+app.get('/getPersonas/:user_id', function (request, response) {
+    //https://graph.facebook.com/<PERSONA_ID>?access_token=<PAGE_ACCESS_TOKEN>
+    //https://graph.facebook.com/me/personas;?access_token=<PAGE_ACCESS_TOKEN>
+    var user_id = request.params.user_id;
+    var url = "";
+    console.log("getPersonas : " + user_id)
+
+    url = "https://graph.facebook.com/"+user_id
     request({
         "uri": url,
         "qs": {
