@@ -303,7 +303,7 @@ function handleMessage_video(sender_psid, received_message) {
         // 回傳的文字訊息
         response = {
             "attachment": {
-                type: "image",
+                type: "video",
                 payload: {
                     url: "https://cdctest.herokuapp.com/video/1.mp4",
                     is_reusable: false // 感覺不到差異Optional. Set to true to make the saved asset sendable to other message recipients. Defaults to false.
@@ -322,7 +322,7 @@ function handleMessage_audio(sender_psid, received_message) {
         // 回傳的文字訊息
         response = {
             "attachment": {
-                type: "image",
+                type: "audio",
                 payload: {
                     url: "https://cdctest.herokuapp.com/audio/1.mp3",
                     is_reusable: false // 感覺不到差異Optional. Set to true to make the saved asset sendable to other message recipients. Defaults to false.
