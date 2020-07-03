@@ -340,9 +340,7 @@ function handleMessage_template(sender_psid, received_message) {
                         "default_action": {
                             "type": "web_url",
                             "url": "https://cdctest.herokuapp.com/image/1.jpg",
-                            "messenger_extensions": false,
                             "webview_height_ratio": "tall",
-                            "fallback_url": "https://cdctest.herokuapp.com/image/1.jpg"
                         },
                         "buttons": [{
                             "type": "web_url",
@@ -358,8 +356,8 @@ function handleMessage_template(sender_psid, received_message) {
             }
         }
     }
-    // 機器人發送回應
-    callSendAPI(sender_psid, response);
+// 機器人發送回應
+callSendAPI(sender_psid, response);
 }
 
 function handleMessage_quick(sender_psid, received_message) {
