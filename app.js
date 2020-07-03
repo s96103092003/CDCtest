@@ -340,7 +340,7 @@ function handleMessage_template(sender_psid, received_message) {
                         "default_action": {
                             "type": "web_url",
                             "url": "https://cdctest.herokuapp.com/image/1.jpg",
-                            "webview_height_ratio": "tall",
+                            "webview_height_ratio": "square",
                         },
                         "buttons": [{
                             "type": "web_url",
