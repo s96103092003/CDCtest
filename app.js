@@ -154,7 +154,7 @@ app.get('/getPersonas', function (request, response) {
     var user_id = request.params.user_id;
     var url = "";
     console.log("getPersonas")
-    url = "https://graph.facebook.com/me/personas;"
+    url = "https://graph.facebook.com/me/personas"
     callPersonasAPI(url)
 })
 app.get('/getPersonas/:user_id', function (request, response) {
