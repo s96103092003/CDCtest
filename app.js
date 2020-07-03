@@ -268,6 +268,7 @@ function handleMessage(sender_psid, received_message) {
     // 機器人發送回應
     callSendAPI(sender_psid, response);
 }
+
 function handleMessage_image(sender_psid, received_message) {
     let response;
     let response1;
@@ -277,61 +278,48 @@ function handleMessage_image(sender_psid, received_message) {
         // 回傳的文字訊息
         response = {
             "attachment": {
-                type : "image",
-                payload :{
-                    url : "https://cdctest.herokuapp.com/image/1.jpg",
-                    is_reusable : false // 感覺不到差異Optional. Set to true to make the saved asset sendable to other message recipients. Defaults to false.
+                type: "image",
+                payload: {
+                    url: "https://cdctest.herokuapp.com/image/1.jpg",
+                    is_reusable: false // 感覺不到差異Optional. Set to true to make the saved asset sendable to other message recipients. Defaults to false.
                 }
             },
         }
         response1 = {
             "attachment": {
-                type : "image",
-                payload :{
-                    url : "https://cdctest.herokuapp.com/image/1.jpg",
-                    is_reusable : true
-                }
-            },
-        }
-        response2 = {
-            "attachment" :{
-                "type":"template",
-                  "payload":{
-                    "template_type":"generic",
-                    "elements":[
-                       {
-                        "title":"Welcome!",
-                        "image_url":"https://cdctest.herokuapp.com/image/1.jpg",
-                        "subtitle":"We have the right hat for everyone.",
+                "type": "template",
+                "payload": {
+                    "template_type": "generic",
+                    "elements": [{
+                        "title": "Welcome!",
+                        "image_url": "https://cdctest.herokuapp.com/image/1.jpg",
+                        "subtitle": "We have the right hat for everyone.",
                         "default_action": {
-                          "type": "web_url",
-                          "url": "https://cdctest.herokuapp.com/image/1.jpg",
-                          "messenger_extensions": false,
-                          "webview_height_ratio": "tall",
-                          "fallback_url": "https://cdctest.herokuapp.com/image/1.jpg"
+                            "type": "web_url",
+                            "url": "https://cdctest.herokuapp.com/image/1.jpg",
+                            "messenger_extensions": false,
+                            "webview_height_ratio": "tall",
+                            "fallback_url": "https://cdctest.herokuapp.com/image/1.jpg"
                         },
-                        "buttons":[
-                          {
-                            "type":"web_url",
-                            "url":"https://cdctest.herokuapp.com/image/1.jpg",
-                            "title":"View Website"
-                          },{
-                            "type":"postback",
-                            "title":"Start Chatting",
-                            "payload":"DEVELOPER_DEFINED_PAYLOAD"
-                          }              
-                        ]      
-                      }
-                    ]
-                  }
+                        "buttons": [{
+                            "type": "web_url",
+                            "url": "https://cdctest.herokuapp.com/image/1.jpg",
+                            "title": "View Website"
+                        }, {
+                            "type": "postback",
+                            "title": "Start Chatting",
+                            "payload": "DEVELOPER_DEFINED_PAYLOAD"
+                        }]
+                    }]
+                }
             }
         }
     }
     // 機器人發送回應
     callSendAPI(sender_psid, response);
     callSendAPI(sender_psid, response1);
-    callSendAPI(sender_psid, response2);
 }
+
 function handleMessage_quick(sender_psid, received_message) {
     let response;
     // 判斷訊息是否包含文字
@@ -376,7 +364,7 @@ function handlePostback(sender_psid, received_postback) {
 app.get('/:dic/:filename', function (request, response) {
     var filename = request.params.filename;
     var dic = request.params.dic;
-    var stream = require('fs').createReadStream('/'+dic+'/' + filename);
+    var stream = require('fs').createReadStream('/' + dic + '/' + filename);
     stream.pipe(response);
     response.clearCookie()
 });
