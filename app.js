@@ -90,12 +90,15 @@ app.post("/", function (req, res) {
                         handleMessage_image(sender_psid, webhook_event.message);
                         break;
                     case "c":
-                        handleMessage_video(sender_psid, webhook_event.message);
+                        handleMessage_template(sender_psid, webhook_event.message);
                         break;
                     case "d":
-                        handleMessage_audio(sender_psid, webhook_event.message);
+                        handleMessage_video(sender_psid, webhook_event.message);
                         break;
                     case "e":
+                        handleMessage_audio(sender_psid, webhook_event.message);
+                        break;
+                    case "f":
                         handleMessage_file(sender_psid, webhook_event.message);
                         break;
                     default:
@@ -271,8 +274,6 @@ function handleMessage(sender_psid, received_message) {
 
 function handleMessage_image(sender_psid, received_message) {
     let response;
-    let response1;
-    let response2;
     // 判斷訊息是否包含文字
     if (received_message.text) {
         // 回傳的文字訊息
@@ -318,6 +319,45 @@ function handleMessage_image(sender_psid, received_message) {
     // 機器人發送回應
     callSendAPI(sender_psid, response);
     callSendAPI(sender_psid, response1);
+}
+
+function handleMessage_template(sender_psid, received_message) {
+    let response;
+    // 判斷訊息是否包含文字
+    if (received_message.text) {
+        // 回傳的文字訊息
+        response = {
+            "attachment": {
+                "type": "template",
+                "payload": {
+                    "template_type": "generic",
+                    "elements": [{
+                        "title": "Welcome!",
+                        "image_url": "https://cdctest.herokuapp.com/image/1.jpg",
+                        "subtitle": "We have the right hat for everyone.",
+                        "default_action": {
+                            "type": "web_url",
+                            "url": "https://cdctest.herokuapp.com/image/1.jpg",
+                            "messenger_extensions": false,
+                            "webview_height_ratio": "tall",
+                            "fallback_url": "https://cdctest.herokuapp.com/image/1.jpg"
+                        },
+                        "buttons": [{
+                            "type": "web_url",
+                            "url": "https://cdctest.herokuapp.com/image/1.jpg",
+                            "title": "View Website"
+                        }, {
+                            "type": "postback",
+                            "title": "Start Chatting",
+                            "payload": "DEVELOPER_DEFINED_PAYLOAD"
+                        }]
+                    }]
+                }
+            }
+        }
+    }
+    // 機器人發送回應
+    callSendAPI(sender_psid, response);
 }
 
 function handleMessage_quick(sender_psid, received_message) {
