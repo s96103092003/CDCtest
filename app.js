@@ -17,7 +17,7 @@ app.use('/image', express.static(__dirname + '/image'));
 app.use('/file', express.static(__dirname + '/file'));
 app.use('/audio', express.static(__dirname + '/audio'));
 app.use('/video', express.static(__dirname + '/video'));
-app.use(bodyParser.json());//
+app.use(bodyParser.json()); //
 var config = fs.readFileSync(__dirname + '/config.json', 'utf8');
 config = JSON.parse(config);
 /*  {"type":"follow",
@@ -370,7 +370,7 @@ function handleMessage_template(sender_psid, received_message) {
                         "default_action": {
                             "type": "web_url",
                             "url": "https://cdctest.herokuapp.com/image/1.jpg",
-                            "webview_height_ratio": "square",
+                            "webview_height_ratio": "tall",
                         },
                         "buttons": [{
                             "type": "web_url",
