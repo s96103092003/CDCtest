@@ -389,6 +389,17 @@ function handlePostback(sender_psid, received_postback) {
     // 取得發送者回覆內容
     let payload = received_postback.payload;
     // 判斷回覆的內容，對應機器人回應的訊息
+    /*
+    {
+        sender: { id: '2892523437540225' },
+        recipient: { id: '108984370859831' },
+        timestamp: 1593762012184,
+        postback: { title: 'Start Chatting', payload: 'DEVELOPER_DEFINED_PAYLOAD' }
+    }
+    */
+    response = {
+        "text": "收到postback : "+payload
+    }
     if (payload === 'yes') {
         response = {
             "text": "Thanks!"
