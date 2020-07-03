@@ -288,39 +288,66 @@ function handleMessage_image(sender_psid, received_message) {
                 }
             },
         }
-        response1 = {
+    }
+    // 機器人發送回應
+    callSendAPI(sender_psid, response);
+}
+
+function handleMessage_video(sender_psid, received_message) {
+    let response;
+    // 判斷訊息是否包含文字
+    if (received_message.text) {
+        // 回傳的文字訊息
+        response = {
             "attachment": {
-                "type": "template",
-                "payload": {
-                    "template_type": "generic",
-                    "elements": [{
-                        "title": "Welcome!",
-                        "image_url": "https://cdctest.herokuapp.com/image/1.jpg",
-                        "subtitle": "We have the right hat for everyone.",
-                        "default_action": {
-                            "type": "web_url",
-                            "url": "https://cdctest.herokuapp.com/image/1.jpg",
-                            "messenger_extensions": false,
-                            "webview_height_ratio": "tall",
-                            "fallback_url": "https://cdctest.herokuapp.com/image/1.jpg"
-                        },
-                        "buttons": [{
-                            "type": "web_url",
-                            "url": "https://cdctest.herokuapp.com/image/1.jpg",
-                            "title": "View Website"
-                        }, {
-                            "type": "postback",
-                            "title": "Start Chatting",
-                            "payload": "DEVELOPER_DEFINED_PAYLOAD"
-                        }]
-                    }]
+                type: "image",
+                payload: {
+                    url: "https://cdctest.herokuapp.com/video/1.mp4",
+                    is_reusable: false // 感覺不到差異Optional. Set to true to make the saved asset sendable to other message recipients. Defaults to false.
                 }
-            }
+            },
         }
     }
     // 機器人發送回應
     callSendAPI(sender_psid, response);
-    callSendAPI(sender_psid, response1);
+}
+
+function handleMessage_audio(sender_psid, received_message) {
+    let response;
+    // 判斷訊息是否包含文字
+    if (received_message.text) {
+        // 回傳的文字訊息
+        response = {
+            "attachment": {
+                type: "image",
+                payload: {
+                    url: "https://cdctest.herokuapp.com/audio/1.mp3",
+                    is_reusable: false // 感覺不到差異Optional. Set to true to make the saved asset sendable to other message recipients. Defaults to false.
+                }
+            },
+        }
+    }
+    // 機器人發送回應
+    callSendAPI(sender_psid, response);
+}
+
+function handleMessage_file(sender_psid, received_message) {
+    let response;
+    // 判斷訊息是否包含文字
+    if (received_message.text) {
+        // 回傳的文字訊息
+        response = {
+            "attachment": {
+                type: "file",
+                payload: {
+                    url: "https://cdctest.herokuapp.com/file/1.txt",
+                    is_reusable: false // 感覺不到差異Optional. Set to true to make the saved asset sendable to other message recipients. Defaults to false.
+                }
+            },
+        }
+    }
+    // 機器人發送回應
+    callSendAPI(sender_psid, response);
 }
 
 function handleMessage_template(sender_psid, received_message) {
@@ -356,8 +383,8 @@ function handleMessage_template(sender_psid, received_message) {
             }
         }
     }
-// 機器人發送回應
-callSendAPI(sender_psid, response);
+    // 機器人發送回應
+    callSendAPI(sender_psid, response);
 }
 
 function handleMessage_quick(sender_psid, received_message) {
@@ -368,13 +395,33 @@ function handleMessage_quick(sender_psid, received_message) {
         response = {
             "text": `You sent the message: "${received_message.text}".`,
             "quick_replies": [{
-                "content_type": "text",
-                "title": "Red",
+                "content_type": "a",
+                "title": "文字訊息",
                 "payload": "<POSTBACK_PAYLOAD>",
                 //"image_url":"http://example.com/img/red.png"
             }, {
-                "content_type": "text",
-                "title": "Green",
+                "content_type": "b",
+                "title": "image",
+                "payload": "<POSTBACK_PAYLOAD>",
+                //"image_url":"http://example.com/img/green.png"
+            }, {
+                "content_type": "c",
+                "title": "template",
+                "payload": "<POSTBACK_PAYLOAD>",
+                //"image_url":"http://example.com/img/green.png"
+            }, {
+                "content_type": "d",
+                "title": "video",
+                "payload": "<POSTBACK_PAYLOAD>",
+                //"image_url":"http://example.com/img/green.png"
+            }, {
+                "content_type": "e",
+                "title": "audio",
+                "payload": "<POSTBACK_PAYLOAD>",
+                //"image_url":"http://example.com/img/green.png"
+            }, {
+                "content_type": "f",
+                "title": "file",
                 "payload": "<POSTBACK_PAYLOAD>",
                 //"image_url":"http://example.com/img/green.png"
             }]
@@ -398,7 +445,7 @@ function handlePostback(sender_psid, received_postback) {
     }
     */
     response = {
-        "text": "收到postback : "+payload
+        "text": "收到postback : " + payload
     }
     if (payload === 'yes') {
         response = {
