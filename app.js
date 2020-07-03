@@ -12,7 +12,8 @@ var request = require("request");
 app.use(bodyParser.urlencoded({
     extended: true
 }));
-//app.use('/tmp', express.static(__dirname + '/tmp'));
+app.use('/tmp', express.static(__dirname + '/tmp'));
+app.use('/image', express.static(__dirname + '/image'));
 app.use(bodyParser.json());
 var config = fs.readFileSync(__dirname + '/config.json', 'utf8');
 config = JSON.parse(config);
