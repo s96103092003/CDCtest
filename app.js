@@ -268,7 +268,43 @@ function handleMessage(sender_psid, received_message) {
     // 機器人發送回應
     callSendAPI(sender_psid, response);
 }
-
+function handleMessage_image(sender_psid, received_message) {
+    let response;
+    let response1;
+    let response2;
+    // 判斷訊息是否包含文字
+    if (received_message.text) {
+        // 回傳的文字訊息
+        response = {
+            "attachment": {
+                type : "image",
+                payload :{
+                    url : "https://cdctest.herokuapp.com/image/1.jpg",
+                    is_reusable : false // Optional. Set to true to make the saved asset sendable to other message recipients. Defaults to false.
+                }
+            },
+        }
+        response1 = {
+            "attachment": {
+                type : "image",
+                payload :{
+                    url : "https://cdctest.herokuapp.com/image/1.jpg",
+                    is_reusable : true
+                }
+            },
+        }
+        response2 = {
+            "text" : "image",
+            "attachment": {
+                type : "image",
+            },
+        }
+    }
+    // 機器人發送回應
+    callSendAPI(sender_psid, response);
+    callSendAPI(sender_psid, response1);
+    callSendAPI(sender_psid, response2);
+}
 function handleMessage_quick(sender_psid, received_message) {
     let response;
     // 判斷訊息是否包含文字
