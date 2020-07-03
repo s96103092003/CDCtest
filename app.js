@@ -280,7 +280,7 @@ function handleMessage_image(sender_psid, received_message) {
                 type : "image",
                 payload :{
                     url : "https://cdctest.herokuapp.com/image/1.jpg",
-                    is_reusable : false // Optional. Set to true to make the saved asset sendable to other message recipients. Defaults to false.
+                    is_reusable : false // 感覺不到差異Optional. Set to true to make the saved asset sendable to other message recipients. Defaults to false.
                 }
             },
         }
@@ -294,10 +294,37 @@ function handleMessage_image(sender_psid, received_message) {
             },
         }
         response2 = {
-            "text" : "image",
-            "attachment": {
-                type : "image",
-            },
+            "attachment" :{
+                "type":"template",
+                  "payload":{
+                    "template_type":"generic",
+                    "elements":[
+                       {
+                        "title":"Welcome!",
+                        "image_url":"https://cdctest.herokuapp.com/image/1.jpg",
+                        "subtitle":"We have the right hat for everyone.",
+                        "default_action": {
+                          "type": "web_url",
+                          "url": "https://cdctest.herokuapp.com/image/1.jpg",
+                          "messenger_extensions": false,
+                          "webview_height_ratio": "tall",
+                          "fallback_url": "https://cdctest.herokuapp.com/image/1.jpg"
+                        },
+                        "buttons":[
+                          {
+                            "type":"web_url",
+                            "url":"https://cdctest.herokuapp.com/image/1.jpg",
+                            "title":"View Website"
+                          },{
+                            "type":"postback",
+                            "title":"Start Chatting",
+                            "payload":"DEVELOPER_DEFINED_PAYLOAD"
+                          }              
+                        ]      
+                      }
+                    ]
+                  }
+            }
         }
     }
     // 機器人發送回應
