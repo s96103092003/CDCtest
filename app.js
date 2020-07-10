@@ -96,21 +96,27 @@ app.post("/", function (req, res) {
                 if (webhook_event.message) {
                     switch (webhook_event.message.text) {
                         case "a":
+                        case "文字訊息":
                             handleMessage(sender_psid, webhook_event.message, access_token);
                             break;
                         case "b":
+                        case "image":
                             handleMessage_image(sender_psid, webhook_event.message, access_token);
                             break;
                         case "c":
+                        case "template":
                             handleMessage_template(sender_psid, webhook_event.message, access_token);
                             break;
                         case "d":
+                        case "video":
                             handleMessage_video(sender_psid, webhook_event.message, access_token);
                             break;
                         case "e":
+                        case "audio":
                             handleMessage_audio(sender_psid, webhook_event.message, access_token);
                             break;
                         case "f":
+                        case "file":
                             handleMessage_file(sender_psid, webhook_event.message, access_token);
                             break;
                         default:
