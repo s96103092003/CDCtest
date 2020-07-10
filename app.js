@@ -91,6 +91,7 @@ app.post("/", function (req, res) {
                     break;
                 }
             }
+            console.log("access_token: "+access_token)
             if (access_token != "") {
                 if (webhook_event.message) {
                     switch (webhook_event.message.text) {
