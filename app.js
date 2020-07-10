@@ -86,7 +86,7 @@ app.post("/", function (req, res) {
             // 判斷訊息是屬於 message 還是 postback」意思是發送者是否是透過機器人提供的選擇做回覆，如果「是」就是 postback；「不是」就屬於 message
             var access_token = ""
             for (var i in config.access_tokens) {
-                if (config.access_tokens[i].recipient === webhook_event.webhook_event) {
+                if (config.access_tokens[i].recipient === webhook_event.recipient) {
                     access_token = config.access_tokens[i].access_token;
                     break;
                 }
