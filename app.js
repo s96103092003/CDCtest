@@ -447,32 +447,32 @@ function handleMessage_quick(sender_psid, received_message, access_token) {
         response = {
             "text": `You sent the message: "${received_message.text}".`,
             "quick_replies": [{
-                "content_type": "a",
+                "content_type": "text",
                 "title": "文字訊息",
                 "payload": "<POSTBACK_PAYLOAD>",
                 //"image_url":"http://example.com/img/red.png"
             }, {
-                "content_type": "b",
+                "content_type": "text",
                 "title": "image",
                 "payload": "<POSTBACK_PAYLOAD>",
                 //"image_url":"http://example.com/img/green.png"
             }, {
-                "content_type": "c",
+                "content_type": "text",
                 "title": "template",
                 "payload": "<POSTBACK_PAYLOAD>",
                 //"image_url":"http://example.com/img/green.png"
             }, {
-                "content_type": "d",
+                "content_type": "text",
                 "title": "video",
                 "payload": "<POSTBACK_PAYLOAD>",
                 //"image_url":"http://example.com/img/green.png"
             }, {
-                "content_type": "e",
+                "content_type": "text",
                 "title": "audio",
                 "payload": "<POSTBACK_PAYLOAD>",
                 //"image_url":"http://example.com/img/green.png"
             }, {
-                "content_type": "f",
+                "content_type": "text",
                 "title": "file",
                 "payload": "<POSTBACK_PAYLOAD>",
                 //"image_url":"http://example.com/img/green.png"
