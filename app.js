@@ -84,32 +84,41 @@ app.post("/", function (req, res) {
             let sender_psid = webhook_event.sender.id;
             // 判斷訊息是屬於 message 還是 postback
             // 判斷訊息是屬於 message 還是 postback」意思是發送者是否是透過機器人提供的選擇做回覆，如果「是」就是 postback；「不是」就屬於 message
-            if (webhook_event.message) {
-                switch (webhook_event.message.text) {
-                    case "a":
-                        handleMessage(sender_psid, webhook_event.message);
-                        break;
-                    case "b":
-                        handleMessage_image(sender_psid, webhook_event.message);
-                        break;
-                    case "c":
-                        handleMessage_template(sender_psid, webhook_event.message);
-                        break;
-                    case "d":
-                        handleMessage_video(sender_psid, webhook_event.message);
-                        break;
-                    case "e":
-                        handleMessage_audio(sender_psid, webhook_event.message);
-                        break;
-                    case "f":
-                        handleMessage_file(sender_psid, webhook_event.message);
-                        break;
-                    default:
-                        handleMessage_quick(sender_psid, webhook_event.message);
-
+            var access_token = ""
+            for (var i in config.access_tokens) {
+                if (config.access_tokens[i].recipient === webhook_event.webhook_event) {
+                    access_token = config.access_tokens[i].access_token;
+                    break;
                 }
-            } else if (webhook_event.postback) {
-                handlePostback(sender_psid, webhook_event.postback);
+            }
+            if (access_token != "") {
+                if (webhook_event.message) {
+                    switch (webhook_event.message.text) {
+                        case "a":
+                            handleMessage(sender_psid, webhook_event.message, access_token);
+                            break;
+                        case "b":
+                            handleMessage_image(sender_psid, webhook_event.message, access_token);
+                            break;
+                        case "c":
+                            handleMessage_template(sender_psid, webhook_event.message, access_token);
+                            break;
+                        case "d":
+                            handleMessage_video(sender_psid, webhook_event.message, access_token);
+                            break;
+                        case "e":
+                            handleMessage_audio(sender_psid, webhook_event.message, access_token);
+                            break;
+                        case "f":
+                            handleMessage_file(sender_psid, webhook_event.message, access_token);
+                            break;
+                        default:
+                            handleMessage_quick(sender_psid, webhook_event.message, access_token);
+
+                    }
+                } else if (webhook_event.postback) {
+                    handlePostback(sender_psid, webhook_event.postback);
+                }
             }
         });
         res.status(200).send('EVENT_RECEIVED');
@@ -164,15 +173,16 @@ app.get('/getPersonas/:user_id', function (request, response) {
     var url = "";
     console.log("getPersonas : " + user_id)
 
-    url = "https://graph.facebook.com/"+user_id
+    url = "https://graph.facebook.com/" + user_id
     callPersonasAPI(url)
 
 })
-function callPersonasAPI(url) {
+
+function callPersonasAPI(url, access_token) {
     request({
         "uri": url,
         "qs": {
-            "access_token": config.channel_access_token
+            "access_token": access_token
         },
         "method": "GET",
         //"json": request_body
@@ -277,7 +287,7 @@ function GetContent(data, channel_access_token) { //OK
     req.end();
 }
 
-function callSendAPI(sender_psid, response) {
+function callSendAPI(sender_psid, response, access_token) {
     let request_body = {
         "recipient": { //發送的ID
             "id": sender_psid
@@ -287,7 +297,7 @@ function callSendAPI(sender_psid, response) {
     request({
         "uri": "https://graph.facebook.com/v7.0/me/messages",
         "qs": {
-            "access_token": config.channel_access_token
+            "access_token": access_token
         },
         "method": "POST",
         "json": request_body
@@ -302,7 +312,7 @@ function callSendAPI(sender_psid, response) {
     });
 }
 
-function handleMessage(sender_psid, received_message) {
+function handleMessage(sender_psid, received_message, access_token) {
     let response;
     // 判斷訊息是否包含文字
     if (received_message.text) {
@@ -312,10 +322,10 @@ function handleMessage(sender_psid, received_message) {
         }
     }
     // 機器人發送回應
-    callSendAPI(sender_psid, response);
+    callSendAPI(sender_psid, response, access_token);
 }
 
-function handleMessage_image(sender_psid, received_message) {
+function handleMessage_image(sender_psid, received_message, access_token) {
     let response;
     // 判斷訊息是否包含文字
     if (received_message.text) {
@@ -331,10 +341,10 @@ function handleMessage_image(sender_psid, received_message) {
         }
     }
     // 機器人發送回應
-    callSendAPI(sender_psid, response);
+    callSendAPI(sender_psid, response, access_token);
 }
 
-function handleMessage_video(sender_psid, received_message) {
+function handleMessage_video(sender_psid, received_message, access_token) {
     let response;
     // 判斷訊息是否包含文字
     if (received_message.text) {
@@ -350,10 +360,10 @@ function handleMessage_video(sender_psid, received_message) {
         }
     }
     // 機器人發送回應
-    callSendAPI(sender_psid, response);
+    callSendAPI(sender_psid, response, access_token);
 }
 
-function handleMessage_audio(sender_psid, received_message) {
+function handleMessage_audio(sender_psid, received_message, access_token) {
     let response;
     // 判斷訊息是否包含文字
     if (received_message.text) {
@@ -369,10 +379,10 @@ function handleMessage_audio(sender_psid, received_message) {
         }
     }
     // 機器人發送回應
-    callSendAPI(sender_psid, response);
+    callSendAPI(sender_psid, response, access_token);
 }
 
-function handleMessage_file(sender_psid, received_message) {
+function handleMessage_file(sender_psid, received_message, access_token) {
     let response;
     // 判斷訊息是否包含文字
     if (received_message.text) {
@@ -388,10 +398,10 @@ function handleMessage_file(sender_psid, received_message) {
         }
     }
     // 機器人發送回應
-    callSendAPI(sender_psid, response);
+    callSendAPI(sender_psid, response, access_token);
 }
 
-function handleMessage_template(sender_psid, received_message) {
+function handleMessage_template(sender_psid, received_message, access_token) {
     let response;
     // 判斷訊息是否包含文字
     if (received_message.text) {
@@ -425,10 +435,10 @@ function handleMessage_template(sender_psid, received_message) {
         }
     }
     // 機器人發送回應
-    callSendAPI(sender_psid, response);
+    callSendAPI(sender_psid, response, access_token);
 }
 
-function handleMessage_quick(sender_psid, received_message) {
+function handleMessage_quick(sender_psid, received_message, access_token) {
     let response;
     // 判斷訊息是否包含文字
     if (received_message.text) {
@@ -469,10 +479,10 @@ function handleMessage_quick(sender_psid, received_message) {
         }
     }
     // 機器人發送回應
-    callSendAPI(sender_psid, response);
+    callSendAPI(sender_psid, response, access_token);
 }
 
-function handlePostback(sender_psid, received_postback) {
+function handlePostback(sender_psid, received_postback, access_token) {
     let response;
     // 取得發送者回覆內容
     let payload = received_postback.payload;
@@ -498,7 +508,7 @@ function handlePostback(sender_psid, received_postback) {
         }
     }
     // 機器人發送回應
-    callSendAPI(sender_psid, response);
+    callSendAPI(sender_psid, response, access_token);
 }
 app.get('/:dic/:filename', function (request, response) {
     var filename = request.params.filename;

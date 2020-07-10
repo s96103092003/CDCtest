@@ -2,7 +2,15 @@
     "channel_id": "555386825366717",
     "channel_secret": "be9b7342d788abdd74cd58f407954f96",
     "redirect_uri": "https://s96103092003.herokuapp.com/",
-    "channel_access_token": "EAAH5HxJwXL0BAEzEUeNAYyk7cZB0MHr2QmHdi443XSBKFvozXxNBTgbHTSS8P5xtWK5qRviES0jfcFz0MBnl6iyyr64UOubItEoPiIXZClLLhNVODhr4jWlU23KtbZBT9v4YL9UeNSmyroSYmtYiGnBc6eAJEm52UImHiXb64DIVg5bmbwvHtEat8ugDjsZD",
-    "channel_access_token1":"EAAH5HxJwXL0BABognHByvZA0DazGCZCJZAGRbXDCUXbxiolRqwcLsQFLuNjuZBrRNealpZAWnZBFYUWZAZCRyO5e4mlQQs1D7SRjVZC5vK8nH5BufbwjaNtP24cbqFZCVENsSnGac2h24ZClOJCDaJ81rtZCXJJAbSg9waE8jrDfNgGXdOb2ywUZAfQdPutcNxJqkjZA4ZD",
+    "access_tokens" :[
+        {
+            "recipient": "100283728425577",
+            "access_token" : "EAAH5HxJwXL0BAAZCxbPZBOWczOjSEIZBq29jVzZC2iBLNO3fAMBvLyzveOy0OMVdjsu7mxDUjTq3p2WB9a0c1aNr0gJuEqz0Un3OPAZCXPzEIW2tzOWYYLlB98SXMDZCc1LTU5nZAjJqb7TIecRGQOv9M69OawWjTkMWWgQ8R3e63pp2iYXZAvkFrRqTEJ5anWEZD"
+        },
+        {
+            "recipient": "108984370859831",
+            "access_token" : "EAAH5HxJwXL0BANOwc4uu1ZA9Y6c5LWuZC39jLGsq4ZAVYgXTUSqVRdp7Sb4doBh6D4l9xRBvieJGZBaEnk3O4ePstUHPSTLdZBBlftaJZChh5eZCbqsFDEy1D3KM5mI01UZAPxUTt0GgwqWAzhxsTVZBc2cLMONIeiNpEogfNvF4choMm5AFtQcZB4bfHhny6CQ9UZD"
+        }
+    ],
     "AUTH_TOKEN": "yiweiTest"
 }
