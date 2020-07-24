@@ -164,7 +164,7 @@ app.post("/", function (req, res) {
                 }
             }
             console.log("access_token: " + access_token)
-            if (access_token != "") {
+            /*if (access_token != "") {
                 if (webhook_event.message) {
                     if (webhook_event.message.text) {
                         switch (webhook_event.message.text) {
@@ -208,9 +208,9 @@ app.post("/", function (req, res) {
                         }
                     }
                 } else if (webhook_event.postback) {
-                    handlePostback(sender_psid, webhook_event.postback);
+                    SendFBPostback(sender_psid, webhook_event.postback);
                 }
-            }
+            }*/
         });
         res.status(200).send('EVENT_RECEIVED');
     } else {
