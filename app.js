@@ -70,7 +70,7 @@ app.get("/", function (req, res) {
   ]
 }
 */
-
+/*
 var a = {
     "object": "page",
     "entry": [{
@@ -141,7 +141,7 @@ var c = {
         }]
     }]
 }
-
+*/
 //接收FB訊息
 app.post("/", function (req, res) {
 
