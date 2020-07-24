@@ -2,24 +2,23 @@
     "channel_id": "555386825366717",
     "channel_secret": "be9b7342d788abdd74cd58f407954f96",
     "redirect_uri": "https://s96103092003.herokuapp.com/",
-    "access_tokens" :[
-        {
+    "access_tokens": [{
             "recipient": "100283728425577",
-            "access_token" : "EAAH5HxJwXL0BAAZCxbPZBOWczOjSEIZBq29jVzZC2iBLNO3fAMBvLyzveOy0OMVdjsu7mxDUjTq3p2WB9a0c1aNr0gJuEqz0Un3OPAZCXPzEIW2tzOWYYLlB98SXMDZCc1LTU5nZAjJqb7TIecRGQOv9M69OawWjTkMWWgQ8R3e63pp2iYXZAvkFrRqTEJ5anWEZD"
+            "access_token": "EAAH5HxJwXL0BAAZCxbPZBOWczOjSEIZBq29jVzZC2iBLNO3fAMBvLyzveOy0OMVdjsu7mxDUjTq3p2WB9a0c1aNr0gJuEqz0Un3OPAZCXPzEIW2tzOWYYLlB98SXMDZCc1LTU5nZAjJqb7TIecRGQOv9M69OawWjTkMWWgQ8R3e63pp2iYXZAvkFrRqTEJ5anWEZD"
         },
         {
             "recipient": "108984370859831",
-            "access_token" : "EAAH5HxJwXL0BANOwc4uu1ZA9Y6c5LWuZC39jLGsq4ZAVYgXTUSqVRdp7Sb4doBh6D4l9xRBvieJGZBaEnk3O4ePstUHPSTLdZBBlftaJZChh5eZCbqsFDEy1D3KM5mI01UZAPxUTt0GgwqWAzhxsTVZBc2cLMONIeiNpEogfNvF4choMm5AFtQcZB4bfHhny6CQ9UZD"
+            "access_token": "EAAH5HxJwXL0BANOwc4uu1ZA9Y6c5LWuZC39jLGsq4ZAVYgXTUSqVRdp7Sb4doBh6D4l9xRBvieJGZBaEnk3O4ePstUHPSTLdZBBlftaJZChh5eZCbqsFDEy1D3KM5mI01UZAPxUTt0GgwqWAzhxsTVZBc2cLMONIeiNpEogfNvF4choMm5AFtQcZB4bfHhny6CQ9UZD"
         },
         {
             "recipient": "114433427003103",
-            "access_token" : "EAAH5HxJwXL0BAK0mOMP3FlCP3lIEIomzQZBqsxcEfcLAbO8ZAbaBmsglPK2gmsI4HZAq28uCLZCghZC9iJ8isZCQZBKVrTzZCXhS91KSy84i9qtmNZAb7HNCuRlWRob2hyNMAxQZAk1jTZBi6JhbbOJbztftgPfZBF0w8OunbdwZAkFbgYOIGALrD9YdtFMkKYRlTIlcZD"
+            "access_token": "EAAH5HxJwXL0BAK0mOMP3FlCP3lIEIomzQZBqsxcEfcLAbO8ZAbaBmsglPK2gmsI4HZAq28uCLZCghZC9iJ8isZCQZBKVrTzZCXhS91KSy84i9qtmNZAb7HNCuRlWRob2hyNMAxQZAk1jTZBi6JhbbOJbztftgPfZBF0w8OunbdwZAkFbgYOIGALrD9YdtFMkKYRlTIlcZD"
         },
         {
             "recipient": "321061435468254",
-            "access_token" : "EAAH5HxJwXL0BAKQg1oobf1oxRSksQHhCiZASfDrEoZBvgJKSpO34WAOqZCqMSAhLWRyVIzZCgJFdnrqhkdrct4JFZCnX2CrccMAPfZAGDw5aelSJZArfyLgG3MQEIk1o6Bsbqgn7rn85lbKvPTS0ggsCph2QIRvLeEacRb11ETz82mb0Hedcxrk7BEBDFe6kB8ZD"
+            "access_token": "EAAH5HxJwXL0BAKQg1oobf1oxRSksQHhCiZASfDrEoZBvgJKSpO34WAOqZCqMSAhLWRyVIzZCgJFdnrqhkdrct4JFZCnX2CrccMAPfZAGDw5aelSJZArfyLgG3MQEIk1o6Bsbqgn7rn85lbKvPTS0ggsCph2QIRvLeEacRb11ETz82mb0Hedcxrk7BEBDFe6kB8ZD"
         }
-        
+
     ],
     "AUTH_TOKEN": "yiweiTest"
 }
