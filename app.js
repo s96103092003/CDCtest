@@ -70,7 +70,79 @@ app.get("/", function (req, res) {
   ]
 }
 */
-//接收LINE訊息
+
+var a = {
+    "object": "page",
+    "entry": [{
+        "id": "100283728425577",
+        "time": 1595575786943,
+        "messaging": [{
+            "sender": {
+                "id": "3116355715119375"
+            },
+            "recipient": {
+                "id": "100283728425577"
+            },
+            "timestamp": 1595575786677,
+            "message": {
+                "mid": "m_K7rDMa4f3j9IjON2h3wx27mPIj1WPS4YksS97kXPthJsY9dHkm09T_yY-2TNqmQXAKoOflYAgPqOSh8ncSjTiw",
+                "attachments": [{
+                    "type": "image",
+                    "payload": {
+                        "url": "https://scontent.xx.fbcdn.net/v/t1.15752-9/106538182_578310383056625_3267246385078665572_n.jpg?_nc_cat=100&_nc_sid=b96e70&_nc_ohc=uPHLzeF2UmcAX9rniGs&_nc_ad=z-m&_nc_cid=0&_nc_ht=scontent.xx&oh=49fd1ae12c74dea7c150c68f6eb74c04&oe=5F3FC551"
+                    }
+                }]
+            }
+        }]
+    }]
+}
+var b = {
+    "object": "page",
+    "entry": [{
+        "id": "100283728425577",
+        "time": 1595575635738,
+        "messaging": [{
+            "sender": {
+                "id": "3116355715119375"
+            },
+            "recipient": {
+                "id": "100283728425577"
+            },
+            "timestamp": 1595575635446,
+            "message": {
+                "mid": "m_eKIeewawv6O13KvO6s6pS7mPIj1WPS4YksS97kXPthL3qSus4iUchjYKC1gElfVqFzhp6bgAdADoQPpnKqLGvA",
+                "text": "1"
+            }
+        }]
+    }]
+}
+var c = {
+    "object": "page",
+    "entry": [{
+        "id": "100283728425577",
+        "time": 1595575939226,
+        "messaging": [{
+            "sender": {
+                "id": "3116355715119375"
+            },
+            "recipient": {
+                "id": "100283728425577"
+            },
+            "timestamp": 1595575938913,
+            "message": {
+                "mid": "m_c7aIoSPyrpTbMzDyug2uPrmPIj1WPS4YksS97kXPthKLLfGET8MVTQ7BqsEEVnu6hex-AcsDJF0EHUZ5Lon4yA",
+                "attachments": [{
+                    "type": "file",
+                    "payload": {
+                        "url": "https://cdn.fbsbx.com/v/t59.2708-21/107271418_574511696765767_4637954170273035811_n.txt/%E6%96%B0%E6%96%87%E5%AD%97%E6%96%87%E4%BB%B6.txt?_nc_cat=106&_nc_sid=0cab14&_nc_ohc=25PyU9XqSAgAX-M9rTd&_nc_ht=cdn.fbsbx.com&oh=31dbaae3b5f1192b4ab0e7f00cca0994&oe=5F1C300A"
+                    }
+                }]
+            }
+        }]
+    }]
+}
+
+//接收FB訊息
 app.post("/", function (req, res) {
 
     console.log("Get Manager Message");
@@ -91,38 +163,51 @@ app.post("/", function (req, res) {
                     break;
                 }
             }
-            console.log("access_token: "+access_token)
+            console.log("access_token: " + access_token)
             if (access_token != "") {
                 if (webhook_event.message) {
-                    switch (webhook_event.message.text) {
-                        case "a":
-                        case "文字訊息":
-                            handleMessage(sender_psid, webhook_event.message, access_token);
-                            break;
-                        case "b":
-                        case "image":
-                            handleMessage_image(sender_psid, webhook_event.message, access_token);
-                            break;
-                        case "c":
-                        case "template":
-                            handleMessage_template(sender_psid, webhook_event.message, access_token);
-                            break;
-                        case "d":
-                        case "video":
-                            handleMessage_video(sender_psid, webhook_event.message, access_token);
-                            break;
-                        case "e":
-                        case "audio":
-                            handleMessage_audio(sender_psid, webhook_event.message, access_token);
-                            break;
-                        case "f":
-                        case "file":
-                            handleMessage_file(sender_psid, webhook_event.message, access_token);
-                            break;
-                        default:
-                            handleMessage_quick(sender_psid, webhook_event.message, access_token);
-
+                    if (webhook_event.message.text) {
+                        switch (webhook_event.message.text) {
+                            case "a":
+                            case "文字訊息":
+                                SendFBMessage(sender_psid, webhook_event.message, access_token);
+                                break;
+                            case "b":
+                            case "image":
+                                SendFBMessage_image(sender_psid, webhook_event.message, access_token);
+                                break;
+                            case "c":
+                            case "template":
+                                SendFBMessage_template(sender_psid, webhook_event.message, access_token);
+                                break;
+                            case "d":
+                            case "video":
+                                SendFBMessage_video(sender_psid, webhook_event.message, access_token);
+                                break;
+                            case "e":
+                            case "audio":
+                                SendFBMessage_audio(sender_psid, webhook_event.message, access_token);
+                                break;
+                            case "f":
+                            case "file":
+                                SendFBMessage_file(sender_psid, webhook_event.message, access_token);
+                                break;
+                            default:
+                                SendFBMessage_quick(sender_psid, webhook_event.message, access_token);
+                        }
+                    } else {
+                        var attachments = webhook_event.message.attachments[0]
+                        if (attachments.type == "file") {
+                            SendFBMessage_file(sender_psid, webhook_event.message, access_token, url.payload.url);
+                        } else if (attachments.type == "audio") {
+                            SendFBMessage_audio(sender_psid, webhook_event.message, access_token, url.payload.url);
+                        } else if (attachments.type == "image") {
+                            SendFBMessage_image(sender_psid, webhook_event.message, access_token, url.payload.url);
+                        } else if (attachments.type == "video") {
+                            SendFBMessage_video(sender_psid, webhook_event.message, access_token, url.payload.url);
+                        }
                     }
+
                 } else if (webhook_event.postback) {
                     handlePostback(sender_psid, webhook_event.postback);
                 }
@@ -319,7 +404,7 @@ function callSendAPI(sender_psid, response, access_token) {
     });
 }
 
-function handleMessage(sender_psid, received_message, access_token) {
+function SendFBMessage(sender_psid, received_message, access_token, sendMessage) {
     let response;
     // 判斷訊息是否包含文字
     if (received_message.text) {
@@ -332,8 +417,9 @@ function handleMessage(sender_psid, received_message, access_token) {
     callSendAPI(sender_psid, response, access_token);
 }
 
-function handleMessage_image(sender_psid, received_message, access_token) {
+function SendFBMessage_image(sender_psid, received_message, access_token) {
     let response;
+    url = url || "https://cdctest.herokuapp.com/image/1.jpg"
     // 判斷訊息是否包含文字
     if (received_message.text) {
         // 回傳的文字訊息
@@ -341,7 +427,7 @@ function handleMessage_image(sender_psid, received_message, access_token) {
             "attachment": {
                 type: "image",
                 payload: {
-                    url: "https://cdctest.herokuapp.com/image/1.jpg",
+                    url: url,
                     is_reusable: false // 感覺不到差異Optional. Set to true to make the saved asset sendable to other message recipients. Defaults to false.
                 }
             },
@@ -351,8 +437,9 @@ function handleMessage_image(sender_psid, received_message, access_token) {
     callSendAPI(sender_psid, response, access_token);
 }
 
-function handleMessage_video(sender_psid, received_message, access_token) {
+function SendFBMessage_video(sender_psid, received_message, access_token) {
     let response;
+    url = url || "https://cdctest.herokuapp.com/video/1.mp4"
     // 判斷訊息是否包含文字
     if (received_message.text) {
         // 回傳的文字訊息
@@ -360,7 +447,7 @@ function handleMessage_video(sender_psid, received_message, access_token) {
             "attachment": {
                 type: "video",
                 payload: {
-                    url: "https://cdctest.herokuapp.com/video/1.mp4",
+                    url: url,
                     is_reusable: false // 感覺不到差異Optional. Set to true to make the saved asset sendable to other message recipients. Defaults to false.
                 }
             },
@@ -370,8 +457,9 @@ function handleMessage_video(sender_psid, received_message, access_token) {
     callSendAPI(sender_psid, response, access_token);
 }
 
-function handleMessage_audio(sender_psid, received_message, access_token) {
+function SendFBMessage_audio(sender_psid, received_message, access_token) {
     let response;
+    url = url || "https://cdctest.herokuapp.com/audio/1.mp3"
     // 判斷訊息是否包含文字
     if (received_message.text) {
         // 回傳的文字訊息
@@ -379,7 +467,7 @@ function handleMessage_audio(sender_psid, received_message, access_token) {
             "attachment": {
                 type: "audio",
                 payload: {
-                    url: "https://cdctest.herokuapp.com/audio/1.mp3",
+                    url: url,
                     is_reusable: false // 感覺不到差異Optional. Set to true to make the saved asset sendable to other message recipients. Defaults to false.
                 }
             },
@@ -389,8 +477,9 @@ function handleMessage_audio(sender_psid, received_message, access_token) {
     callSendAPI(sender_psid, response, access_token);
 }
 
-function handleMessage_file(sender_psid, received_message, access_token) {
+function SendFBMessage_file(sender_psid, received_message, access_token, url) {
     let response;
+    url = url || "https://cdctest.herokuapp.com/file/1.txt"
     // 判斷訊息是否包含文字
     if (received_message.text) {
         // 回傳的文字訊息
@@ -398,7 +487,7 @@ function handleMessage_file(sender_psid, received_message, access_token) {
             "attachment": {
                 type: "file",
                 payload: {
-                    url: "https://cdctest.herokuapp.com/file/1.txt",
+                    url: url,
                     is_reusable: false // 感覺不到差異Optional. Set to true to make the saved asset sendable to other message recipients. Defaults to false.
                 }
             },
@@ -408,7 +497,7 @@ function handleMessage_file(sender_psid, received_message, access_token) {
     callSendAPI(sender_psid, response, access_token);
 }
 
-function handleMessage_template(sender_psid, received_message, access_token) {
+function SendFBMessage_template(sender_psid, received_message, access_token) {
     let response;
     // 判斷訊息是否包含文字
     if (received_message.text) {
@@ -445,7 +534,7 @@ function handleMessage_template(sender_psid, received_message, access_token) {
     callSendAPI(sender_psid, response, access_token);
 }
 
-function handleMessage_quick(sender_psid, received_message, access_token) {
+function SendFBMessage_quick(sender_psid, received_message, access_token) {
     let response;
     // 判斷訊息是否包含文字
     if (received_message.text) {
@@ -489,7 +578,7 @@ function handleMessage_quick(sender_psid, received_message, access_token) {
     callSendAPI(sender_psid, response, access_token);
 }
 
-function handlePostback(sender_psid, received_postback, access_token) {
+function SendFBPostback(sender_psid, received_postback, access_token) {
     let response;
     // 取得發送者回覆內容
     let payload = received_postback.payload;
