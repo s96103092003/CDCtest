@@ -207,7 +207,6 @@ app.post("/", function (req, res) {
                             SendFBMessage_video(sender_psid, webhook_event.message, access_token, url.payload.url);
                         }
                     }
-
                 } else if (webhook_event.postback) {
                     handlePostback(sender_psid, webhook_event.postback);
                 }
@@ -247,7 +246,7 @@ app.post("/", function (req, res) {
                 PostToLINE(data, channel_access_token, this.callback); // reply_token 已過期，改用 PUSH_MESSAGE                   
         });
     */
-
+//
 });
 app.get('/getPersonas', function (request, response) {
     //https://graph.facebook.com/<PERSONA_ID>?access_token=<PAGE_ACCESS_TOKEN>
