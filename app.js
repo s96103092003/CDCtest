@@ -585,7 +585,7 @@ var Stage = null;
 var userStage = new Map();
 var userData = new Map();
 var text = new Map();
-
+//
 app.post("/", function (request, response) {
     ///
     console.log("Get LINE Message");
