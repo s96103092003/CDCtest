@@ -1,4 +1,4 @@
-try{
+try {
     var http = require("http");
     var express = require("express");
     var app = express();
@@ -21,6 +21,9 @@ try{
     app.use(bodyParser.json()); //
     var config = fs.readFileSync(__dirname + '/config.json', 'utf8');
     config = JSON.parse(config);
+    //var DirectLine = require(path.join(__dirname, '/directline.js'))
+    var fbmessage = require('./fbmessage');
+    var FBMessageAPI = new fbmessage.fb_message();
     /*  {"type":"follow",
       "replyToken":"c24acf8f5dae4993b25eb5974a07cbdb",
       "source":{
@@ -46,7 +49,7 @@ try{
             console.log("verify error")
             res.sendStatus(403)
         }
-    
+
     })
     /*
     {
@@ -145,11 +148,11 @@ try{
     */
     //接收FB訊息
     app.post("/", function (req, res) {
-    
+
         console.log("Get Manager Message");
         var userMessage = req.body;
         console.log(JSON.stringify(userMessage));
-    
+
         if (userMessage.object === 'page') {
             userMessage.entry.forEach(function (entry) {
                 let webhook_event = entry.messaging[0];
@@ -165,59 +168,59 @@ try{
                     }
                 }
                 console.log("access_token: " + access_token)
-                /*if (access_token != "") {
+                if (access_token != "") {
                     if (webhook_event.message) {
                         if (webhook_event.message.text) {
                             switch (webhook_event.message.text) {
                                 case "a":
                                 case "文字訊息":
-                                    SendFBMessage(sender_psid, webhook_event.message, access_token);
+                                    FBMessageAPI.SendFBMessage(sender_psid, webhook_event.message, access_token);
                                     break;
                                 case "b":
                                 case "image":
-                                    SendFBMessage_image(sender_psid, webhook_event.message, access_token);
+                                    FBMessageAPI.SendFBMessage_image(sender_psid, webhook_event.message, access_token);
                                     break;
                                 case "c":
                                 case "template":
-                                    SendFBMessage_template(sender_psid, webhook_event.message, access_token);
+                                    FBMessageAPI.SendFBMessage_template(sender_psid, webhook_event.message, access_token);
                                     break;
                                 case "d":
                                 case "video":
-                                    SendFBMessage_video(sender_psid, webhook_event.message, access_token);
+                                    FBMessageAPI.SendFBMessage_video(sender_psid, webhook_event.message, access_token);
                                     break;
                                 case "e":
                                 case "audio":
-                                    SendFBMessage_audio(sender_psid, webhook_event.message, access_token);
+                                    FBMessageAPI.SendFBMessage_audio(sender_psid, webhook_event.message, access_token);
                                     break;
                                 case "f":
                                 case "file":
                                     SendFBMessage_file(sender_psid, webhook_event.message, access_token);
                                     break;
                                 default:
-                                    SendFBMessage_quick(sender_psid, webhook_event.message, access_token);
+                                    FBMessageAPI.SendFBMessage_quick(sender_psid, webhook_event.message, access_token);
                             }
                         } else {
                             var attachments = webhook_event.message.attachments[0]
                             if (attachments.type == "file") {
-                                SendFBMessage_file(sender_psid, webhook_event.message, access_token, url.payload.url);
+                                FBMessageAPI.SendFBMessage_file(sender_psid, webhook_event.message, access_token, url.payload.url);
                             } else if (attachments.type == "audio") {
-                                SendFBMessage_audio(sender_psid, webhook_event.message, access_token, url.payload.url);
+                                FBMessageAPI.SendFBMessage_audio(sender_psid, webhook_event.message, access_token, url.payload.url);
                             } else if (attachments.type == "image") {
-                                SendFBMessage_image(sender_psid, webhook_event.message, access_token, url.payload.url);
+                                FBMessageAPI.SendFBMessage_image(sender_psid, webhook_event.message, access_token, url.payload.url);
                             } else if (attachments.type == "video") {
-                                SendFBMessage_video(sender_psid, webhook_event.message, access_token, url.payload.url);
+                                FBMessageAPI.SendFBMessage_video(sender_psid, webhook_event.message, access_token, url.payload.url);
                             }
                         }
                     } else if (webhook_event.postback) {
-                        SendFBPostback(sender_psid, webhook_event.postback);
+                        FBMessageAPI.SendFBPostback(sender_psid, webhook_event.postback);
                     }
-                }*/
+                }
             });
             res.status(200).send('EVENT_RECEIVED');
         } else {
             res.sendStatus(404);
         }
-    
+
         //var channel_access_token = config.channel_access_token;
         /*
             var data = {
@@ -247,7 +250,7 @@ try{
                     PostToLINE(data, channel_access_token, this.callback); // reply_token 已過期，改用 PUSH_MESSAGE                   
             });
         */
-    //
+        //
     });
     app.get('/getPersonas', function (request, response) {
         //https://graph.facebook.com/<PERSONA_ID>?access_token=<PAGE_ACCESS_TOKEN>
@@ -264,12 +267,12 @@ try{
         var user_id = request.params.user_id;
         var url = "";
         console.log("getPersonas : " + user_id)
-    
+
         url = "https://graph.facebook.com/" + user_id
         callPersonasAPI(url)
-    
+
     })
-    
+
     function callPersonasAPI(url, access_token) {
         request({
             "uri": url,
@@ -280,7 +283,7 @@ try{
             //"json": request_body
         }, (err, res, body) => {
             if (!err) {
-    
+
                 console.log('---> message sent!')
                 console.log(JSON.stringify(res, null, 2))
             } else {
@@ -302,15 +305,15 @@ try{
                     'Authorization': 'Bearer <' + config.channel_access_token + '>'
                 }
             };
-    
+
             var req = https.request(options, function (res) {
                 console.log('STATUS: ' + res.statusCode);
                 console.log('HEADERS: ' + JSON.stringify(res.headers));
                 res.body = '';
-    
+
                 this.response.setHeader('Content-Length', res.headers['content-length']);
                 this.response.setHeader('Content-Type', res.headers['content-type']);
-    
+
                 res.on('data', function (chunk) {
                     console.log('get response data');
                     res.body = res.body + chunk;
@@ -336,7 +339,7 @@ try{
             logger.error(e);
         }
     });
-    
+
     function GetContent(data, channel_access_token) { //OK
         var options = {
             host: 'api.line.me',
@@ -349,7 +352,7 @@ try{
             }
         };
         var https = require('https');
-    
+
         var req = https.request(options, function (res) {
             res.setEncoding("binary");
             console.log('STATUS: ' + res.statusCode);
@@ -357,12 +360,12 @@ try{
             res.body = '';
             res.on('data', function (chunk) {
                 console.log('get response data');
-    
+
                 res.body = res.body + chunk;
             });
-    
+
             res.on('end', function () {
-    
+
                 res.body = require('btoa')(res.body);
                 try {
                     fs.writeFile("/tmp/123.jpg", res.body, 'base64', function (err) {
@@ -373,239 +376,12 @@ try{
                 } catch (e) {
                     console.log(e);
                 }
-    
+
             });
         });
         req.end();
     }
-    
-    function callSendAPI(sender_psid, response, access_token) {
-        let request_body = {
-            "recipient": { //發送的ID
-                "id": sender_psid
-            },
-            "message": response, //訊息格式
-        }
-        request({
-            "uri": "https://graph.facebook.com/v7.0/me/messages",
-            "qs": {
-                "access_token": access_token
-            },
-            "method": "POST",
-            "json": request_body
-        }, (err, res, body) => {
-            if (!err) {
-    
-                console.log('---> message sent!')
-                console.log(JSON.stringify(request_body, null, 2))
-            } else {
-                console.error("Unable to send message:" + err);
-            }
-        });
-    }
-    
-    function SendFBMessage(sender_psid, received_message, access_token, sendMessage) {
-        let response;
-        // 判斷訊息是否包含文字
-        if (received_message.text) {
-            // 回傳的文字訊息
-            response = {
-                "text": `You sent the message: "${received_message.text}".`,
-            }
-        }
-        // 機器人發送回應
-        callSendAPI(sender_psid, response, access_token);
-    }
-    
-    function SendFBMessage_image(sender_psid, received_message, access_token) {
-        let response;
-        url = url || "https://cdctest.herokuapp.com/image/1.jpg"
-        // 判斷訊息是否包含文字
-        if (received_message.text) {
-            // 回傳的文字訊息
-            response = {
-                "attachment": {
-                    type: "image",
-                    payload: {
-                        url: url,
-                        is_reusable: false // 感覺不到差異Optional. Set to true to make the saved asset sendable to other message recipients. Defaults to false.
-                    }
-                },
-            }
-        }
-        // 機器人發送回應
-        callSendAPI(sender_psid, response, access_token);
-    }
-    
-    function SendFBMessage_video(sender_psid, received_message, access_token) {
-        let response;
-        url = url || "https://cdctest.herokuapp.com/video/1.mp4"
-        // 判斷訊息是否包含文字
-        if (received_message.text) {
-            // 回傳的文字訊息
-            response = {
-                "attachment": {
-                    type: "video",
-                    payload: {
-                        url: url,
-                        is_reusable: false // 感覺不到差異Optional. Set to true to make the saved asset sendable to other message recipients. Defaults to false.
-                    }
-                },
-            }
-        }
-        // 機器人發送回應
-        callSendAPI(sender_psid, response, access_token);
-    }
-    
-    function SendFBMessage_audio(sender_psid, received_message, access_token) {
-        let response;
-        url = url || "https://cdctest.herokuapp.com/audio/1.mp3"
-        // 判斷訊息是否包含文字
-        if (received_message.text) {
-            // 回傳的文字訊息
-            response = {
-                "attachment": {
-                    type: "audio",
-                    payload: {
-                        url: url,
-                        is_reusable: false // 感覺不到差異Optional. Set to true to make the saved asset sendable to other message recipients. Defaults to false.
-                    }
-                },
-            }
-        }
-        // 機器人發送回應
-        callSendAPI(sender_psid, response, access_token);
-    }
-    
-    function SendFBMessage_file(sender_psid, received_message, access_token, url) {
-        let response;
-        url = url || "https://cdctest.herokuapp.com/file/1.txt"
-        // 判斷訊息是否包含文字
-        if (received_message.text) {
-            // 回傳的文字訊息
-            response = {
-                "attachment": {
-                    type: "file",
-                    payload: {
-                        url: url,
-                        is_reusable: false // 感覺不到差異Optional. Set to true to make the saved asset sendable to other message recipients. Defaults to false.
-                    }
-                },
-            }
-        }
-        // 機器人發送回應
-        callSendAPI(sender_psid, response, access_token);
-    }
-    
-    function SendFBMessage_template(sender_psid, received_message, access_token) {
-        let response;
-        // 判斷訊息是否包含文字
-        if (received_message.text) {
-            // 回傳的文字訊息
-            response = {
-                "attachment": {
-                    "type": "template",
-                    "payload": {
-                        "template_type": "generic",
-                        "elements": [{
-                            "title": "Welcome!",
-                            "image_url": "https://cdctest.herokuapp.com/image/1.jpg",
-                            "subtitle": "We have the right hat for everyone.",
-                            "default_action": {
-                                "type": "web_url",
-                                "url": "https://cdctest.herokuapp.com/image/1.jpg",
-                                "webview_height_ratio": "tall",
-                            },
-                            "buttons": [{
-                                "type": "web_url",
-                                "url": "https://cdctest.herokuapp.com/image/1.jpg",
-                                "title": "View Website"
-                            }, {
-                                "type": "postback",
-                                "title": "Start Chatting",
-                                "payload": "DEVELOPER_DEFINED_PAYLOAD"
-                            }]
-                        }]
-                    }
-                }
-            }
-        }
-        // 機器人發送回應
-        callSendAPI(sender_psid, response, access_token);
-    }
-    
-    function SendFBMessage_quick(sender_psid, received_message, access_token) {
-        let response;
-        // 判斷訊息是否包含文字
-        if (received_message.text) {
-            // 回傳的文字訊息
-            response = {
-                "text": `You sent the message: "${received_message.text}".`,
-                "quick_replies": [{
-                    "content_type": "text",
-                    "title": "文字訊息",
-                    "payload": "<POSTBACK_PAYLOAD>",
-                    //"image_url":"http://example.com/img/red.png"
-                }, {
-                    "content_type": "text",
-                    "title": "image",
-                    "payload": "<POSTBACK_PAYLOAD>",
-                    //"image_url":"http://example.com/img/green.png"
-                }, {
-                    "content_type": "text",
-                    "title": "template",
-                    "payload": "<POSTBACK_PAYLOAD>",
-                    //"image_url":"http://example.com/img/green.png"
-                }, {
-                    "content_type": "text",
-                    "title": "video",
-                    "payload": "<POSTBACK_PAYLOAD>",
-                    //"image_url":"http://example.com/img/green.png"
-                }, {
-                    "content_type": "text",
-                    "title": "audio",
-                    "payload": "<POSTBACK_PAYLOAD>",
-                    //"image_url":"http://example.com/img/green.png"
-                }, {
-                    "content_type": "text",
-                    "title": "file",
-                    "payload": "<POSTBACK_PAYLOAD>",
-                    //"image_url":"http://example.com/img/green.png"
-                }]
-            }
-        }
-        // 機器人發送回應
-        callSendAPI(sender_psid, response, access_token);
-    }
-    
-    function SendFBPostback(sender_psid, received_postback, access_token) {
-        let response;
-        // 取得發送者回覆內容
-        let payload = received_postback.payload;
-        // 判斷回覆的內容，對應機器人回應的訊息
-        /*
-        {
-            sender: { id: '2892523437540225' },
-            recipient: { id: '108984370859831' },
-            timestamp: 1593762012184,
-            postback: { title: 'Start Chatting', payload: 'DEVELOPER_DEFINED_PAYLOAD' }
-        }
-        */
-        response = {
-            "text": "收到postback : " + payload
-        }
-        if (payload === 'yes') {
-            response = {
-                "text": "Thanks!"
-            }
-        } else if (payload === 'no') {
-            response = {
-                "text": "Oops, try sending another image."
-            }
-        }
-        // 機器人發送回應
-        callSendAPI(sender_psid, response, access_token);
-    }
+
     app.get('/:dic/:filename', function (request, response) {
         var filename = request.params.filename;
         var dic = request.params.dic;
@@ -613,20 +389,20 @@ try{
         stream.pipe(response);
         response.clearCookie()
     });
-    
-    
+
+
     //APP
     app.get("/api", function (req, res) {
         res.send("API is running");
     });
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
+
     /*var http = require("http");
     var https = require('https');
     var express = require("express");
@@ -826,7 +602,6 @@ try{
         res.send("API is running");
     });
     */
-}
-catch(e){
+} catch (e) {
     console.log(JSON.stringify(e, null, 2))
 }
