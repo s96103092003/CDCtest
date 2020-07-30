@@ -4,11 +4,9 @@ var fb_message = function () {
     this.SendFBMessage = function (sender_psid, received_message, access_token, sendMessage) {
         let response;
         // 判斷訊息是否包含文字
-        if (received_message.text) {
-            // 回傳的文字訊息
-            response = {
-                "text": `You sent the message: "${received_message.text}".`,
-            }
+        // 回傳的文字訊息
+        response = {
+            "text": `You sent the message: "${received_message.text}".`,
         }
         // 機器人發送回應
         callSendAPI(sender_psid, response, access_token);
@@ -17,18 +15,17 @@ var fb_message = function () {
         let response;
         url = url || "https://cdctest.herokuapp.com/image/1.jpg"
         // 判斷訊息是否包含文字
-        if (received_message.text) {
-            // 回傳的文字訊息
-            response = {
-                "attachment": {
-                    type: "image",
-                    payload: {
-                        url: url,
-                        is_reusable: false // 感覺不到差異Optional. Set to true to make the saved asset sendable to other message recipients. Defaults to false.
-                    }
-                },
-            }
+        // 回傳的文字訊息
+        response = {
+            "attachment": {
+                type: "image",
+                payload: {
+                    url: url,
+                    is_reusable: false // 感覺不到差異Optional. Set to true to make the saved asset sendable to other message recipients. Defaults to false.
+                }
+            },
         }
+
         // 機器人發送回應
         callSendAPI(sender_psid, response, access_token);
     }
@@ -36,18 +33,18 @@ var fb_message = function () {
         let response;
         url = url || "https://cdctest.herokuapp.com/video/1.mp4"
         // 判斷訊息是否包含文字
-        if (received_message.text) {
-            // 回傳的文字訊息
-            response = {
-                "attachment": {
-                    type: "video",
-                    payload: {
-                        url: url,
-                        is_reusable: false // 感覺不到差異Optional. Set to true to make the saved asset sendable to other message recipients. Defaults to false.
-                    }
-                },
-            }
+
+        // 回傳的文字訊息
+        response = {
+            "attachment": {
+                type: "video",
+                payload: {
+                    url: url,
+                    is_reusable: false // 感覺不到差異Optional. Set to true to make the saved asset sendable to other message recipients. Defaults to false.
+                }
+            },
         }
+
         // 機器人發送回應
         callSendAPI(sender_psid, response, access_token);
     }
@@ -56,123 +53,122 @@ var fb_message = function () {
         let response;
         url = url || "https://cdctest.herokuapp.com/audio/1.mp3"
         // 判斷訊息是否包含文字
-        if (received_message.text) {
-            // 回傳的文字訊息
-            response = {
-                "attachment": {
-                    type: "audio",
-                    payload: {
-                        url: url,
-                        is_reusable: false // 感覺不到差異Optional. Set to true to make the saved asset sendable to other message recipients. Defaults to false.
-                    }
-                },
-            }
+
+        // 回傳的文字訊息
+        response = {
+            "attachment": {
+                type: "audio",
+                payload: {
+                    url: url,
+                    is_reusable: false // 感覺不到差異Optional. Set to true to make the saved asset sendable to other message recipients. Defaults to false.
+                }
+            },
         }
+
         // 機器人發送回應
         callSendAPI(sender_psid, response, access_token);
     }
-    
+
     this.SendFBMessage_file = function (sender_psid, received_message, access_token, url) {
         let response;
         url = url || "https://cdctest.herokuapp.com/file/1.txt"
         // 判斷訊息是否包含文字
-        if (received_message.text) {
-            // 回傳的文字訊息
-            response = {
-                "attachment": {
-                    type: "file",
-                    payload: {
-                        url: url,
-                        is_reusable: false // 感覺不到差異Optional. Set to true to make the saved asset sendable to other message recipients. Defaults to false.
-                    }
-                },
-            }
+
+        // 回傳的文字訊息
+        response = {
+            "attachment": {
+                type: "file",
+                payload: {
+                    url: url,
+                    is_reusable: false // 感覺不到差異Optional. Set to true to make the saved asset sendable to other message recipients. Defaults to false.
+                }
+            },
         }
+
         // 機器人發送回應
         callSendAPI(sender_psid, response, access_token);
     }
-    
+
     this.SendFBMessage_template = function (sender_psid, received_message, access_token) {
         let response;
         // 判斷訊息是否包含文字
-        if (received_message.text) {
-            // 回傳的文字訊息
-            response = {
-                "attachment": {
-                    "type": "template",
-                    "payload": {
-                        "template_type": "generic",
-                        "elements": [{
-                            "title": "Welcome!",
-                            "image_url": "https://cdctest.herokuapp.com/image/1.jpg",
-                            "subtitle": "We have the right hat for everyone.",
-                            "default_action": {
-                                "type": "web_url",
-                                "url": "https://cdctest.herokuapp.com/image/1.jpg",
-                                "webview_height_ratio": "tall",
-                            },
-                            "buttons": [{
-                                "type": "web_url",
-                                "url": "https://cdctest.herokuapp.com/image/1.jpg",
-                                "title": "View Website"
-                            }, {
-                                "type": "postback",
-                                "title": "Start Chatting",
-                                "payload": "DEVELOPER_DEFINED_PAYLOAD"
-                            }]
+
+        // 回傳的文字訊息
+        response = {
+            "attachment": {
+                "type": "template",
+                "payload": {
+                    "template_type": "generic",
+                    "elements": [{
+                        "title": "Welcome!",
+                        "image_url": "https://cdctest.herokuapp.com/image/1.jpg",
+                        "subtitle": "We have the right hat for everyone.",
+                        "default_action": {
+                            "type": "web_url",
+                            "url": "https://cdctest.herokuapp.com/image/1.jpg",
+                            "webview_height_ratio": "tall",
+                        },
+                        "buttons": [{
+                            "type": "web_url",
+                            "url": "https://cdctest.herokuapp.com/image/1.jpg",
+                            "title": "View Website"
+                        }, {
+                            "type": "postback",
+                            "title": "Start Chatting",
+                            "payload": "DEVELOPER_DEFINED_PAYLOAD"
                         }]
-                    }
+                    }]
                 }
             }
         }
+
         // 機器人發送回應
         callSendAPI(sender_psid, response, access_token);
     }
-    
-    this.SendFBMessage_quick = function(sender_psid, received_message, access_token) {
+
+    this.SendFBMessage_quick = function (sender_psid, received_message, access_token) {
         let response;
         // 判斷訊息是否包含文字
-        if (received_message.text) {
-            // 回傳的文字訊息
-            response = {
-                "text": `You sent the message: "${received_message.text}".`,
-                "quick_replies": [{
-                    "content_type": "text",
-                    "title": "文字訊息",
-                    "payload": "<POSTBACK_PAYLOAD>",
-                    //"image_url":"http://example.com/img/red.png"
-                }, {
-                    "content_type": "text",
-                    "title": "image",
-                    "payload": "<POSTBACK_PAYLOAD>",
-                    //"image_url":"http://example.com/img/green.png"
-                }, {
-                    "content_type": "text",
-                    "title": "template",
-                    "payload": "<POSTBACK_PAYLOAD>",
-                    //"image_url":"http://example.com/img/green.png"
-                }, {
-                    "content_type": "text",
-                    "title": "video",
-                    "payload": "<POSTBACK_PAYLOAD>",
-                    //"image_url":"http://example.com/img/green.png"
-                }, {
-                    "content_type": "text",
-                    "title": "audio",
-                    "payload": "<POSTBACK_PAYLOAD>",
-                    //"image_url":"http://example.com/img/green.png"
-                }, {
-                    "content_type": "text",
-                    "title": "file",
-                    "payload": "<POSTBACK_PAYLOAD>",
-                    //"image_url":"http://example.com/img/green.png"
-                }]
-            }
+
+        // 回傳的文字訊息
+        response = {
+            "text": `You sent the message: "${received_message.text}".`,
+            "quick_replies": [{
+                "content_type": "text",
+                "title": "文字訊息",
+                "payload": "<POSTBACK_PAYLOAD>",
+                //"image_url":"http://example.com/img/red.png"
+            }, {
+                "content_type": "text",
+                "title": "image",
+                "payload": "<POSTBACK_PAYLOAD>",
+                //"image_url":"http://example.com/img/green.png"
+            }, {
+                "content_type": "text",
+                "title": "template",
+                "payload": "<POSTBACK_PAYLOAD>",
+                //"image_url":"http://example.com/img/green.png"
+            }, {
+                "content_type": "text",
+                "title": "video",
+                "payload": "<POSTBACK_PAYLOAD>",
+                //"image_url":"http://example.com/img/green.png"
+            }, {
+                "content_type": "text",
+                "title": "audio",
+                "payload": "<POSTBACK_PAYLOAD>",
+                //"image_url":"http://example.com/img/green.png"
+            }, {
+                "content_type": "text",
+                "title": "file",
+                "payload": "<POSTBACK_PAYLOAD>",
+                //"image_url":"http://example.com/img/green.png"
+            }]
         }
         // 機器人發送回應
         callSendAPI(sender_psid, response, access_token);
     }
-    
+
     this.SendFBPostback = function (sender_psid, received_postback, access_token) {
         let response;
         // 取得發送者回覆內容
@@ -218,7 +214,7 @@ var fb_message = function () {
             "json": request_body
         }, (err, res, body) => {
             if (!err) {
-    
+
                 console.log('---> message sent!')
                 console.log(JSON.stringify(request_body, null, 2))
             } else {
@@ -226,7 +222,7 @@ var fb_message = function () {
             }
         });
     }
-    
+
 }
 /*
 function GetContent(data, channel_access_token) { //OK
