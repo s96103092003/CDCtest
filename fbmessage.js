@@ -1,4 +1,4 @@
-
+var request = require("request");
 var fb_message = function () {
     // 傳送訊息給 FB 使用者
     this.SendFBMessage = function (sender_psid, received_message, access_token, sendMessage) {
