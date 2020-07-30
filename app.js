@@ -156,7 +156,7 @@ try {
         if (userMessage.object === 'page') {
             userMessage.entry.forEach(function (entry) {
                 let webhook_event = entry.messaging[0];
-                console.log(webhook_event);
+                console.log(JSON.stringify(webhook_event, null, 2));
                 let sender_psid = webhook_event.sender.id;
                 // 判斷訊息是屬於 message 還是 postback
                 // 判斷訊息是屬於 message 還是 postback」意思是發送者是否是透過機器人提供的選擇做回覆，如果「是」就是 postback；「不是」就屬於 message
@@ -202,13 +202,13 @@ try {
                         } else {
                             var attachments = webhook_event.message.attachments[0]
                             if (attachments.type == "file") {
-                                FBMessageAPI.SendFBMessage_file(sender_psid, webhook_event.message, access_token, url.payload.url);
+                                FBMessageAPI.SendFBMessage_file(sender_psid, webhook_event.message, access_token, attachments.payload.url);
                             } else if (attachments.type == "audio") {
-                                FBMessageAPI.SendFBMessage_audio(sender_psid, webhook_event.message, access_token, url.payload.url);
+                                FBMessageAPI.SendFBMessage_audio(sender_psid, webhook_event.message, access_token, attachments.payload.url);
                             } else if (attachments.type == "image") {
-                                FBMessageAPI.SendFBMessage_image(sender_psid, webhook_event.message, access_token, url.payload.url);
+                                FBMessageAPI.SendFBMessage_image(sender_psid, webhook_event.message, access_token, attachments.payload.url);
                             } else if (attachments.type == "video") {
-                                FBMessageAPI.SendFBMessage_video(sender_psid, webhook_event.message, access_token, url.payload.url);
+                                FBMessageAPI.SendFBMessage_video(sender_psid, webhook_event.message, access_token, attachments.payload.url);
                             }
                         }
                     } else if (webhook_event.postback) {
