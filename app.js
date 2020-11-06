@@ -70,7 +70,7 @@ try {
             res.sendStatus(403)
         }
 
-    })
+    })//
     /*
     {
       "object":"page",
