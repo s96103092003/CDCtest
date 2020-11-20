@@ -75,6 +75,7 @@ function GetAccount(userId, accessToken, callback) {
         }
     };
     var https = require('https');
+    console.log(JSON.stringify(options, null, 2))
     var req = https.request(options, function (res) {
         res.setEncoding('utf8');
         res.on('data', function (chunk) {
