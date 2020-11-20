@@ -34,8 +34,68 @@ app.get("/index", function (req, res) {
     console.log("get index");
     var data = fs.readFileSync(__dirname + '/pages/index.html', 'utf8');
     res.set("Content-Type", 'text/html');
+    data = "<script>const appId = " + config.channel_id + ";</script>" + data
     res.send(data)
 })
+app.post("/GetLongLivedUserAccessToken", function (req, res) {
+    console.log("GetLongLivedUserAccessToken");
+    var userId = req.body.userId
+    var accessToken = req.body.accessToken
+    //res.send(data)
+})
+app.post("/GetAccount", function (req, res) {
+    console.log("GetAccount");
+    var userId = req.body.userId
+    var accessToken = req.body.accessToken
+    GetAccount(userId, accessToken, function(flag, data){
+        if(flag){
+            console.log(JSON.stringify(data, null, 2))
+            res.send(data);
+        }
+        else{
+            res.sendStatus(404);
+        }
+    })
+    //res.send(data)
+})
+
+function GetAccount(userId, accessToken, callback) {
+    console.log("GetAccount");
+    var data = ""
+    var options = {
+        host: 'graph.facebook.com',
+        port: '443',
+        path: userId + '/accounts?access_token=' + accessToken,
+        method: 'GET',
+        headers: {
+            //'Content-Type': 'application/json; charset=UTF-8',
+            //'Content-Length': Buffer.byteLength(JSON.stringify(data)),
+            //'Authorization': 'Bearer <' + channel_access_token + '>'
+        }
+    };
+    var https = require('https');
+    var req = https.request(options, function (res) {
+        res.setEncoding('utf8');
+        res.on('data', function (chunk) {
+            console.log('Response: ' + chunk);
+            data += chunk
+        });
+        res.on('end', function () {});
+        console.log('GetAccount status code: ' + res.statusCode);
+        if (res.statusCode == 200) {
+            console.log('GetAccount success');
+            this.callback(true, data);
+        } else {
+            console.log('GetAccount failure');
+            this.callback(false);
+        }
+    }.bind({
+        callback: callback
+    }));
+    //req.write(JSON.stringify(data));
+    req.end();
+}
+
 app.get("/ig/auth", function (req, res) {
     console.log("get webhook verify_token");
     console.log("req.url : " + req.url)
