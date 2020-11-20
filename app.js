@@ -7,8 +7,8 @@ var bodyParser = require("body-parser");
 var querystring = require("querystring");
 var url = require("url");
 var fs = require("fs");
-var utf8 = require("utf8");
-var request = require("request");
+//var utf8 = require("utf8");
+//var request = require("request");
 app.use(bodyParser.urlencoded({
     extended: true
 }));
@@ -21,8 +21,8 @@ app.use(bodyParser.json()); //
 var config = fs.readFileSync(__dirname + '/config.json', 'utf8');
 config = JSON.parse(config);
 //var DirectLine = require(path.join(__dirname, '/directline.js'))
-var fbmessage = require('./fbmessage');
-var FBMessageAPI = new fbmessage.fb_message();
+//var fbmessage = require('./fbmessage');
+//var FBMessageAPI = new fbmessage.fb_message();
 /*  {"type":"follow",
   "replyToken":"c24acf8f5dae4993b25eb5974a07cbdb",
   "source":{
