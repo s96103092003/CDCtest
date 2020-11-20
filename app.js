@@ -46,10 +46,10 @@ app.post("/GetLongLivedUserAccessToken", function (req, res) {
 app.post("/GetAccount", function (req, res) {
     console.log("GetAccount");
     console.log(JSON.stringify(req.body, null, 2))
-    var userId = req.body.userId
+    var userID = req.body.userID
     var accessToken = req.body.accessToken
 
-    GetAccount(userId, accessToken, function (flag, data) {
+    GetAccount(userID, accessToken, function (flag, data) {
         if (flag) {
             console.log(JSON.stringify(data, null, 2))
             res.send(data);
@@ -61,7 +61,7 @@ app.post("/GetAccount", function (req, res) {
 })
 
 function GetAccount(userId, accessToken, callback) {
-    console.log("GetAccount");
+    console.log("GetAccount function");
     var data = ""
     var options = {
         host: 'graph.facebook.com',
