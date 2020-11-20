@@ -40,11 +40,11 @@
 
 
           })*/
-          $.post("./GetLongLivedUserAccessToken", {
+          $.post("./GetAccount", {
             userID: response.authResponse.userID,
             accessToken: response.authResponse.accessToken
-          }, function (data, err) {
-            console.log(JSON.stringify(data, null, 2))
+          }, function (err, data) {
+            console.log("GetAccount : "+JSON.stringify(data, null, 2))
 
           })
           //呼叫FB.api()取得使用者資料
