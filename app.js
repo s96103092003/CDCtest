@@ -45,14 +45,15 @@ app.post("/GetLongLivedUserAccessToken", function (req, res) {
 })
 app.post("/GetAccount", function (req, res) {
     console.log("GetAccount");
+    console.log(JSON.stringify(req.body, null, 2))
     var userId = req.body.userId
     var accessToken = req.body.accessToken
-    GetAccount(userId, accessToken, function(flag, data){
-        if(flag){
+
+    GetAccount(userId, accessToken, function (flag, data) {
+        if (flag) {
             console.log(JSON.stringify(data, null, 2))
             res.send(data);
-        }
-        else{
+        } else {
             res.sendStatus(404);
         }
     })
@@ -65,7 +66,7 @@ function GetAccount(userId, accessToken, callback) {
     var options = {
         host: 'graph.facebook.com',
         port: '443',
-        path: userId + '/accounts?access_token=' + accessToken,
+        path: '/' + userId + '/accounts?access_token=' + accessToken,
         method: 'GET',
         headers: {
             //'Content-Type': 'application/json; charset=UTF-8',
