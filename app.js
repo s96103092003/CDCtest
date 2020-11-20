@@ -60,13 +60,13 @@ app.post("/GetAccount", function (req, res) {
     //res.send(data)
 })
 
-function GetAccount(userId, accessToken, callback) {
+function GetAccount(userID, accessToken, callback) {
     console.log("GetAccount function");
     var data = ""
     var options = {
         host: 'graph.facebook.com',
         port: '443',
-        path: '/' + userId + '/accounts?access_token=' + accessToken,
+        path: '/' + userID + '/accounts?access_token=' + accessToken,
         method: 'GET',
         headers: {
             //'Content-Type': 'application/json; charset=UTF-8',
