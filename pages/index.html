@@ -1,6 +1,4 @@
-<div class="fb-login-button" data-size="large" data-button-type="continue_with" data-layout="default"
-  data-auto-logout-link="false" data-use-continue-as="false" data-width="" id="login"></div>
-
+<button id="login"></button>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script>
   //初始化
@@ -54,8 +52,8 @@
             //如果想取得額外的授權資料需要另外設定在scope參數裡面
             //可以設定的授權資料可以參考官方文件          
           }, {
-            scope: 'email,user_likes'
-            //scope: "pages_manage_ads,pages_manage_metadata,pages_read_engagement,pages_read_user_content,pages_show_list,public_profile,pages_messaging,pages_manage_posts,pages_manage_engagement"
+            //scope: 'email,user_likes'
+            scope: "pages_manage_ads,pages_manage_metadata,pages_read_engagement,pages_read_user_content,pages_show_list,public_profile,pages_messaging,pages_manage_posts,pages_manage_engagement"
           });
         }
       });
