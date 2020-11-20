@@ -31,6 +31,12 @@ try {
           "type":"user"
           },
       "timestamp":1500003748184}*/
+    app.get("/index", function (req, res) {
+        console.log("get index");
+        var data = fs.readFileSync(__dirname + '/pages/index.html', 'utf8');
+        res.set("Content-Type", 'text/html');
+        res.send(data)
+    })
     app.get("/ig/auth", function (req, res) {
         console.log("get webhook verify_token");
         console.log("req.url : " + req.url)
@@ -70,7 +76,7 @@ try {
             res.sendStatus(403)
         }
 
-    })//
+    }) //
     /*
     {
       "object":"page",
@@ -616,12 +622,12 @@ try {
         })
     }
     
-    
+    */
     //APP
     app.get("/api", function (req, res) {
         res.send("API is running");
     });
-    */
+    
 } catch (e) {
     console.log(JSON.stringify(e, null, 2))
 }
