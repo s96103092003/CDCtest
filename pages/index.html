@@ -31,7 +31,7 @@
       FB.getLoginStatus(function (response) {
         //如果已經有授權過應用程式
         console.log("getLoginStatus : " + JSON.stringify(response, null, 2))
-        if (response.authResponse.accessToken != null && response.authResponse.userID != null) {
+        if (response.authResponse) {
           //呼叫FB.api()取得使用者資料
           /*FB.api('/me', {
                 fields: 'id,name,email'
