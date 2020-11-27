@@ -1,85 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh">
+    <head>
+
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!--<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta name="description" content="">
+        <meta name="author" content="">-->
+    
+        <title>FB應用程式綁定</title>
+    
+        <!-- Bootstrap core CSS -->
+        <link rel="stylesheet" href="../pages/scripts/bootstrap/css/bootstrap.css" type="text/css">
+        <link rel="stylesheet" href="../pages/scripts/font-awesome/css/all.min.css" type="text/css">
+    </head>
+    <style type="text/css">
+    
+    </style>
+    <body>
+
+    </body>
+    <footer>
+
+
+    </footer>
+</html>
 <button id="login">連結FB帳號</button>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script>
-  //初始化
-  window.fbAsyncInit = function () {
-    FB.init({
-      appId: appId,
-      cookie: true, // Enable cookies to allow the server to access the session.
-      xfbml: true, // Parse social plugins on this webpage.
-      version: 'v9.0' // Use this Graph API version for this call.
-    });
-    //記錄用戶行為資料 可在後台查看用戶資訊
-    FB.AppEvents.logPageView();
-  };
-  //嵌入臉書sdk
-  (function (d, s, id) {
-    var js, fjs = d.getElementsByTagName(s)[0];
-    if (d.getElementById(id)) {
-      return;
-    }
-    js = d.createElement(s);
-    js.id = id;
-    js.src = "https://connect.facebook.net/en_US/sdk.js";
-    fjs.parentNode.insertBefore(js, fjs);
-  }(document, 'script', 'facebook-jssdk'));
-
-  $(function () {
-    //點擊登入按鈕
-    $("#login").click(function () {
-      //檢查臉書登入狀態
-      //FB.getLoginStatus(function (response) {
-      FB.login(function (response) {
-        //如果已經有授權過應用程式
-        console.log("getLoginStatus : " + JSON.stringify(response, null, 2))
-        if (response.authResponse) {
-          /*$.post("./GetLongLivedUserAccessToken", {
-            userID: response.authResponse.userID,
-            accessToken: response.authResponse.accessToken
-          }, function (data, err) {
-
-
-          })*/
-          $.post("./GetAccount", {
-            userID: response.authResponse.userID,
-            accessToken: response.authResponse.accessToken
-          }, function (data, status) {
-            console.log("GetAccount : " + JSON.stringify(data, null, 2))
-
-          })
-          //呼叫FB.api()取得使用者資料
-          /*FB.api('/me', {
-                fields: 'id,name,email'
-              }, function (response) {
-                //這邊就可以判斷取得資料跟網站使用者資料是否一致
-                console.log()
-              });*/
-          //沒授權過應用程式
-        } else {
-          //呼叫FB.login()請求使用者授權
-          /*FB.login(function (response) {
-            console.log("login : " + JSON.stringify(response, null, 2))
-            if (response.authResponse) {
-              FB.api('/me', {
-                fields: 'id,name,email'
-              }, function (response) {
-                //這邊就可以判斷取得資料跟網站使用者資料是否一致
-                console.log()
-              });
-            }
-            //FB.login()預設只會回傳基本的授權資料
-            //如果想取得額外的授權資料需要另外設定在scope參數裡面
-            //可以設定的授權資料可以參考官方文件          
-          }, {
-            //scope: 'email,user_likes'
-            scope: "pages_manage_ads,pages_manage_metadata,pages_read_engagement,pages_read_user_content,pages_show_list,public_profile,pages_messaging,pages_manage_posts,pages_manage_engagement"
-          });*/
-        }
-      }, {
-        //scope: 'email,user_likes'
-        scope: "pages_messaging,leads_retrieval,pages_manage_ads,pages_manage_metadata,pages_read_engagement,pages_read_user_content,pages_show_list,public_profile,pages_messaging,pages_manage_posts,pages_manage_engagement"
-      });
-    });
-  });
-</script>
-
+<!-- Bootstrap core JavaScript -->
+    <script type="text/javascript" src="../pages/scripts/jquery/jquery-3.4.1.min.js"></script>
+    <script type="text/javascript" src="../pages/scripts/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script type="text/javascript" src="../pages/scripts/jquery/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="../pages/scripts/bootbox/bootbox.all.min.js"></script>
+    <script type="text/javascript" src="../pages/scripts/vue_2.6.10/vue.js"></script>
+    <script type="text/javascript" src="../pages/scripts/vue-i18n_8.15.0/vue-i18n.js"></script>
+    <script type="text/javascript" src="../pages/js/circular-json.js"></script>
+    <script type="text/javascript" src="../pages/js/lang.js"></script>

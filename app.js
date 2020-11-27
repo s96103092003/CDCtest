@@ -34,7 +34,7 @@ app.get("/index", function (req, res) {
     console.log("get index");
     var data = fs.readFileSync(__dirname + '/pages/index.html', 'utf8');
     res.set("Content-Type", 'text/html');
-    data = "<script>const appId = " + config.channel_id + ";</script>" + data
+    data = "<script>const appId = " + config.APP_Id + ";</script>" + data
     res.send(data)
 })
 app.post("/GetLongLivedUserAccessToken", function (req, res) {
@@ -371,7 +371,7 @@ app.post("/", function (req, res) {
                     break;
     
             }
-            ReplyMessage(data, channel_access_token, data.replyToken, function (ret) {
+            ReplyMessage(data, Sl_access_token, data.replyToken, function (ret) {
                 if (!ret)
                     PostToLINE(data, channel_access_token, this.callback); // reply_token 已過期，改用 PUSH_MESSAGE                   
             });
@@ -419,7 +419,7 @@ function callPersonasAPI(url, access_token) {
 }
 app.get('/download/content/:message_id', function (request, response) {
     try {
-        var channel_id = config.channel_id;
+        var APP_Id = config.APP_Id;
         var message_id = request.params.message_id;
         var https = require('https');
         var options = {
