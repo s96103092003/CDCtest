@@ -59,6 +59,7 @@ app.post("/GetAccount", function (req, res) {
     })
     //res.send(data)
 })
+
 /*
 getLoginStatus : {
   "authResponse": {
@@ -176,48 +177,6 @@ function GetAccount(userID, accessToken, callback) {
     req.end();
 }
 
-
-
-app.get("/ig/auth", function (req, res) {
-    console.log("get webhook verify_token");
-    console.log("req.url : " + req.url)
-    var arg = url.parse(req.url).query;
-    var a = req.query['hub.mode'];
-    console.log("a : " + a)
-    console.log("req.url arg: " + JSON.stringify(querystring.parse(arg)))
-    var mode = querystring.parse(arg)["hub.mode"];
-    var verify_token = querystring.parse(arg)["hub.verify_token"];
-    var challenge = querystring.parse(arg)["hub.challenge"];
-    console.log(config.AUTH_TOKEN + "  " + verify_token)
-    if (mode === 'subscribe' && config.AUTH_TOKEN === verify_token) {
-        console.log("verify success")
-        res.status(200).send(challenge)
-    } else {
-        console.log("verify error")
-        res.sendStatus(403)
-    }
-
-})
-app.get("/", function (req, res) {
-    console.log("get webhook verify_token");
-    console.log("req.url : " + req.url)
-    var arg = url.parse(req.url).query;
-    var a = req.query['hub.mode'];
-    console.log("a : " + a)
-    console.log("req.url arg: " + JSON.stringify(querystring.parse(arg)))
-    var mode = querystring.parse(arg)["hub.mode"];
-    var verify_token = querystring.parse(arg)["hub.verify_token"];
-    var challenge = querystring.parse(arg)["hub.challenge"];
-    console.log(config.AUTH_TOKEN + "  " + verify_token)
-    if (mode === 'subscribe' && config.AUTH_TOKEN === verify_token) {
-        console.log("verify success")
-        res.status(200).send(challenge)
-    } else {
-        console.log("verify error")
-        res.sendStatus(403)
-    }
-
-}) //
 /*
 {
   "object":"page",
