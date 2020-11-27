@@ -135,6 +135,8 @@ getLoginStatus : {
 
 function GetAccount(userID, accessToken, callback) {
     console.log("GetAccount function");
+    //pages_show_list 權限
+    //用於列出可在粉絲專頁上執行 MODERATE 工作的所有粉絲專頁的使用者存取權杖
     var data = ""
     var options = {
         host: 'graph.facebook.com',
@@ -562,6 +564,8 @@ app.get("/api", function (req, res) {
 });
 
 
+/*
+
 
 
 
@@ -762,7 +766,3 @@ function resProcessMessage(userId, replyToken) {
 }
 
 */
-//APP
-app.get("/api", function (req, res) {
-    res.send("API is running");
-});

@@ -44,7 +44,7 @@
             userID: response.authResponse.userID,
             accessToken: response.authResponse.accessToken
           }, function (data, status) {
-            console.log("GetAccount : "+JSON.stringify(data, null, 2))
+            console.log("GetAccount : " + JSON.stringify(data, null, 2))
 
           })
           //呼叫FB.api()取得使用者資料
@@ -77,8 +77,9 @@
         }
       }, {
         //scope: 'email,user_likes'
-        scope: "pages_manage_ads,pages_manage_metadata,pages_read_engagement,pages_read_user_content,pages_show_list,public_profile,pages_messaging,pages_manage_posts,pages_manage_engagement"
+        scope: "pages_messaging,leads_retrieval,pages_manage_ads,pages_manage_metadata,pages_read_engagement,pages_read_user_content,pages_show_list,public_profile,pages_messaging,pages_manage_posts,pages_manage_engagement"
       });
     });
   });
 </script>
+

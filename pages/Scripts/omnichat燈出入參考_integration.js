@@ -822,6 +822,7 @@
         }
 
         function J() {
+            //喵喵 登入FB成功後
             if (W != null) {
                 f.getFacebookGraphApiMyPagesV2(W, function (e, t, n) {
                     if (e == true) {
@@ -1318,6 +1319,7 @@
                 })
             });
             $(document).on("click", "#disconnect-your-fb-acc", function () {
+                //喵喵 登出
                 FB.logout(function (e) {
                     W = null;
                     $(".fb-available-page-table-body").empty();
@@ -1327,6 +1329,7 @@
                 })
             });
             $(document).on("click", "#connect-your-fb-acc", function () {
+                //喵喵 連結FB帳戶
                 FB.login(function (e) {
                     if (e.status === "connected") {
                         if (e.authResponse.accessToken != null && e.authResponse.userID != null) {
