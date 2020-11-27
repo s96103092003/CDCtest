@@ -43,7 +43,7 @@
           $.post("./GetAccount", {
             userID: response.authResponse.userID,
             accessToken: response.authResponse.accessToken
-          }, function (data, err) {
+          }, function (data, status) {
             console.log("GetAccount : "+JSON.stringify(data, null, 2))
 
           })
