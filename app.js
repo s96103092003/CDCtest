@@ -105,7 +105,9 @@ getLoginStatus : {
                     console.log('GetAccount failure');
                     this.callback(false);
                 }
-            });
+            }.bind({
+                callback: this.callback
+            }));
         }.bind({
             callback: callback
         }));
