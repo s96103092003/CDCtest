@@ -217,7 +217,7 @@ var fb_message = function () {
             }
         };
         var https = require('https');
-        var req = https.request(options, function (res) {
+        var req = https.request(options, function (res, err) {
             var result = "";
             res.setEncoding('utf8');
             res.on('data', function (chunk) {
