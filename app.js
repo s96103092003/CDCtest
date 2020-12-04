@@ -1,7 +1,7 @@
 var http = require("http");
 var express = require("express");
 var app = express();
-var port = process.env.PORT;
+var port = process.env.PORT || 50037;
 var server = http.Server(app).listen(port);
 var bodyParser = require("body-parser");
 var querystring = require("querystring");
@@ -12,11 +12,20 @@ var fs = require("fs");
 app.use(bodyParser.urlencoded({
     extended: true
 }));
+app.all('*', function (req, res, next) {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+    res.header('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type');
+    next();
+});
+app.use(express.static('public'));
 app.use('/tmp', express.static(__dirname + '/tmp'));
 app.use('/image', express.static(__dirname + '/image'));
 app.use('/file', express.static(__dirname + '/file'));
 app.use('/audio', express.static(__dirname + '/audio'));
 app.use('/video', express.static(__dirname + '/video'));
+app.use('/pages', express.static(__dirname + '/pages'));
+
 app.use(bodyParser.json()); //
 var config = fs.readFileSync(__dirname + '/config.json', 'utf8');
 config = JSON.parse(config);
@@ -34,7 +43,7 @@ app.get("/index", function (req, res) {
     console.log("get index");
     var data = fs.readFileSync(__dirname + '/pages/index.html', 'utf8');
     res.set("Content-Type", 'text/html');
-    data = "<script>const appId = " + config.APP_Id + ";</script>" + data
+    data = data + "<script>const appId = " + config.APP_Id + ";</script>"
     res.send(data)
 })
 app.post("/GetLongLivedUserAccessToken", function (req, res) {
