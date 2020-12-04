@@ -1,4 +1,3 @@
-var request = require("request");
 var fb_message = function () {
     // 傳送訊息給 FB 使用者
     this.SendFBMessage = function (sender_psid, received_message, access_token, sendMessage) {
@@ -199,30 +198,49 @@ var fb_message = function () {
     }
 
     function callSendAPI(sender_psid, response, access_token) {
+        console.log("callSendAPI function")
         let request_body = {
             "recipient": { //發送的ID
                 "id": sender_psid
             },
             "message": response, //訊息格式
         }
-        request({
-            "uri": "https://graph.facebook.com/v7.0/me/messages",
-            "qs": {
-                "access_token": access_token
-            },
-            "method": "POST",
-            "json": request_body
-        }, (err, res, body) => {
-            if (!err) {
-
-                console.log('---> message sent!')
-                console.log(JSON.stringify(request_body, null, 2))
-            } else {
-                console.error("Unable to send message:" + err);
+        var options = {
+            host: 'graph.facebook.com',
+            port: '443',
+            path: '/v7.0/me/messages?access_token=' + access_token,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json; charset=UTF-8',
+                'Content-Length': Buffer.byteLength(request_body),
+                //'Authorization': 'Bearer <' + channel_access_token + '>'
             }
-        });
+        };
+        var https = require('https');
+        var req = https.request(options, function (res) {
+            var result = "";
+            res.setEncoding('utf8');
+            res.on('data', function (chunk) {
+                //console.log('Response: ' + chunk);
+                result += chunk
+            });
+            res.on('end', function () {
+                console.log('callSendAPI status code: ' + res.statusCode);
+                if (res.statusCode == 200) {
+                    console.log('---> message sent!')
+                    console.log(JSON.stringify(request_body, null, 2))
+                } else {
+                    console.error("Unable to send message:" + err);
+                }
+            }.bind({
+                callback: this.callback
+            }));
+        }.bind({
+            callback: callback
+        }));
+        req.write(request_body);
+        req.end();
     }
-
 }
 /*
 function GetContent(data, channel_access_token) { //OK
