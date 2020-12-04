@@ -36,6 +36,8 @@ process.on('uncaughtException', function (err) {
 var config = fs.readFileSync(__dirname + '/config.json', 'utf8');
 config = JSON.parse(config);
 //var DirectLine = require(path.join(__dirname, '/directline.js'))
+var pageMap = new Map();
+var userMap = new Map();
 var fbmessage = require('./fbmessage');
 var FBMessageAPI = new fbmessage.fb_message();
 /*  {"type":"follow",
@@ -46,7 +48,7 @@ var FBMessageAPI = new fbmessage.fb_message();
       },
   "timestamp":1500003748184}*/
 //accessToken
-var pageMap = new Map();
+
 app.get("/index", function (req, res) {
     console.log("get index");
     var data = fs.readFileSync(__dirname + '/pages/index.html', 'utf8');
@@ -85,6 +87,23 @@ app.post("/GetAccount", function (req, res) {
                 })
             }
             res.send(result);
+            if (!userMap.has(userID)) {
+                userMap.set(userID, setInterval(function () {
+                    GetAccount(userID, accessToken, async function (flag, data) {
+                        if (flag) {
+                            console.log("50分一次更新page acesstoken : " + userID)
+                            data = JSON.parse(data).data
+                            for (var i in data) {
+                                var item = data[i]
+                                pageMap.set(item.id, item.access_token)
+                            }
+                        } else {
+                            res.sendStatus(404);
+                        }
+                    })
+                }, 1 * 60000))
+            }
+
         } else {
             res.sendStatus(404);
         }
@@ -451,13 +470,13 @@ app.post("/", function (req, res) {
             let sender_psid = webhook_event.sender.id;
             // 判斷訊息是屬於 message 還是 postback
             // 判斷訊息是屬於 message 還是 postback」意思是發送者是否是透過機器人提供的選擇做回覆，如果「是」就是 postback；「不是」就屬於 message
-            var access_token = ""
-            for (var i in config.access_tokens) {
+            var access_token = pageMap.get(webhook_event.recipient.id)
+            /*for (var i in config.access_tokens) {
                 if (config.access_tokens[i].recipient === webhook_event.recipient.id) {
                     access_token = config.access_tokens[i].access_token;
                     break;
                 }
-            }
+            }*/
             console.log("access_token: " + access_token)
             if (access_token != "") {
                 if (webhook_event.message) {

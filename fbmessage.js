@@ -197,7 +197,7 @@ var fb_message = function () {
         callSendAPI(sender_psid, response, access_token);
     }
 
-    function callSendAPI(sender_psid, response, access_token) {
+    function callSendAPI(sender_psid, response, access_token, callback) {
         console.log("callSendAPI function")
         let request_body = {
             "recipient": { //發送的ID
