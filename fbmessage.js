@@ -212,7 +212,7 @@ var fb_message = function () {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json; charset=UTF-8',
-                'Content-Length': Buffer.byteLength(request_body),
+                'Content-Length': Buffer.byteLength(JSON.stringify(request_body)),
                 //'Authorization': 'Bearer <' + channel_access_token + '>'
             }
         };
@@ -238,7 +238,7 @@ var fb_message = function () {
         }.bind({
             callback: callback
         }));
-        req.write(request_body);
+        req.write(JSON.stringify(request_body));
         req.end();
     }
 }
