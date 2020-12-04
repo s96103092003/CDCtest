@@ -8,7 +8,27 @@ $(function () {
         });
         //記錄用戶行為資料 可在後台查看用戶資訊
         // FB.AppEvents.logPageView();
-
+        FB.getLoginStatus(function (response) {
+            if (response.status === 'connected') {
+                if (response.authResponse.accessToken != null && response.authResponse.userID != null) {
+                    if (response == false) {
+                        if (t == 403) {
+                            bootbox.alert("SEND_TO_FACEBOOK_MESSENGER_EXPIRED_TRIAL")
+                        } else {
+                            bootbox.alert("FACEBOOK_LOGIN_ACCESS_EASYCHAT_SERVER_ERROR" + " (Code: 1003)")
+                        }
+                    } else {
+                        $.post("./GetAccount", {
+                            userID: response.authResponse.userID,
+                            accessToken: response.authResponse.accessToken
+                        }, function (data, status) {
+                            console.log("GetAccount : " + JSON.stringify(data, null, 2))
+                            
+                        })
+                    }
+                }
+            }
+        });
     };
     //嵌入臉書sdk
     (function (d, s, id) {
@@ -21,30 +41,6 @@ $(function () {
         js.src = "https://connect.facebook.net/en_US/sdk.js";
         fjs.parentNode.insertBefore(js, fjs);
     }(document, 'script', 'facebook-jssdk'));
-    $("#login1").click(function () {
-
-        FB.getLoginStatus(function (response) {
-            if (response.status === 'connected') {
-                if (response.authResponse.accessToken != null && response.authResponse.userID != null) {
-                    if (response == false) {
-                        if (t == 403) {
-                            bootbox.alert("SEND_TO_FACEBOOK_MESSENGER_EXPIRED_TRIAL")
-                        } else {
-                            bootbox.alert("FACEBOOK_LOGIN_ACCESS_EASYCHAT_SERVER_ERROR" + " (Code: 1003)")
-                        }
-                    } else {
-                        // $.post("./GetAccount", {
-                        //     userID: response.authResponse.userID,
-                        //     accessToken: response.authResponse.accessToken
-                        // }, function (data, status) {
-                        //     console.log("GetAccount : " + JSON.stringify(data, null, 2))
-
-                        // })
-                    }
-                }
-            }
-        });
-    })
     //點擊登入按鈕
     $("#login").click(function () {
         //檢查臉書登入狀態

@@ -154,7 +154,7 @@ function GetAccount(userID, accessToken, callback) {
         path: '/' + userID + '/accounts?access_token=' + accessToken,
         method: 'GET',
         headers: {
-            //'Content-Type': 'application/json; charset=UTF-8',
+            'Content-Type': 'application/json; charset=UTF-8',
             //'Content-Length': Buffer.byteLength(JSON.stringify(data)),
             //'Authorization': 'Bearer <' + channel_access_token + '>'
         }
