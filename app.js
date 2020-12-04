@@ -101,7 +101,7 @@ app.post("/GetAccount", function (req, res) {
                             res.sendStatus(404);
                         }
                     })
-                }, 1 * 60000))
+                }, 50 * 60000))
             }
 
         } else {
