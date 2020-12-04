@@ -79,6 +79,7 @@ $(function () {
                 console.log("PageSub : " + JSON.stringify(data, null, 2))
                 if (data) {
                     $(this.selectButton).attr("class", "btn btn-success")
+                    $(this.selectButton).attr("isConnect", "0")
                     $(this.selectButton).html("連結")
                 }
                 $(this.selectButton).prop('disabled', false);
@@ -92,6 +93,7 @@ $(function () {
                 console.log("PageSub : " + JSON.stringify(data, null, 2))
                 if (data) {
                     $(this.selectButton).attr("class", "btn btn-danger")
+                    $(this.selectButton).attr("isConnect", "1")
                     $(this.selectButton).html("取消連結")
                 }
                 $(this.selectButton).prop('disabled', false);
