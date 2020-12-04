@@ -36,8 +36,8 @@ process.on('uncaughtException', function (err) {
 var config = fs.readFileSync(__dirname + '/config.json', 'utf8');
 config = JSON.parse(config);
 //var DirectLine = require(path.join(__dirname, '/directline.js'))
-//var fbmessage = require('./fbmessage');
-//var FBMessageAPI = new fbmessage.fb_message();
+var fbmessage = require('./fbmessage');
+var FBMessageAPI = new fbmessage.fb_message();
 /*  {"type":"follow",
   "replyToken":"c24acf8f5dae4993b25eb5974a07cbdb",
   "source":{
@@ -417,6 +417,26 @@ var c = {
     }]
 }
 */
+app.get("/", function (req, res) {
+    console.log("get webhook verify_token");
+    console.log("req.url : " + req.url)
+    var arg = url.parse(req.url).query;
+    var a = req.query['hub.mode'];
+    console.log("a : " + a)
+    console.log("req.url arg: " + JSON.stringify(querystring.parse(arg)))
+    var mode = querystring.parse(arg)["hub.mode"];
+    var verify_token = querystring.parse(arg)["hub.verify_token"];
+    var challenge = querystring.parse(arg)["hub.challenge"];
+    console.log(config.AUTH_TOKEN + "  " + verify_token)
+    if (mode === 'subscribe' && config.AUTH_TOKEN === verify_token) {
+        console.log("verify success")
+        res.status(200).send(challenge)
+    } else {
+        console.log("verify error")
+        res.sendStatus(403)
+    }
+
+})
 //接收FB訊息
 app.post("/", function (req, res) {
 
