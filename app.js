@@ -142,7 +142,7 @@ getLoginStatus : {
 }
 */
 
-
+//
 function GetAccount(userID, accessToken, callback) {
     console.log("GetAccount function");
     //pages_show_list 權限
