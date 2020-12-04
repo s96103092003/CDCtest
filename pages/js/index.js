@@ -23,7 +23,7 @@ $(function () {
                             accessToken: response.authResponse.accessToken
                         }, function (data, status) {
                             console.log("GetAccount : " + JSON.stringify(data, null, 2))
-
+                            MyFb.setPageList(data)
                         })
                     }
                 }
