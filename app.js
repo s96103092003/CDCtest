@@ -9,15 +9,16 @@ var url = require("url");
 var fs = require("fs");
 //var utf8 = require("utf8");
 //var request = require("request");
-app.use(bodyParser.urlencoded({
-    extended: true
-}));
+
 app.all('*', function (req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
     res.header('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type');
     next();
 });
+app.use(bodyParser.urlencoded({
+    extended: true
+}));
 app.use(express.static('public'));
 app.use('/tmp', express.static(__dirname + '/tmp'));
 app.use('/image', express.static(__dirname + '/image'));
@@ -25,8 +26,13 @@ app.use('/file', express.static(__dirname + '/file'));
 app.use('/audio', express.static(__dirname + '/audio'));
 app.use('/video', express.static(__dirname + '/video'));
 app.use('/pages', express.static(__dirname + '/pages'));
+app.use(bodyParser.json());
 
-app.use(bodyParser.json()); //
+process.on('uncaughtException', function (err) {
+    console.log('uncaughtException occurred: ' + (err.stack ? err.stack : err));
+});
+
+//
 var config = fs.readFileSync(__dirname + '/config.json', 'utf8');
 config = JSON.parse(config);
 //var DirectLine = require(path.join(__dirname, '/directline.js'))
@@ -39,6 +45,8 @@ config = JSON.parse(config);
       "type":"user"
       },
   "timestamp":1500003748184}*/
+//accessToken
+var pageMap = new Map();
 app.get("/index", function (req, res) {
     console.log("get index");
     var data = fs.readFileSync(__dirname + '/pages/index.html', 'utf8');
@@ -58,10 +66,55 @@ app.post("/GetAccount", function (req, res) {
     var userID = req.body.userID
     var accessToken = req.body.accessToken
 
-    GetAccount(userID, accessToken, function (flag, data) {
+    GetAccount(userID, accessToken, async function (flag, data) {
         if (flag) {
             console.log("Response:" + JSON.stringify(data, null, 2))
-            res.send(data);
+            var result = []
+            data = JSON.parse(data).data
+            for (var i in data) {
+                var item = data[i]
+                pageMap.set(item.id, item.access_token)
+                var isConnect = await getPageSubscribed(item.id, item.access_token);
+                result.push({
+                    "category": item.category,
+                    "category_list": item.category_list,
+                    "name": item.name,
+                    "id": item.id,
+                    "picture_url": item.picture.data.url,
+                    "isConnect": isConnect[0]
+                })
+            }
+            res.send(result);
+        } else {
+            res.sendStatus(404);
+        }
+    })
+    //res.send(data)
+})
+app.post("/PageSub", function (req, res) {
+    console.log("GetPageSub");
+    console.log(JSON.stringify(req.body, null, 2))
+    var pageId = req.body.pageId
+
+    postPageSubscribed(pageId, pageMap.get(pageId), function (flag, data) {
+        if (flag) {
+            console.log("Response:" + JSON.stringify(data, null, 2))
+            res.send(true);
+        } else {
+            res.sendStatus(404);
+        }
+    })
+    //res.send(data)
+})
+app.post("/DeletePageSub", function (req, res) {
+    console.log("DeletePageSub");
+    console.log(JSON.stringify(req.body, null, 2))
+    var pageId = req.body.pageId
+
+    deletePageSubscribed(pageId, pageMap.get(pageId), function (flag, data) {
+        if (flag) {
+            console.log("Response:" + JSON.stringify(data, null, 2))
+            res.send(true);
         } else {
             res.sendStatus(404);
         }
@@ -69,80 +122,7 @@ app.post("/GetAccount", function (req, res) {
     //res.send(data)
 })
 
-/*
-getLoginStatus : {
-  "authResponse": {
-    "accessToken": "EAAH5HxJwXL0BANs4A9pZB55R2gB8iN2KxvTailgS87jf2lJHawRkjOsVuAKEC9slsE2HbIYZC3txyjoRrDJDkm87RtZBW9yi1wGcSM7EXsVsk6P8HCQ2TpUNEXUtN6fqpWDZAfb8r7OIwaZCkpAnPORrttuCazOZBOXqSFgLvPEzFVkhi9ZBcicYeEfQjyQZB2KKyP9ZA4gbeiAZDZD",
-    "userID": "3539715262714428",
-    "expiresIn": 5144,
-    "signedRequest": "FWHxc_w4Escl-DrsaWgGSAWLHkV8f5zopAwQ63NaVuw.eyJ1c2VyX2lkIjoiMzUzOTcxNTI2MjcxNDQyOCIsImNvZGUiOiJBUUNmNzQ4bFdGclJ1Uk9rdFMzQUJwMDItQkZmMllaRUFLLXNPTDVtNWV4V2xKWlAzWnNrNloyeFNEYWExcXVGbVBQR1hxMC0waXo1N0p3RkZDTTZON1Q0VjlhOS1oTFowNmVXbXluUWpGVTV6XzgwVFpIejQ0VjR5WlpaU0g0T19zNmZDS2x2MElOWDBNX2dSRnJDVlNCMENITGp1VGdQVXpzanRLZVVndnpRYkpYVzFaQ00wZzNCdU5RdWlMU1V5RUF6aG9XNW4yNWV3NWVoWGZxZVBKZVlwYkJyazJ3V01NLWVBdnl2UC1neFczUkhTUTBXekxZSnpJMFZ0bG1RNFBzNWRSaHRZS1ZMbmQzSWQyam1GSU1ITkFtamMyX2hzSWNJUk9CaXREdW4tMnczZTd6VkxLcXVQVnNkbnRncTFXVG5KaWtJU1NTS3dlT3NqaklOdXpqOCIsImFsZ29yaXRobSI6IkhNQUMtU0hBMjU2IiwiaXNzdWVkX2F0IjoxNjA2NDQ4MDU2fQ",
-    "graphDomain": "facebook",
-    "data_access_expiration_time": 1614224056
-  },
-  "status": "connected"
-}
-{
-    "data": [{
-        "access_token": "EAAH5HxJwXL0BAJ2GZAmHJv1JVU7Ae4dPyB9FXmNsD5lksxJ6k1yzgxUEcZA97iYy56tAlD3UOBRqmEKAKq3OMT2ExObWzHBO1fE0F8g8dVVzwRNBFncVq0YqqhgtGm2ZBPPYIof2WPP78t5vDxo8if6p9FNdGP4Y5g7ZCbcHkWaEN3sT2s2EdmAjsKgWh62ll3LmMXVamgZDZD",
-        "category": "\\u5b78\\u6821",
-        "category_list": [{
-            "id": "2601",
-            "name": "\\u5b78\\u6821"
-        }],
-        "name": "\\u6e2c\\u8a661",
-        "id": "100283728425577",
-        "tasks": ["ANALYZE", "ADVERTISE", "MESSAGING", "MODERATE", "CREATE_CONTENT", "MANAGE"]
-    }, {
-        "access_token": "EAAH5HxJwXL0BAHxoKn0oTJVwGQ6LE2k64wfqzTyrp1ib5rJRxpRDxMfkVugtMyzrJ6MtlSZBv2KssgDZBgZCkwEhAm91BjkEbToxKtiiKZCfv4FeTIRrEpqtPP31OWzMQFvYj731W64RcvaWIHyUqWaUv2FevCiDq6GyhjyLKt6TPI3XZCif1ZAIZAwhpTiySkR9DNsnD7gyAZDZD",
-        "category": "\\u96fb\\u5b50\\u5546\\u52d9\\u7db2\\u7ad9",
-        "category_list": [{
-            "id": "1756049968005436",
-            "name": "\\u96fb\\u5b50\\u5546\\u52d9\\u7db2\\u7ad9"
-        }],
-        "name": "Test",
-        "id": "106251464548622",
-        "tasks": ["ANALYZE", "ADVERTISE", "MESSAGING", "MODERATE", "CREATE_CONTENT", "MANAGE"]
-    }, {
-        "access_token": "EAAH5HxJwXL0BAGZAGYXO3oHpiVzRnEn0I0ZChcKLX98M2WF70ArM7XznQK8N0DaNMllQtNTxE3rYgZBBsMdlpJYHQUZB0iS7S4iMM3KqWfcdHwsgb44zZAs7XqIFIiZANNOOldZBZBGpQb50RIpQxnPn8myxBuX5fEmaPhYe6sy8ImV1BUY6c1CqYU11x2wtt3xAg0tARZAZAJpAZDZD",
-        "category": "\\u5546\\u54c1\\uff0f\\u670d\\u52d9",
-        "category_list": [{
-            "id": "2201",
-            "name": "\\u5546\\u54c1\\uff0f\\u670d\\u52d9"
-        }],
-        "name": "\\u6e2c\\u8a66\\u7528",
-        "id": "108984370859831",
-        "tasks": ["ANALYZE", "ADVERTISE", "MESSAGING", "MODERATE", "CREATE_CONTENT", "MANAGE"]
-    }, {
-        "access_token": "EAAH5HxJwXL0BAJ68HJU7sLhUv2BPfn7xQvj7u0BZASsCTpvgTaN88pzlQdMGrxPzzoZCTDj11OQEaTkZCefvoWhx9UukuxltnlQYN5aQSce0nDqXWdkPfHlZBOmnJBkdDA0cfligj6ZBWbqFMkWNOSUhIJzDJmXHU4rtwdhM7TQU2c1XM2I60ZAPHQgzzBKD3RvpCnnDr3SQZDZD",
-        "category": "\\u5728\\u5730\\u670d\\u52d9",
-        "category_list": [{
-            "id": "1758418281071392",
-            "name": "\\u672c\\u5730\\u670d\\u52d9"
-        }],
-        "name": "Othertest",
-        "id": "114433427003103",
-        "tasks": ["ANALYZE", "ADVERTISE", "MESSAGING", "MODERATE", "CREATE_CONTENT", "MANAGE"]
-    }, {
-        "access_token": "EAAH5HxJwXL0BAGLhbPyUqkofw5s0NMXNzjZCmH9HHQo5fNI2xXwfOZBGJAbsfhZAbi9xLS63AmhxynyYmvQl67ZCyC4g0REnmj4HMKA8f5UH0PjiIoKSmU3sfViMguKMt89nZADSTdzplxGiRuJGMyWkZArNC6NNaY7Nc9hfNwwQbnxsfVjTS164OvipKkzAClfwPZBvUX7yAZDZD",
-        "category": "\\u5546\\u54c1\\uff0f\\u670d\\u52d9",
-        "category_list": [{
-            "id": "2201",
-            "name": "\\u5546\\u54c1\\uff0f\\u670d\\u52d9"
-        }],
-        "name": "LAB-Qbe",
-        "id": "321061435468254",
-        "tasks": ["ANALYZE", "ADVERTISE", "MESSAGING", "MODERATE"]
-    }],
-    "paging": {
-        "cursors": {
-            "before": "MTAwMjgzNzI4NDI1NTc3",
-            "after": "MzIxMDYxNDM1NDY4MjU0"
-        }
-    }
-}
-*/
 
-//
 function GetAccount(userID, accessToken, callback) {
     console.log("GetAccount function");
     //pages_show_list 權限
@@ -151,7 +131,7 @@ function GetAccount(userID, accessToken, callback) {
     var options = {
         host: 'graph.facebook.com',
         port: '443',
-        path: '/' + userID + '/accounts?access_token=' + accessToken,
+        path: '/' + userID + '/accounts?access_token=' + accessToken + '&&fields=id,name,picture,category,category_list,access_token',
         method: 'GET',
         headers: {
             'Content-Type': 'application/json; charset=UTF-8',
@@ -186,6 +166,162 @@ function GetAccount(userID, accessToken, callback) {
     req.end();
 }
 
+function postPageSubscribed(pageId, accessToken, callback) {
+    console.log("postPageSubscribed function");
+    //pages_show_list 權限
+    //用於列出可在粉絲專頁上執行 MODERATE 工作的所有粉絲專頁的使用者存取權杖 
+    var data = {
+        "access_token": accessToken,
+        "subscribed_fields": [
+            'messaging_optins',
+            'messaging_postbacks',
+            'messages',
+            'leadgen'
+        ]
+    }
+    var options = {
+        host: 'graph.facebook.com',
+        port: '443',
+        path: '/v2.11/' + pageId + '/subscribed_apps',
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Content-Length': Buffer.byteLength(JSON.stringify(data)),
+            //'Authorization': 'Bearer <' + channel_access_token + '>'
+        }
+    };
+    var https = require('https');
+    var req = https.request(options, function (res) {
+        var result = "";
+        res.setEncoding('utf8');
+        res.on('data', function (chunk) {
+            //console.log('Response: ' + chunk);
+            result += chunk
+        });
+        res.on('end', function () {
+            console.log('postPageSubscribed status code: ' + res.statusCode);
+            if (res.statusCode == 200) {
+                console.log('postPageSubscribed success');
+                this.callback(true, result);
+            } else {
+                console.log('postPageSubscribed failure');
+                this.callback(false);
+            }
+        }.bind({
+            callback: this.callback
+        }));
+    }.bind({
+        callback: callback
+    }));
+    req.write(JSON.stringify(data));
+    req.end();
+
+}
+
+function deletePageSubscribed(pageId, accessToken, callback) {
+    console.log("deletePageSubscribed function");
+    //pages_show_list 權限
+    //用於列出可在粉絲專頁上執行 MODERATE 工作的所有粉絲專頁的使用者存取權杖
+
+    // var data = {
+    //     "access_token": accessToken,
+    //     "subscribed_fields": [
+    //         'messaging_optins',
+    //         'messaging_postbacks',
+    //         'messages',
+    //         'leadgen'
+    //     ]
+    // }
+    var options = {
+        host: 'graph.facebook.com',
+        port: '443',
+        path: '/v2.11/' + pageId + '/subscribed_apps?access_token=' + accessToken,
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json; charset=UTF-8',
+            //'Content-Length': Buffer.byteLength(JSON.stringify(data)),
+            //'Authorization': 'Bearer <' + channel_access_token + '>'
+        }
+    };
+    var https = require('https');
+    var req = https.request(options, function (res) {
+        var result = "";
+        res.setEncoding('utf8');
+        res.on('data', function (chunk) {
+            //console.log('Response: ' + chunk);
+            result += chunk
+        });
+        res.on('end', function () {
+            console.log('deletePageSubscribed status code: ' + res.statusCode);
+            if (res.statusCode == 200) {
+                console.log('deletePageSubscribed success');
+                this.callback(true, result);
+            } else {
+                console.log('deletePageSubscribed failure');
+                this.callback(false, result);
+            }
+        }.bind({
+            callback: this.callback
+        }));
+    }.bind({
+        callback: callback
+    }));
+
+    // req.write(JSON.stringify(data));
+    req.end();
+
+}
+async function getPageSubscribed(pageId, accessToken) {
+    console.log("getPageSubscribed function");
+    //pages_show_list 權限
+    //用於列出可在粉絲專頁上執行 MODERATE 工作的所有粉絲專頁的使用者存取權杖
+    return new Promise((resolve, reject) => {
+        // var data = {
+        //     "access_token": accessToken,
+        //     "subscribed_fields": [
+        //         'messaging_optins',
+        //         'messaging_postbacks',
+        //         'messages',
+        //         'leadgen'
+        //     ]
+        // }
+        var options = {
+            host: 'graph.facebook.com',
+            port: '443',
+            path: '/v2.11/' + pageId + '/subscribed_apps?access_token=' + accessToken,
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json; charset=UTF-8',
+                //'Content-Length': Buffer.byteLength(JSON.stringify(data)),
+                //'Authorization': 'Bearer <' + channel_access_token + '>'
+            }
+        };
+        var https = require('https');
+        var req = https.request(options, function (res) {
+            var result = "";
+            res.setEncoding('utf8');
+            res.on('data', function (chunk) {
+                //console.log('Response: ' + chunk);
+                result += chunk
+            });
+            res.on('end', function () {
+                console.log('getPageSubscribed status code: ' + res.statusCode);
+                if (res.statusCode == 200) {
+                    console.log('getPageSubscribed success');
+                    if (JSON.parse(result).data.length == 0)
+                        resolve([false, result]);
+                    else
+                        resolve([true, result]);
+                } else {
+                    console.log('getPageSubscribed failure');
+                    resolve([false, result]);
+                }
+            });
+        });
+        // req.write(JSON.stringify(data));
+        req.end();
+    });
+}
 /*
 {
   "object":"page",
