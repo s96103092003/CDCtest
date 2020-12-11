@@ -56,6 +56,13 @@ app.get("/index", function (req, res) {
     data = data + "<script>const appId = " + config.APP_Id + ";</script>"
     res.send(data)
 })
+app.get("/omnichat", function (req, res) {
+    console.log("get omnichat");
+    var data = fs.readFileSync(__dirname + '/pages/omnichat.html', 'utf8');
+    res.set("Content-Type", 'text/html');
+    //data = data + "<script>const appId = " + config.APP_Id + ";</script>"
+    res.send(data)
+})
 app.post("/GetLongLivedUserAccessToken", function (req, res) {
     console.log("GetLongLivedUserAccessToken");
     var userId = req.body.userId
