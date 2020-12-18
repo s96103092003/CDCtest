@@ -35,27 +35,11 @@ process.on('uncaughtException', function (err) {
 //
 var config = fs.readFileSync(__dirname + '/config.json', 'utf8');
 config = JSON.parse(config);
-//var DirectLine = require(path.join(__dirname, '/directline.js'))
 var pageMap = new Map();
 var userMap = new Map();
 var fbmessage = require('./fbmessage');
 var FBMessageAPI = new fbmessage.fb_message();
-/*  {"type":"follow",
-  "replyToken":"c24acf8f5dae4993b25eb5974a07cbdb",
-  "source":{
-      "userId":"Uc1c123646251df321f1a139eddb2a3f2",
-      "type":"user"
-      },
-  "timestamp":1500003748184}*/
-//accessToken
 
-app.get("/index", function (req, res) {
-    console.log("get index");
-    var data = fs.readFileSync(__dirname + '/pages/index.html', 'utf8');
-    res.set("Content-Type", 'text/html');
-    data = data + "<script>const appId = " + config.APP_Id + ";</script>"
-    res.send(data)
-})
 app.get("/omnichat", function (req, res) {
     console.log("get omnichat");
     var data = fs.readFileSync(__dirname + '/pages/omnichat.html', 'utf8');
@@ -63,12 +47,23 @@ app.get("/omnichat", function (req, res) {
     //data = data + "<script>const appId = " + config.APP_Id + ";</script>"
     res.send(data)
 })
-app.post("/GetLongLivedUserAccessToken", function (req, res) {
-    console.log("GetLongLivedUserAccessToken");
-    var userId = req.body.userId
-    var accessToken = req.body.accessToken
-    //res.send(data)
+
+//#region 粉專綁定用
+/**
+ * 
+ * 主頁
+ */
+app.get("/index", function (req, res) {
+    console.log("get index");
+    var data = fs.readFileSync(__dirname + '/pages/index.html', 'utf8');
+    res.set("Content-Type", 'text/html');
+    data = data + "<script>const appId = " + config.APP_Id + ";</script>"
+    res.send(data)
 })
+/**
+ * 
+ * 取得FB帳號
+ */
 app.post("/GetAccount", function (req, res) {
     console.log("GetAccount");
     console.log(JSON.stringify(req.body, null, 2))
@@ -117,6 +112,10 @@ app.post("/GetAccount", function (req, res) {
     })
     //res.send(data)
 })
+/**
+ * 
+ * 訂閱粉專
+ */
 app.post("/PageSub", function (req, res) {
     console.log("GetPageSub");
     console.log(JSON.stringify(req.body, null, 2))
@@ -132,6 +131,10 @@ app.post("/PageSub", function (req, res) {
     })
     //res.send(data)
 })
+/**
+ * 
+ * 刪除訂閱粉專
+ */
 app.post("/DeletePageSub", function (req, res) {
     console.log("DeletePageSub");
     console.log(JSON.stringify(req.body, null, 2))
@@ -248,16 +251,6 @@ function deletePageSubscribed(pageId, accessToken, callback) {
     console.log("deletePageSubscribed function");
     //pages_show_list 權限
     //用於列出可在粉絲專頁上執行 MODERATE 工作的所有粉絲專頁的使用者存取權杖
-
-    // var data = {
-    //     "access_token": accessToken,
-    //     "subscribed_fields": [
-    //         'messaging_optins',
-    //         'messaging_postbacks',
-    //         'messages',
-    //         'leadgen'
-    //     ]
-    // }
     var options = {
         host: 'graph.facebook.com',
         port: '443',
@@ -302,15 +295,6 @@ async function getPageSubscribed(pageId, accessToken) {
     //pages_show_list 權限
     //用於列出可在粉絲專頁上執行 MODERATE 工作的所有粉絲專頁的使用者存取權杖
     return new Promise((resolve, reject) => {
-        // var data = {
-        //     "access_token": accessToken,
-        //     "subscribed_fields": [
-        //         'messaging_optins',
-        //         'messaging_postbacks',
-        //         'messages',
-        //         'leadgen'
-        //     ]
-        // }
         var options = {
             host: 'graph.facebook.com',
             port: '443',
@@ -348,101 +332,9 @@ async function getPageSubscribed(pageId, accessToken) {
         req.end();
     });
 }
-/*
-{
-  "object":"page",
-  "entry":[
-    {
-      "id":"<PAGE_ID>",
-      "time":1458692752478,
-      "messaging":[
-        {
-          "sender":{
-            "id":"<PSID>"
-          },
-          "recipient":{
-            "id":"<PAGE_ID>"
-          },
+//#endregion
 
-          ...
-        }
-      ]
-    }
-  ]
-}
-*/
-/*
-var a = {
-    "object": "page",
-    "entry": [{
-        "id": "100283728425577",
-        "time": 1595575786943,
-        "messaging": [{
-            "sender": {
-                "id": "3116355715119375"
-            },
-            "recipient": {
-                "id": "100283728425577"
-            },
-            "timestamp": 1595575786677,
-            "message": {
-                "mid": "m_K7rDMa4f3j9IjON2h3wx27mPIj1WPS4YksS97kXPthJsY9dHkm09T_yY-2TNqmQXAKoOflYAgPqOSh8ncSjTiw",
-                "attachments": [{
-                    "type": "image",
-                    "payload": {
-                        "url": "https://scontent.xx.fbcdn.net/v/t1.15752-9/106538182_578310383056625_3267246385078665572_n.jpg?_nc_cat=100&_nc_sid=b96e70&_nc_ohc=uPHLzeF2UmcAX9rniGs&_nc_ad=z-m&_nc_cid=0&_nc_ht=scontent.xx&oh=49fd1ae12c74dea7c150c68f6eb74c04&oe=5F3FC551"
-                    }
-                }]
-            }
-        }]
-    }]
-}
-var b = {
-    "object": "page",
-    "entry": [{
-        "id": "100283728425577",
-        "time": 1595575635738,
-        "messaging": [{
-            "sender": {
-                "id": "3116355715119375"
-            },
-            "recipient": {
-                "id": "100283728425577"
-            },
-            "timestamp": 1595575635446,
-            "message": {
-                "mid": "m_eKIeewawv6O13KvO6s6pS7mPIj1WPS4YksS97kXPthL3qSus4iUchjYKC1gElfVqFzhp6bgAdADoQPpnKqLGvA",
-                "text": "1"
-            }
-        }]
-    }]
-}
-var c = {
-    "object": "page",
-    "entry": [{
-        "id": "100283728425577",
-        "time": 1595575939226,
-        "messaging": [{
-            "sender": {
-                "id": "3116355715119375"
-            },
-            "recipient": {
-                "id": "100283728425577"
-            },
-            "timestamp": 1595575938913,
-            "message": {
-                "mid": "m_c7aIoSPyrpTbMzDyug2uPrmPIj1WPS4YksS97kXPthKLLfGET8MVTQ7BqsEEVnu6hex-AcsDJF0EHUZ5Lon4yA",
-                "attachments": [{
-                    "type": "file",
-                    "payload": {
-                        "url": "https://cdn.fbsbx.com/v/t59.2708-21/107271418_574511696765767_4637954170273035811_n.txt/%E6%96%B0%E6%96%87%E5%AD%97%E6%96%87%E4%BB%B6.txt?_nc_cat=106&_nc_sid=0cab14&_nc_ohc=25PyU9XqSAgAX-M9rTd&_nc_ht=cdn.fbsbx.com&oh=31dbaae3b5f1192b4ab0e7f00cca0994&oe=5F1C300A"
-                    }
-                }]
-            }
-        }]
-    }]
-}
-*/
+/**驗證後台是否存在 */
 app.get("/", function (req, res) {
     console.log("get webhook verify_token");
     console.log("req.url : " + req.url)
@@ -712,207 +604,3 @@ app.get('/:dic/:filename', function (request, response) {
 app.get("/api", function (req, res) {
     res.send("API is running");
 });
-
-
-/*
-
-
-
-
-
-
-
-/*var http = require("http");
-var https = require('https');
-var express = require("express");
-var app = express();
-var port = process.env.PORT;
-var server = http.Server(app).listen(port);
-var fs = require("fs");
-var bodyParser = require('body-parser');
-var config = fs.readFileSync(__dirname + '/config.json', 'utf8');
-config = JSON.parse(config);
-var linemessageapi = require('./linemessage');
-var linemessage = new linemessageapi.linemessage();
-app.use(bodyParser.urlencoded({
-    extended: true
-}));
-app.use(bodyParser.json());
-var doctorNames = [
-    ["林醫師", "林醫生"],
-    ["劉醫師", "劉醫生"],
-    ["陳醫師", "陳醫生"],
-    ["楊醫師", "楊醫生"]
-];
-var dataSeg = [];
-for (var i = 1; i <= 12; i++) {
-    var buf = []
-    for (var j = 1; j <= 31; j++) {
-        buf.push(i + "月" + j + "日");
-        buf.push(i + "月" + j + "號");
-    }
-    dataSeg.push(buf);
-}
-var timeSeg = [
-    ["上午", "早上"],
-    ["下午", "中午"],
-    ["晚上", "傍晚"]
-];
-var objectSeg = [
-    ["內科", "內科系"],
-    ["外科", "外科系"],
-    ["婦產科", "婦科", "婦科系"],
-    ["小兒科", "兒科", "兒科系"]
-];
-
-var Stage = null;
-var userStage = new Map();
-var userData = new Map();
-var text = new Map();
-
-app.post("/", function (request, response) {
-    ///
-    console.log("Get LINE Message");
-    var results = request.body.events;
-    console.log(JSON.stringify(results));
-    console.log('receive message count: ' + results.length);
-    for (var idx = 0; idx < results.length; idx++) {
-
-        switch (results[idx].message.type) {
-            case "text":
-                var userText = results[idx].message.text;
-                console.log("userStage: " + userStage.get(results[idx].source.userId))
-                console.log("userData: " + userData.get(results[idx].source.userId))
-                if (userText.indexOf("預約") != -1 || userText.indexOf("掛號") != -1 || userStage.get(results[idx].source.userId) == "預約") {
-                    if (userStage.get(results[idx].source.userId) == null) {
-                        userStage.set(results[idx].source.userId, "預約")
-                    }
-                    ResProcessCheck(results[idx].source.userId, userText, function () {
-                        resProcessMessage(results[idx].source.userId, results[idx].replyToken)
-                    })
-
-                } else { //
-                    if (userStage.get(results[idx].source.userId) == null) {
-                        linemessage.SendMessage(results[idx].source.userId, "看不懂喔", 'linehack2018', results[idx].source.replyToken, function (result) {
-                            if (!result) console.log(result);
-                            else console.log(result);
-                        })
-                    }
-                }
-                break;
-            default:
-                if (userStage.get(results[idx].source.userId) == "預約") {
-                    linemessage.SendMessage(results[idx].source.userId, "你還沒完成預約流程喔", 'linehack2018', results[idx].source.replyToken, function (result) {
-                        if (!result) console.log(result);
-                        else console.log(result);
-                    })
-                } else if (userStage.get(results[idx].source.userId) == null) {
-                    linemessage.SendMessage(results[idx].source.userId, "看不懂喔", 'linehack2018', results[idx].source.replyToken, function (result) {
-                        if (!result) console.log(result);
-                        else console.log(result);
-                    })
-                }
-                break;
-        }
-    }
-});
-//
-function ResProcessCheck(userId, userText, callback) {
-    console.log("into ResProcessCheck")
-    var find = false;
-    var ResProcess;
-    if (userData.get(userId) == null) {
-        console.log("ResProcessCheck userData null")
-        ResProcess = {
-            object: null,
-            date: null, //日期
-            time: null, //時段 0,1,2
-            doctorName: null
-        };
-    } else {
-        console.log("ResProcessCheck userData hasValue")
-        ResProcess = userData.get(userId);
-    }
-    for (var i = 0; i < doctorNames.length; i++) {
-        for (var j = 0; j < doctorNames[i].length; j++) {
-            if (userText.indexOf(doctorNames[i][j]) != -1) {
-                ResProcess.doctorName = doctorNames[i][0];
-                find = true;
-                break;
-            }
-        }
-        if (find) {
-            find = false;
-            break;
-        }
-    }
-    for (var i = 0; i < dataSeg.length; i++) {
-        for (var j = 0; j < dataSeg[i].length; j++) {
-            if (userText.indexOf(dataSeg[i][j]) != -1) {
-                ResProcess.date = dataSeg[i][0];
-                find = true;
-                break;
-            }
-        }
-        if (find) {
-            find = false;
-            break;
-        }
-    }
-    for (var i = 0; i < objectSeg.length; i++) {
-        for (var j = 0; j < objectSeg[i].length; j++) {
-            if (userText.indexOf(objectSeg[i][j]) != -1) {
-                ResProcess.object = objectSeg[i][0];
-                find = true;
-                break;
-            }
-        }
-        if (find) {
-            find = false;
-            break;
-        }
-    }
-    for (var i = 0; i < timeSeg.length; i++) {
-        for (var j = 0; j < timeSeg[i].length; j++) {
-            if (userText.indexOf(timeSeg[i][j]) != -1) {
-                ResProcess.time = timeSeg[i][0];
-                find = true;
-                break;
-            }
-        }
-        if (find) {
-            find = false;
-            break;
-        }
-    }
-    console.log("after check: " + JSON.stringify(ResProcess))
-    userData.set(userId, ResProcess)
-    callback();
-}
-
-function resProcessMessage(userId, replyToken) {
-    console.log("into resProcess")
-    var text = "";
-    var ResProcess = userData.get(userId);
-    console.log("resProcess " + JSON.stringify(ResProcess))
-    if (ResProcess.object == null) {
-        text = "請問要預約的科系是什麼?"
-    } else if (ResProcess.date == null) {
-        text = "請問要預約幾月幾日呢?"
-    } else if (ResProcess.time == null) {
-        text = "請問要預約上午、下午還是晚上時段呢?"
-    } //else if (ResProcess.doctorName == null) {
-    // text = "有指定的醫師嗎?"
-    //} 
-    else {
-        text = "預約完成"
-        userStage.set(userId, null)
-        userData.set(userId, null)
-    }
-    linemessage.SendMessage(userId, text, 'linehack2018', replyToken, function (result) {
-        if (!result) console.log(result);
-        else console.log(result);
-    })
-}
-
-*/
