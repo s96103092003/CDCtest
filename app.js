@@ -96,8 +96,8 @@ app.post("/GetAccount", function (req, res) {
                         if (flag) {
                             console.log("50分一次更新user acesstoken : " + userID)
                             data = JSON.parse(data)
-                            console.log("USER ACCESS " + userAccessMap.get(userID) + " => " + data.accessToken)
-                            userAccessMap.set(userID, data.accessToken);
+                            console.log("USER ACCESS " + userAccessMap.get(userID) + " => " + data.access_token)
+                            userAccessMap.set(userID, data.access_token);
                             GetAccount(userID, userAccessMap.get(userID), async function (flag, data) {
                                 if (flag) {
                                     console.log("50分一次更新page acesstoken : " + userID)
