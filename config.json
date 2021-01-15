@@ -1,6 +1,6 @@
 {
     "APP_Id": "555386825366717",
-    "channel_secret": "be9b7342d788abdd74cd58f407954f96",
+    "APP_Secret": "be9b7342d788abdd74cd58f407954f96",
     "redirect_uri": "https://s96103092003.herokuapp.com/",
     "access_tokens" :[
         {

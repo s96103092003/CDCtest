@@ -37,6 +37,7 @@ var config = fs.readFileSync(__dirname + '/config.json', 'utf8');
 config = JSON.parse(config);
 var pageMap = new Map();
 var userMap = new Map();
+var userAccessMap = new Map();
 var fbmessage = require('./fbmessage');
 var FBMessageAPI = new fbmessage.fb_message();
 
@@ -90,19 +91,30 @@ app.post("/GetAccount", function (req, res) {
             }
             res.send(result);
             if (!userMap.has(userID)) {
+                userAccessMap.set(userID, accessToken);
                 userMap.set(userID, setInterval(function () {
-                    GetAccount(userID, accessToken, async function (flag, data) {
+                    UpdateUserAccessToken(userAccessMap.get(userID), async function (flag, data) {
                         if (flag) {
-                            console.log("50分一次更新page acesstoken : " + userID)
-                            data = JSON.parse(data).data
-                            for (var i in data) {
-                                var item = data[i]
-                                pageMap.set(item.id, item.access_token)
-                            }
+                            console.log("50分一次更新user acesstoken : " + userID)
+                            data = JSON.parse(data)
+                            userAccessMap.set(userID, data.accessToken);
+                            GetAccount(userID, userAccessMap.get(userID), async function (flag, data) {
+                                if (flag) {
+                                    console.log("50分一次更新page acesstoken : " + userID)
+                                    data = JSON.parse(data).data
+                                    for (var i in data) {
+                                        var item = data[i]
+                                        pageMap.set(item.id, item.access_token)
+                                    }
+                                } else {
+                                    res.sendStatus(404);
+                                }
+                            })
                         } else {
                             res.sendStatus(404);
                         }
                     })
+
                 }, 50 * 60000))
             }
 
@@ -180,6 +192,7 @@ function GetAccount(userID, accessToken, callback) {
             console.log('GetAccount status code: ' + res.statusCode);
             if (res.statusCode == 200) {
                 console.log('GetAccount success');
+                console.log('GetAccount Response: ' + data);
                 this.callback(true, data);
             } else {
                 console.log('GetAccount failure');
@@ -194,7 +207,49 @@ function GetAccount(userID, accessToken, callback) {
     //req.write(JSON.stringify(data));
     req.end();
 }
-
+function UpdateUserAccessToken(accessToken, callback) {
+    console.log("UpdateUserAccessToken function");
+    //pages_show_list 權限
+    //用於列出可在粉絲專頁上執行 MODERATE 工作的所有粉絲專頁的使用者存取權杖
+    var data = ""
+    var options = {
+        host: 'graph.facebook.com',
+        port: '443',
+        path: '/oauth/access_token?grant_type=fb_exchange_token&&client_id='+config.APP_Id+'&&client_id='+config.APP_Secret+'&&fb_exchange_token=' + accessToken + '',
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json; charset=UTF-8',
+            //'Content-Length': Buffer.byteLength(JSON.stringify(data)),
+            //'Authorization': 'Bearer <' + channel_access_token + '>'
+        }
+    };
+    var https = require('https');
+    console.log(JSON.stringify(options, null, 2))
+    var req = https.request(options, function (res) {
+        res.setEncoding('utf8');
+        res.on('data', function (chunk) {
+            //console.log('Response: ' + chunk);
+            data += chunk
+        });
+        res.on('end', function () {
+            console.log('UpdateUserAccessToken status code: ' + res.statusCode);
+            if (res.statusCode == 200) {
+                console.log('UpdateUserAccessToken success');
+                console.log('UpdateUserAccessToken Response: ' + data);
+                this.callback(true, data);
+            } else {
+                console.log('UpdateUserAccessToken failure');
+                this.callback(false);
+            }
+        }.bind({
+            callback: this.callback
+        }));
+    }.bind({
+        callback: callback
+    }));
+    //req.write(JSON.stringify(data));
+    req.end();
+}
 function postPageSubscribed(pageId, accessToken, callback) {
     console.log("postPageSubscribed function");
     //pages_show_list 權限
@@ -231,6 +286,7 @@ function postPageSubscribed(pageId, accessToken, callback) {
             console.log('postPageSubscribed status code: ' + res.statusCode);
             if (res.statusCode == 200) {
                 console.log('postPageSubscribed success');
+                console.log('postPageSubscribed Response: ' + result);
                 this.callback(true, result);
             } else {
                 console.log('postPageSubscribed failure');

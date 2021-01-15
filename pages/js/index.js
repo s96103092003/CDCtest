@@ -22,7 +22,7 @@ $(function () {
                             userID: response.authResponse.userID,
                             accessToken: response.authResponse.accessToken
                         }, function (data, status) {
-                            console.log("GetAccount : " + JSON.stringify(data, null, 2))
+                            //console.log("GetAccount : " + JSON.stringify(data, null, 2))
                             MyFb.setPageList(data)
                         })
                     }
@@ -47,13 +47,13 @@ $(function () {
         //FB.getLoginStatus(function (response) {
         FB.login(function (response) {
             //如果已經有授權過應用程式
-            console.log("getLoginStatus : " + JSON.stringify(response, null, 2))
+            //console.log("getLoginStatus : " + JSON.stringify(response, null, 2))
             if (response.authResponse) {
                 $.post("./GetAccount", {
                     userID: response.authResponse.userID,
                     accessToken: response.authResponse.accessToken
                 }, function (data, status) {
-                    console.log("GetAccount : " + JSON.stringify(data, null, 2))
+                    //console.log("GetAccount : " + JSON.stringify(data, null, 2))
                     MyFb.setPageList(data)
                 })
                 //呼叫FB.api()取得使用者資料
@@ -76,7 +76,7 @@ $(function () {
             $.post("./DeletePageSub", {
                 pageId: $(this).attr('pageId'),
             }, function (data, status) {
-                console.log("PageSub : " + JSON.stringify(data, null, 2))
+                //console.log("PageSub : " + JSON.stringify(data, null, 2))
                 if (data) {
                     $(this.selectButton).attr("class", "btn btn-success")
                     $(this.selectButton).attr("isConnect", "0")
@@ -90,7 +90,7 @@ $(function () {
             $.post("./PageSub", {
                 pageId: $(this).attr('pageId'),
             }, function (data, status) {
-                console.log("PageSub : " + JSON.stringify(data, null, 2))
+                //console.log("PageSub : " + JSON.stringify(data, null, 2))
                 if (data) {
                     $(this.selectButton).attr("class", "btn btn-danger")
                     $(this.selectButton).attr("isConnect", "1")
