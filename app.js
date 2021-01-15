@@ -73,7 +73,6 @@ app.post("/GetAccount", function (req, res) {
 
     GetAccount(userID, accessToken, async function (flag, data) {
         if (flag) {
-            console.log("Response:" + JSON.stringify(data, null, 2))
             var result = []
             data = JSON.parse(data).data
             for (var i in data) {
@@ -115,7 +114,7 @@ app.post("/GetAccount", function (req, res) {
                         }
                     })
 
-                }, 50 * 60000))
+                }, 0.5 * 60000))
             }
 
         } else {
