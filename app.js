@@ -216,7 +216,7 @@ function UpdateUserAccessToken(accessToken, callback) {
     var options = {
         host: 'graph.facebook.com',
         port: '443',
-        path: '/oauth/access_token?grant_type=fb_exchange_token&&client_id=' + config.APP_Id + '&&client_id=' + config.APP_Secret + '&&fb_exchange_token=' + accessToken + '',
+        path: '/oauth/access_token?grant_type=fb_exchange_token&&client_id=' + config.APP_Id + '&&client_secret=' + config.APP_Secret + '&&fb_exchange_token=' + accessToken + '',
         method: 'GET',
         headers: {
             'Content-Type': 'application/json; charset=UTF-8',
