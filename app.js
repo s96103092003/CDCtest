@@ -96,6 +96,7 @@ app.post("/GetAccount", function (req, res) {
                         if (flag) {
                             console.log("50分一次更新user acesstoken : " + userID)
                             data = JSON.parse(data)
+                            console.log("USER ACCESS " + userAccessMap.get(userID) + " => " + data.accessToken)
                             userAccessMap.set(userID, data.accessToken);
                             GetAccount(userID, userAccessMap.get(userID), async function (flag, data) {
                                 if (flag) {
@@ -206,6 +207,7 @@ function GetAccount(userID, accessToken, callback) {
     //req.write(JSON.stringify(data));
     req.end();
 }
+
 function UpdateUserAccessToken(accessToken, callback) {
     console.log("UpdateUserAccessToken function");
     //pages_show_list 權限
@@ -214,7 +216,7 @@ function UpdateUserAccessToken(accessToken, callback) {
     var options = {
         host: 'graph.facebook.com',
         port: '443',
-        path: '/oauth/access_token?grant_type=fb_exchange_token&&client_id='+config.APP_Id+'&&client_id='+config.APP_Secret+'&&fb_exchange_token=' + accessToken + '',
+        path: '/oauth/access_token?grant_type=fb_exchange_token&&client_id=' + config.APP_Id + '&&client_id=' + config.APP_Secret + '&&fb_exchange_token=' + accessToken + '',
         method: 'GET',
         headers: {
             'Content-Type': 'application/json; charset=UTF-8',
@@ -249,6 +251,7 @@ function UpdateUserAccessToken(accessToken, callback) {
     //req.write(JSON.stringify(data));
     req.end();
 }
+
 function postPageSubscribed(pageId, accessToken, callback) {
     console.log("postPageSubscribed function");
     //pages_show_list 權限
