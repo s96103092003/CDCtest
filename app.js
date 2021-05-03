@@ -53,6 +53,8 @@ app.post("/", function (req, res) {
 
     }
     if (userInput != "") {
+        var requestUrl = config.localUrl + "/" + encodeURI(userInput);
+        console.log("url: " + requestUrl)
         request.get(config.localUrl + "/" + encodeURI(userInput), function (error, response, body) {
             console.error('error:', error); // Print the error if one occurred
             console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
@@ -70,12 +72,13 @@ app.post("/", function (req, res) {
                     text: "找不到適合的答案"
                 })
             }
+            ReplyMessage(data, channel_access_token, data.replyToken, function (ret) {
+                if (!ret)
+                    PostToLINE(data, channel_access_token, this.callback); // reply_token 已過期，改用 PUSH_MESSAGE                   
+            });
         })
     }
-    ReplyMessage(data, channel_access_token, data.replyToken, function (ret) {
-        if (!ret)
-            PostToLINE(data, channel_access_token, this.callback); // reply_token 已過期，改用 PUSH_MESSAGE                   
-    });
+    
 
 
 });
