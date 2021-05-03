@@ -16,6 +16,7 @@
     "body-parser": "latest",
     "request": "latest",
     "iconv-lite": "latest",
-    "fs": "latest"
+    "fs": "latest",
+    "elasticsearch": "latest"
   }
 }
