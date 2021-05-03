@@ -14,8 +14,6 @@
     "log4js": "^1.1.1",
     "log4js-extend": "^0.1.2",
     "body-parser": "latest",
-    "request": "latest",
-    "iconv-lite": "latest",
     "fs": "latest",
     "elasticsearch": "latest"
   }
