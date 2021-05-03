@@ -28,95 +28,6 @@ process.on('uncaughtException', function (err) {
 var config = fs.readFileSync(__dirname + '/config.json', 'utf8');
 config = JSON.parse(config);
 
-let Eng2ChiIntentTag = fs.readFileSync(__dirname + '/intentTag.json', 'utf8');
-Eng2ChiIntentTag = JSON.parse(Eng2ChiIntentTag);
-let Chi2EngIntentTag = {}
-for (let k in Eng2ChiIntentTag) {
-    Chi2EngIntentTag[Eng2ChiIntentTag[k]] = k
-}
-
-
-var elasticsearch = require('elasticsearch');
-var esClient = new elasticsearch.Client({
-    host: 'localhost:9200',
-    log: 'trace',
-    apiVersion: '7.x', // use the same version of your Elasticsearch instance
-});
-/*
-esClient.ping({
-    // ping usually has a 3000ms timeout
-    requestTimeout: 1000
-}, function (error) {
-    if (error) {
-        console.trace('elasticsearch cluster is down!');
-    } else {
-        console.log('All is well');
-    }
-});
-*/
-app.get("/:message", function (req, res) {
-    try {
-        var message = req.params.message;
-        var Url = encodeURI(config.ModelUrl + message)
-        //decodeURI
-        if (message != "favicon.ico") {
-            request(Url, async function (error, response, body) {
-                console.error('error:', error); // Print the error if one occurred
-                console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-                console.log('body:', body); // Print the HTML for the Google homepage.
-                if (error != null) {
-                    res.send({
-                        intent: "",
-                        entities: [{
-
-                        }],
-                        isSuccess: false
-                    })
-                } else {
-                    body = JSON.parse(body)
-                    console.log(body.intent)
-                    EntityString = []
-                    for (var i in body.entities) {
-                        if (body.entities.length - 1 == i)
-                            EntityString += body.entities[i].word
-                        else
-                            EntityString += body.entities[i].word + " "
-                    }
-                    var answer = await esClient.search({
-                        index: 'cdc',
-                        type: 'cdcanswer',
-                        body: {
-                            size: 5,
-                            from: 0,
-                            query: {
-                                match: {
-                                    entities: EntityString,
-                                },
-                                match: {
-                                    intentEng: body.intent
-                                }
-                            }
-                        }
-                    });
-                    console.log(JSON.stringify(answer, null, 2))
-                    body.answer = answer.hits.hits
-                    res.send(JSON.stringify(body, null, 2))
-                }
-            });
-        }
-
-    }
-    catch (e) {
-        res.send({
-            intent: "",
-            entities: [{
-
-            }],
-            isSuccess: false
-        })
-    }
-
-})
 //接收LINE訊息
 app.post("/", function (req, res) {
 
@@ -168,6 +79,7 @@ app.post("/", function (req, res) {
 
 
 });
+
 app.get('/download/content/:message_id', function (request, response) {
     try {
         var channel_id = config.channel_id;
@@ -286,37 +198,6 @@ function ReplyMessage(data, channel_access_token, reply_token, callback) {
     req.end();
 }
 
-function GetAnswer(message, callback) {
-
-    var options = {
-        host: 'http://127.0.0.1',
-        port: '80',
-        path: '/GetAnswer/' + message,
-        method: 'Get',
-    };
-    var https = require('https');
-    var req = https.request(options, function (res) {
-        res.setEncoding('utf8');
-        var result = ""
-        res.on('data', function (chunk) {
-            console.log('Response: ' + chunk);
-            result += chunk
-        });
-        res.on('end', function () { });
-        console.log('Reply message status code: ' + res.statusCode);
-        if (res.statusCode == 200) {
-            console.log('Reply message success');
-            callback(true, JSON.parse(result));
-        } else {
-            console.log('Reply message failure');
-            callback(false);
-        }
-    });
-    //req.write(JSON.stringify(data));
-    req.end();
-
-
-}
 function PostToLINE(data, channel_access_token, callback) {
     console.log("PostToLINE")
     console.log(JSON.stringify(data));
@@ -355,94 +236,6 @@ app.get('/tmp/:filename', function (request, response) {
 app.get("/api", function (req, res) {
     res.send("API is running");
 });
-app.get("/CDC/InsertCsvData", function (req, res) {
-    console.log('function InsertData')
-    var answerCsv = fs.readFileSync('./data/CDC用Answer.csv', 'binary');
-    ConvertToTable(answerCsv, async function (DataTable) {
-        var saveData = [];
-        for (var i = 1; i < DataTable.length; i++) {
-            var entityString = "";
-            if (DataTable[i].length >= 5)
-                entityString = DataTable[i].slice(4).join(' ')
-            //await postUserData(DataTable[i][0], DataTable[i][3], entityString, DataTable[i][1], DataTable[i][2], Chi2EngIntentTag[DataTable[i][3]])
-            saveData.push({
-                index: {
-                    _index: 'cdc',
-                    _type: 'cdcanswer',
-                }
-            })
-            saveData.push({
-                "intentEng": Chi2EngIntentTag[DataTable[i][3]],
-                "intent": DataTable[i][3],
-                "entities": entityString,
-                "answer": DataTable[i][0],
-                "question": DataTable[i][1],
-                "relativeQuestion": DataTable[i][2]
-            })
-        }
-        // 對傳遞的資料執行批量索引
-        esClient.bulk({ body: saveData }, function (err, response) {
-            if (err) {
-                console.log("Failed Bulk operation".red, err)
-            } else {
-                console.log("Successfully imported %s".green, (saveData.length) / 2);
-            }
-
-            console.log('InsertData success')
-            res.send(200)
-        })
-    })
-})
-async function postUserData(answer, intent, entities, question, relativeQuestion, intentEng) { //ID隨機
-    console.log("function postUserData")
-    return new Promise((resolve, reject) => {
-        var contents = JSON.stringify({
-            "intentEng": intentEng,
-            "intent": intent,
-            "entities": entities,
-            "answer": answer,
-            "question": question,
-            "relativeQuestion": relativeQuestion
-        });
-        var options = {
-            host: '127.0.0.1',
-            path: '/cdc/' + String(intentEng).toLowerCase(),
-            port: 9200,
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json; charset=utf-8',
-                'Content-Length': contents.length
-            }
-        }
-        var https = require('https');
-        var req = http.request(options, function (res) {
-            res.setEncoding('utf8');
-            res.on('data', function (data) {
-                console.log("data:", data); //一段html代码
-                resolve([true, data]);
-            });
-        });
-        req.write(contents);
-        req.end;
-    });
-}
-
-
-
-
-function ConvertToTable(data, callBack) {
-    data = data.toString();
-    var table = new Array();
-    var rows = new Array();
-    var buf = new Buffer(data, 'binary');
-    var str = iconv.decode(buf, 'utf-8');
-    rows = str.split("\r\n");
-    for (var i = 0; i < rows.length; i++) {
-        table.push(rows[i].split(","));
-    }
-    callBack(table);
-}
-
 /*var http = require("http");
 var https = require('https');
 var express = require("express");
