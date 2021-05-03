@@ -1,34 +1,130 @@
 var http = require("http");
 var express = require("express");
+var request = require("request");
+var fs = require("fs");
+var iconv = require('iconv-lite');
 var app = express();
-var port = process.env.PORT;
+var port = process.env.PORT || 8080;
 var server = http.Server(app).listen(port);
 var bodyParser = require("body-parser");
-var fs = require("fs");
+app.all('*', function (req, res, next) {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+    res.header('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type');
+    next();
+});
 app.use(bodyParser.urlencoded({
     extended: true
 }));
+app.use(express.static('public'));
 //app.use('/tmp', express.static(__dirname + '/tmp'));
 app.use(bodyParser.json());
+
+
+process.on('uncaughtException', function (err) {
+    console.log('uncaughtException occurred: ' + (err.stack ? err.stack : err));
+});
+
 var config = fs.readFileSync(__dirname + '/config.json', 'utf8');
 config = JSON.parse(config);
-/*  {"type":"follow",
-  "replyToken":"c24acf8f5dae4993b25eb5974a07cbdb",
-  "source":{
-      "userId":"Uc1c123646251df321f1a139eddb2a3f2",
-      "type":"user"
-      },
-  "timestamp":1500003748184}*/
+
+let Eng2ChiIntentTag = fs.readFileSync(__dirname + '/intentTag.json', 'utf8');
+Eng2ChiIntentTag = JSON.parse(Eng2ChiIntentTag);
+let Chi2EngIntentTag = {}
+for (let k in Eng2ChiIntentTag) {
+    Chi2EngIntentTag[Eng2ChiIntentTag[k]] = k
+}
+
+
+var elasticsearch = require('elasticsearch');
+var esClient = new elasticsearch.Client({
+    host: 'localhost:9200',
+    log: 'trace',
+    apiVersion: '7.x', // use the same version of your Elasticsearch instance
+});
+/*
+esClient.ping({
+    // ping usually has a 3000ms timeout
+    requestTimeout: 1000
+}, function (error) {
+    if (error) {
+        console.trace('elasticsearch cluster is down!');
+    } else {
+        console.log('All is well');
+    }
+});
+*/
+app.get("/:message", function (req, res) {
+    try {
+        var message = req.params.message;
+        var Url = encodeURI(config.ModelUrl + message)
+        //decodeURI
+        if (message != "favicon.ico") {
+            request(Url, async function (error, response, body) {
+                console.error('error:', error); // Print the error if one occurred
+                console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+                console.log('body:', body); // Print the HTML for the Google homepage.
+                if (error != null) {
+                    res.send({
+                        intent: "",
+                        entities: [{
+
+                        }],
+                        isSuccess: false
+                    })
+                } else {
+                    body = JSON.parse(body)
+                    console.log(body.intent)
+                    EntityString = []
+                    for (var i in body.entities) {
+                        if (body.entities.length - 1 == i)
+                            EntityString += body.entities[i].word
+                        else
+                            EntityString += body.entities[i].word + " "
+                    }
+                    var answer = await esClient.search({
+                        index: 'cdc',
+                        type: 'cdcanswer',
+                        body: {
+                            size: 5,
+                            from: 0,
+                            query: {
+                                match: {
+                                    entities: EntityString,
+                                },
+                                match: {
+                                    intentEng: body.intent
+                                }
+                            }
+                        }
+                    });
+                    console.log(JSON.stringify(answer, null, 2))
+                    body.answer = answer.hits.hits
+                    res.send(JSON.stringify(body, null, 2))
+                }
+            });
+        }
+
+    }
+    catch (e) {
+        res.send({
+            intent: "",
+            entities: [{
+
+            }],
+            isSuccess: false
+        })
+    }
+
+})
 //接收LINE訊息
-app.post("/", function (request, response) {
+app.post("/", function (req, res) {
 
     console.log("Get LINE Message");
-    var userMessage = request.body;
+    var userMessage = req.body;
 
     console.log(JSON.stringify(userMessage.events[0]));
 
-    var SearchList = new Array();
-    SearchList[0] = "@打招呼";
     var channel_access_token = config.channel_access_token;
 
     var data = {
@@ -36,18 +132,34 @@ app.post("/", function (request, response) {
         'replyToken': userMessage.events[0].replyToken,
         'messages': []
     };
-
+    var userInput = "";
     switch (userMessage.events[0].message.type) {
         case "text":
             var msg = userMessage.events[0].message.text;
-            var buf = {
-                type : 'text',
-                text : msg
-            }
-            data.messages.push(buf)
+            userInput = msg
             console.log(msg);
             break;
 
+    }
+    if (userInput != "") {
+        request.get(config.localUrl + "/" + userInput, function (error, response, body) {
+            console.error('error:', error); // Print the error if one occurred
+            console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+            console.log('body:', body); // Print the HTML for the Google homepage.
+            body = JSON.parse(body)
+            if (body.answer.length > 0) {
+                data.messages.push({
+                    type: 'text',
+                    text: body.answer[0]._source.answer
+                })
+            }
+            else {
+                data.messages.push({
+                    type: 'text',
+                    text: "找不到適合的答案"
+                })
+            }
+        })
     }
     ReplyMessage(data, channel_access_token, data.replyToken, function (ret) {
         if (!ret)
@@ -110,7 +222,7 @@ function GetContent(data, channel_access_token) { //OK
         }
     };
     var https = require('https');
-    
+
     var req = https.request(options, function (res) {
         res.setEncoding("binary");
         console.log('STATUS: ' + res.statusCode);
@@ -121,9 +233,9 @@ function GetContent(data, channel_access_token) { //OK
 
             res.body = res.body + chunk;
         });
-          
+
         res.on('end', function () {
-          
+
             res.body = require('btoa')(res.body);
             try {
                 fs.writeFile("/tmp/123.jpg", res.body, 'base64', function (err) {
@@ -160,7 +272,7 @@ function ReplyMessage(data, channel_access_token, reply_token, callback) {
         res.on('data', function (chunk) {
             console.log('Response: ' + chunk);
         });
-        res.on('end', function () {});
+        res.on('end', function () { });
         console.log('Reply message status code: ' + res.statusCode);
         if (res.statusCode == 200) {
             console.log('Reply message success');
@@ -174,6 +286,37 @@ function ReplyMessage(data, channel_access_token, reply_token, callback) {
     req.end();
 }
 
+function GetAnswer(message, callback) {
+
+    var options = {
+        host: 'http://127.0.0.1',
+        port: '80',
+        path: '/GetAnswer/' + message,
+        method: 'Get',
+    };
+    var https = require('https');
+    var req = https.request(options, function (res) {
+        res.setEncoding('utf8');
+        var result = ""
+        res.on('data', function (chunk) {
+            console.log('Response: ' + chunk);
+            result += chunk
+        });
+        res.on('end', function () { });
+        console.log('Reply message status code: ' + res.statusCode);
+        if (res.statusCode == 200) {
+            console.log('Reply message success');
+            callback(true, JSON.parse(result));
+        } else {
+            console.log('Reply message failure');
+            callback(false);
+        }
+    });
+    //req.write(JSON.stringify(data));
+    req.end();
+
+
+}
 function PostToLINE(data, channel_access_token, callback) {
     console.log("PostToLINE")
     console.log(JSON.stringify(data));
@@ -194,35 +337,111 @@ function PostToLINE(data, channel_access_token, callback) {
         res.on('data', function (chunk) {
             console.log('Response: ' + chunk);
         });
-        res.on('end', function () {});
+        res.on('end', function () { });
     });
     req.write(JSON.stringify(data));
     req.end();
     try {
         callback(true);
-    } catch (e) {};
+    } catch (e) { };
 }
-
-
 app.get('/tmp/:filename', function (request, response) {
     var filename = request.params.filename;
     var stream = require('fs').createReadStream('/tmp/' + filename);
     stream.pipe(response);
     response.clearCookie()
 });
-
-
 //APP
 app.get("/api", function (req, res) {
     res.send("API is running");
 });
+app.get("/CDC/InsertCsvData", function (req, res) {
+    console.log('function InsertData')
+    var answerCsv = fs.readFileSync('./data/CDC用Answer.csv', 'binary');
+    ConvertToTable(answerCsv, async function (DataTable) {
+        var saveData = [];
+        for (var i = 1; i < DataTable.length; i++) {
+            var entityString = "";
+            if (DataTable[i].length >= 5)
+                entityString = DataTable[i].slice(4).join(' ')
+            //await postUserData(DataTable[i][0], DataTable[i][3], entityString, DataTable[i][1], DataTable[i][2], Chi2EngIntentTag[DataTable[i][3]])
+            saveData.push({
+                index: {
+                    _index: 'cdc',
+                    _type: 'cdcanswer',
+                }
+            })
+            saveData.push({
+                "intentEng": Chi2EngIntentTag[DataTable[i][3]],
+                "intent": DataTable[i][3],
+                "entities": entityString,
+                "answer": DataTable[i][0],
+                "question": DataTable[i][1],
+                "relativeQuestion": DataTable[i][2]
+            })
+        }
+        // 對傳遞的資料執行批量索引
+        esClient.bulk({ body: saveData }, function (err, response) {
+            if (err) {
+                console.log("Failed Bulk operation".red, err)
+            } else {
+                console.log("Successfully imported %s".green, (saveData.length) / 2);
+            }
+
+            console.log('InsertData success')
+            res.send(200)
+        })
+    })
+})
+async function postUserData(answer, intent, entities, question, relativeQuestion, intentEng) { //ID隨機
+    console.log("function postUserData")
+    return new Promise((resolve, reject) => {
+        var contents = JSON.stringify({
+            "intentEng": intentEng,
+            "intent": intent,
+            "entities": entities,
+            "answer": answer,
+            "question": question,
+            "relativeQuestion": relativeQuestion
+        });
+        var options = {
+            host: '127.0.0.1',
+            path: '/cdc/' + String(intentEng).toLowerCase(),
+            port: 9200,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json; charset=utf-8',
+                'Content-Length': contents.length
+            }
+        }
+        var https = require('https');
+        var req = http.request(options, function (res) {
+            res.setEncoding('utf8');
+            res.on('data', function (data) {
+                console.log("data:", data); //一段html代码
+                resolve([true, data]);
+            });
+        });
+        req.write(contents);
+        req.end;
+    });
+}
 
 
 
 
-
-
-
+function ConvertToTable(data, callBack) {
+    data = data.toString();
+    var table = new Array();
+    var rows = new Array();
+    var buf = new Buffer(data, 'binary');
+    var str = iconv.decode(buf, 'utf-8');
+    rows = str.split("\r\n");
+    for (var i = 0; i < rows.length; i++) {
+        table.push(rows[i].split(","));
+    }
+    callBack(table);
+}
 
 /*var http = require("http");
 var https = require('https');
@@ -405,7 +624,7 @@ function resProcessMessage(userId, replyToken) {
         text = "請問要預約上午、下午還是晚上時段呢?"
     } //else if (ResProcess.doctorName == null) {
     // text = "有指定的醫師嗎?"
-    //} 
+    //}
     else {
         text = "預約完成"
         userStage.set(userId, null)

@@ -3,5 +3,7 @@
     "channel_secret": "b6ef4c97466b183cf76f198f9c9f7ef1",
     "redirect_uri": "https://s96103092003.herokuapp.com/",
     "channel_access_token": "yHeoGNC/JKjX3Fc1LVrQSf3jTXpvF+zn4rId5lZaqbgoAmIHTW0cmG35VlLmHzJ6KUkuoPokEvsQe3pVBDM5xLZUPWdtmTn0MyLof3OGx5VQ0hlj6PhDN2ds2In7MvTXKtd/17iO9gmOUi4M5Qt1FwdB04t89/1O/w1cDnyilFU=",
-    "AUTH_TOKEN": ""
+    "AUTH_TOKEN": "",
+    "ModelUrl": "http://127.0.0.1:5000/GetAnswer/",
+    "localUrl" : "http://62f774182280.ngrok.io"
 }
