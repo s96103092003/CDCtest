@@ -63,7 +63,7 @@ app.post("/", function (req, res) {
             if (body.answer.length > 0) {
                 data.messages.push({
                     type: 'text',
-                    text: body.answer[0]._source.answer
+                    text: String(body.answer[0]._source.answer).replace(/<br \/>/g, "\n")
                 })
             }
             else {
