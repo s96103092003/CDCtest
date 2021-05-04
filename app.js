@@ -58,16 +58,16 @@ app.post("/", function (req, res) {
                             LineMessageAPI.SendButtons(userMessage.events[0].source.userId, "您對該回答滿意嗎", [{
                                 "type": "postback",
                                 "label": "滿意",
-                                "data": `action=qa&q=${userInput}&score=2`,
+                                "data": `?action=qa&q=${userInput}&score=2`,
                             }, {
                                 "type": "postback",
                                 "label": "普通",
-                                "data": `action=qa&q=${userInput}&score=1`,
+                                "data": `?action=qa&q=${userInput}&score=1`,
 
                             }, {
                                 "type": "postback",
                                 "label": "不滿意",
-                                "data": `action=qa&q=${userInput}&score=0`,
+                                "data": `?action=qa&q=${userInput}&score=0`,
                             }], "您對該回答滿意嗎", userMessage.events[0].replyToken, function () {
                                 var relativeQuestion = String(body.answer[0]._source.relativeQuestion).split('-')
                                 var buttons = []
@@ -110,6 +110,9 @@ app.post("/", function (req, res) {
         let action = arg["action"];
         let q = arg["q"];
         let score = arg["score"];
+        console.log(q)
+        console.log(action)
+        console.log(score)
         switch (action) {
             case "qa":
                 request.post({
