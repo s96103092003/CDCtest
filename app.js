@@ -89,11 +89,11 @@ app.get("/:message", function (req, res) {
                             size: 5,
                             from: 0,
                             query: {
-                                match: {
-                                    entities: EntityString,
-                                },
-                                match: {
-                                    intentEng: body.intent
+                                bool: {
+                                    must: [
+                                        { match_phrase: { entities: EntityString } },
+                                        { match_phrase: { intentEng: body.intent } }
+                                    ]
                                 }
                             }
                         }
@@ -142,7 +142,9 @@ app.post("/", function (req, res) {
 
     }
     if (userInput != "") {
-        request.get(config.localUrl + "/" + userInput, function (error, response, body) {
+        var requestUrl = config.localUrl + "/" + encodeURI(userInput);
+        console.log("url: " + requestUrl)
+        request.get(requestUrl, function (error, response, body) {
             console.error('error:', error); // Print the error if one occurred
             console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
             console.log('body:', body); // Print the HTML for the Google homepage.
@@ -150,7 +152,7 @@ app.post("/", function (req, res) {
             if (body.answer.length > 0) {
                 data.messages.push({
                     type: 'text',
-                    text: body.answer[0]._source.answer
+                    text: String(body.answer[0]._source.answer).replace(/<br \/>/g, "\n")
                 })
             }
             else {
@@ -159,12 +161,13 @@ app.post("/", function (req, res) {
                     text: "找不到適合的答案"
                 })
             }
+            ReplyMessage(data, channel_access_token, data.replyToken, function (ret) {
+                if (!ret)
+                    PostToLINE(data, channel_access_token, this.callback); // reply_token 已過期，改用 PUSH_MESSAGE                   
+            });
         })
     }
-    ReplyMessage(data, channel_access_token, data.replyToken, function (ret) {
-        if (!ret)
-            PostToLINE(data, channel_access_token, this.callback); // reply_token 已過期，改用 PUSH_MESSAGE                   
-    });
+
 
 
 });
