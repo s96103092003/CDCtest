@@ -52,8 +52,48 @@ app.post("/", function (req, res) {
                     console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
                     console.log('body:', body); // Print the HTML for the Google homepage.
                     body = JSON.parse(body)
-                    if (body.answer.length > 0) {
-                        let answer = String(body.answer[0]._source.answer).replace(/<br \/>/g, "\n")
+                    if(body.source == 0){
+                        if (body.answer.length > 0) {
+                            let answer = String(body.answer[0]._source.answer).replace(/<br \/>/g, "\n")
+                            LineMessageAPI.SendMessage(userMessage.events[0].source.userId, userMessage.events[0].replyToken, answer, function () {
+                                LineMessageAPI.SendButtons(userMessage.events[0].source.userId, "您對該回答滿意嗎", [{
+                                    "type": "postback",
+                                    "label": "滿意",
+                                    "data": `?action=qa&q=${userInput}&score=2`,
+                                }, {
+                                    "type": "postback",
+                                    "label": "普通",
+                                    "data": `?action=qa&q=${userInput}&score=1`,
+    
+                                }, {
+                                    "type": "postback",
+                                    "label": "不滿意",
+                                    "data": `?action=qa&q=${userInput}&score=0`,
+                                }], "您對該回答滿意嗎", userMessage.events[0].replyToken, function () {
+                                    var relativeQuestion = String(body.answer[0]._source.relativeQuestion).split('-')
+                                    var buttons = []
+                                    for (var i in relativeQuestion) {
+                                        buttons.push({
+                                            "type": "message",
+                                            "label": relativeQuestion[i],
+                                            "text": relativeQuestion[i]
+                                        })
+                                    }
+                                    LineMessageAPI.SendButtons(userMessage.events[0].source.userId, "接下來想了解什麼", buttons, "接下來想了解什麼", userMessage.events[0].replyToken, function () {
+                                    })
+    
+                                })
+    
+                            })
+    
+                        }
+                        else {
+                            userInput = "找不到適合的答案"                      
+                            LineMessageAPI.SendMessage(userMessage.events[0].source.userId, userMessage.events[0].replyToken, userInput, function () { })
+                        }
+                    }
+                    else if(body.source == 1){
+                        let answer = String(body.answer).replace(/<br \/>/g, "\n")
                         LineMessageAPI.SendMessage(userMessage.events[0].source.userId, userMessage.events[0].replyToken, answer, function () {
                             LineMessageAPI.SendButtons(userMessage.events[0].source.userId, "您對該回答滿意嗎", [{
                                 "type": "postback",
@@ -69,7 +109,7 @@ app.post("/", function (req, res) {
                                 "label": "不滿意",
                                 "data": `?action=qa&q=${userInput}&score=0`,
                             }], "您對該回答滿意嗎", userMessage.events[0].replyToken, function () {
-                                var relativeQuestion = String(body.answer[0]._source.relativeQuestion).split('-')
+                                var relativeQuestion = String(body.relativeQuestion).split('-')
                                 var buttons = []
                                 for (var i in relativeQuestion) {
                                     buttons.push({
@@ -86,11 +126,7 @@ app.post("/", function (req, res) {
                         })
 
                     }
-                    else {
-                        body.answer = []
-                        userInput = "找不到適合的答案"                      
-                        LineMessageAPI.SendMessage(userMessage.events[0].source.userId, userMessage.events[0].replyToken, userInput, function () { })
-                    }
+                    body.userId = userMessage.events[0].source.userId
                     request.post({
                         url: config.localUrl + "/CDC/QALog",
                         form: body
@@ -103,7 +139,6 @@ app.post("/", function (req, res) {
                 })
                 break;
         }
-
     }
     else if (userMessage.events[0].type === "postback") {
         let arg = url.parse(userMessage.events[0].postback.data, true).query;
