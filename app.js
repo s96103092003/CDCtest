@@ -87,8 +87,8 @@ app.post("/", function (req, res) {
 
                     }
                     else {
-                        userInput = "找不到適合的答案"
                         body.answer = []
+                        userInput = "找不到適合的答案"                      
                         LineMessageAPI.SendMessage(userMessage.events[0].source.userId, userMessage.events[0].replyToken, userInput, function () { })
                     }
                     request.post({
