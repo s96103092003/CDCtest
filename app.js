@@ -52,7 +52,7 @@ app.post("/", function (req, res) {
                 body = JSON.parse(body)
                 if (body.answer.length > 0) {
                     userInput = String(body.answer[0]._source.answer).replace(/<br \/>/g, "\n")
-                    LineMessageAPI.SendMessage(userMessage.events[0].source.userId, userMessage.events[0].replyToken, userInput)
+                    LineMessageAPI.SendMessage(userMessage.events[0].source.userId, userMessage.events[0].replyToken, userInput, function(){})
                     var relativeQuestion = String(body.answer[0]._source.relativeQuestion).split('-')
                     var buttons = []
                     for (var i in relativeQuestion) {
@@ -86,7 +86,7 @@ app.post("/", function (req, res) {
                 }
                 else {
                     userInput = "找不到適合的答案"
-                    LineMessageAPI.SendMessage(userMessage.events[0].source.userId, userMessage.events[0].replyToken, userInput)
+                    LineMessageAPI.SendMessage(userMessage.events[0].source.userId, userMessage.events[0].replyToken, userInput, function(){})
                 }
                 request.post(config.localUrl + "/CDC/QALog", body, function (error, response, body) {
                     console.error('error:', error); // Print the error if one occurred
