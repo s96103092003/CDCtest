@@ -1,0 +1,15 @@
+{
+	"appenders": [
+		{
+			"type": "console",
+			"layout": {
+				"type": "basic"
+			},
+			"category": "cdc"
+		},
+		{
+			"type": "file",
+			"filename": "cdc.log"
+		}
+	]
+}

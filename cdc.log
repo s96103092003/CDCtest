@@ -1,0 +1,1196 @@
+[2021-05-04 15:49:13.184] [INFO] cdc - statusCode: 200 (app.js:114:24)
+[2021-05-04 15:49:13.194] [INFO] cdc - body: {
+  "entities": [
+    {
+      "ner": "infectiousDisease", 
+      "word": "\u5929\u82b1"
+    }
+  ], 
+  "intent": "vaccine_sideEffect", 
+  "isSuccess": true
+}
+ (app.js:115:24)
+[2021-05-04 15:49:13.197] [INFO] cdc - vaccine_sideEffect (app.js:128:28)
+[2021-05-04 15:49:13.219] [INFO] cdc - {
+  "took": 0,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 1,
+      "relation": "eq"
+    },
+    "max_score": 14.387224,
+    "hits": [
+      {
+        "_index": "cdc",
+        "_type": "cdcanswer",
+        "_id": "1MQmMXkBpQ2IkrWC5A5H",
+        "_score": 14.387224,
+        "_source": {
+          "intentEng": "vaccine_sideEffect",
+          "intent": "疫苗副作用",
+          "entities": "天花",
+          "answer": "由於自1955年起，臺灣就未曾再有天花病例發生，因此自1979年起即停止牛痘疫苗接種。",
+          "question": "接種天花疫苗後會有什麼副作用?",
+          "relativeQuestion": "天花疫苗保護力可以持續多久?-疑似罹患天花要去哪裡就醫?-疑似罹患天花要去哪裡就醫?"
+        }
+      }
+    ]
+  }
+} (app.js:152:28)
+[2021-05-04 15:49:13.527] [INFO] cdc - Insert QALog (app.js:176:12)
+[2021-05-04 15:49:13.529] [INFO] cdc - Insert QALog Data : {
+  "entities": [
+    {
+      "ner": "infectiousDisease",
+      "word": "天花"
+    }
+  ],
+  "intent": "vaccine_sideEffect",
+  "isSuccess": "true",
+  "answer": {
+    "intentEng": "vaccine_sideEffect",
+    "intent": "疫苗副作用",
+    "entities": "天花",
+    "answer": "由於自1955年起，臺灣就未曾再有天花病例發生，因此自1979年起即停止牛痘疫苗接種。",
+    "question": "接種天花疫苗後會有什麼副作用?",
+    "relativeQuestion": "天花疫苗保護力可以持續多久?-疑似罹患天花要去哪裡就醫?-疑似罹患天花要去哪裡就醫?"
+  },
+  "q": "接種天花疫苗後會有什麼副作用",
+  "source": "0",
+  "createtime": "Tue May 04 2021 15:49:13 GMT+0800 (GMT+08:00)"
+} (app.js:182:12)
+[2021-05-04 15:49:13.546] [INFO] cdc - response : {
+  "_index": "qalog",
+  "_type": "qalog",
+  "_id": "FsRaNnkBpQ2IkrWCOo69",
+  "_version": 1,
+  "result": "created",
+  "_shards": {
+    "total": 2,
+    "successful": 1,
+    "failed": 0
+  },
+  "_seq_no": 7,
+  "_primary_term": 1
+} (app.js:189:12)
+[2021-05-04 15:54:41.988] [INFO] cdc - statusCode: 200 (app.js:114:24)
+[2021-05-04 15:54:41.990] [INFO] cdc - body: {
+  "entities": [
+    {
+      "ner": "infectiousDisease", 
+      "word": "\u5929\u82b1"
+    }
+  ], 
+  "intent": "vaccine_protection", 
+  "isSuccess": true
+}
+ (app.js:115:24)
+[2021-05-04 15:54:41.992] [INFO] cdc - vaccine_protection (app.js:128:28)
+[2021-05-04 15:54:42.000] [INFO] cdc - {
+  "took": 0,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 1,
+      "relation": "eq"
+    },
+    "max_score": 14.3764715,
+    "hits": [
+      {
+        "_index": "cdc",
+        "_type": "cdcanswer",
+        "_id": "0sQmMXkBpQ2IkrWC5A5H",
+        "_score": 14.3764715,
+        "_source": {
+          "intentEng": "vaccine_protection",
+          "intent": "疫苗保護力",
+          "entities": "天花",
+          "answer": "感染前施打牛痘疫苗可預防疾病的發生(保護力約3~5年)；感染後3天內施打牛痘疫苗仍可減輕嚴重度或預防疾病的發生。<br />感染後4-7天內施打牛痘疫苗可能提供對天花之部分保護性；若病人出疹後才施打牛痘疫苗則不具有保護性。<br />",
+          "question": "天花疫苗保護力可以持續多久?",
+          "relativeQuestion": "我現在適合接種天花疫苗嗎?-天花疫苗有哪些廠牌?-天花疫苗該接種幾劑?"
+        }
+      }
+    ]
+  }
+} (app.js:152:28)
+[2021-05-04 15:54:42.275] [INFO] cdc - Insert QALog (app.js:176:12)
+[2021-05-04 15:54:42.276] [INFO] cdc - Insert QALog Data : {
+  "entities": [
+    {
+      "ner": "infectiousDisease",
+      "word": "天花"
+    }
+  ],
+  "intent": "vaccine_protection",
+  "isSuccess": "true",
+  "answer": {
+    "intentEng": "vaccine_protection",
+    "intent": "疫苗保護力",
+    "entities": "天花",
+    "answer": "感染前施打牛痘疫苗可預防疾病的發生(保護力約3~5年)；感染後3天內施打牛痘疫苗仍可減輕嚴重度或預防疾病的發生。<br />感染後4-7天內施打牛痘疫苗可能提供對天花之部分保護性；若病人出疹後才施打牛痘疫苗則不具有保護性。<br />",
+    "question": "天花疫苗保護力可以持續多久?",
+    "relativeQuestion": "我現在適合接種天花疫苗嗎?-天花疫苗有哪些廠牌?-天花疫苗該接種幾劑?"
+  },
+  "q": "天花疫苗保護力可以持續多久",
+  "source": "0",
+  "createtime": "Tue May 04 2021 15:54:42 GMT+0800 (GMT+08:00)"
+} (app.js:182:12)
+[2021-05-04 15:54:42.290] [INFO] cdc - response : {
+  "_index": "qalog",
+  "_type": "qalog",
+  "_id": "F8RfNnkBpQ2IkrWCPo7n",
+  "_version": 1,
+  "result": "created",
+  "_shards": {
+    "total": 2,
+    "successful": 1,
+    "failed": 0
+  },
+  "_seq_no": 8,
+  "_primary_term": 1
+} (app.js:189:12)
+[2021-05-04 15:54:49.848] [INFO] cdc - Insert QALog (app.js:176:12)
+[2021-05-04 15:57:31.383] [INFO] cdc - Insert QALog (app.js:176:12)
+[2021-05-04 16:15:12.352] [INFO] cdc - statusCode: 200 (app.js:122:24)
+[2021-05-04 16:15:12.361] [INFO] cdc - body: {
+  "entities": [
+    {
+      "ner": "infectiousDisease", 
+      "word": "\u5929\u82b1"
+    }
+  ], 
+  "intent": "vaccine_class", 
+  "isSuccess": true
+}
+ (app.js:123:24)
+[2021-05-04 16:15:12.364] [INFO] cdc - vaccine_class (app.js:136:28)
+[2021-05-04 16:15:12.388] [INFO] cdc - {
+  "took": 1,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 1,
+      "relation": "eq"
+    },
+    "max_score": 14.3764715,
+    "hits": [
+      {
+        "_index": "cdc",
+        "_type": "cdcanswer",
+        "_id": "0MQmMXkBpQ2IkrWC5A5H",
+        "_score": 14.3764715,
+        "_source": {
+          "intentEng": "vaccine_class",
+          "intent": "疫苗類別",
+          "entities": "天花",
+          "answer": "由於自1955年起，臺灣就未曾再有天花病例發生，因此自1979年起即停止牛痘疫苗接種。",
+          "question": "天花疫苗有哪些廠牌?",
+          "relativeQuestion": "天花疫苗保護力可以持續多久?-接種天花疫苗後會有什麼副作用?-如何預防天花?"
+        }
+      }
+    ]
+  }
+} (app.js:160:28)
+[2021-05-04 16:15:12.703] [INFO] cdc - Insert QALog (app.js:184:12)
+[2021-05-04 16:15:12.705] [INFO] cdc - Insert QALog Data : {
+  "entities": [
+    {
+      "ner": "infectiousDisease",
+      "word": "天花"
+    }
+  ],
+  "intent": "vaccine_class",
+  "isSuccess": "true",
+  "answer": {
+    "intentEng": "vaccine_class",
+    "intent": "疫苗類別",
+    "entities": "天花",
+    "answer": "由於自1955年起，臺灣就未曾再有天花病例發生，因此自1979年起即停止牛痘疫苗接種。",
+    "question": "天花疫苗有哪些廠牌?",
+    "relativeQuestion": "天花疫苗保護力可以持續多久?-接種天花疫苗後會有什麼副作用?-如何預防天花?"
+  },
+  "q": "天花疫苗有哪些廠牌",
+  "source": "0",
+  "createtime": "Tue May 04 2021 16:15:12 GMT+0800 (GMT+08:00)"
+} (app.js:201:12)
+[2021-05-04 16:15:12.723] [INFO] cdc - response : {
+  "_index": "qalog",
+  "_type": "qalog",
+  "_id": "GMRyNnkBpQ2IkrWCBY5H",
+  "_version": 1,
+  "result": "created",
+  "_shards": {
+    "total": 2,
+    "successful": 1,
+    "failed": 0
+  },
+  "_seq_no": 9,
+  "_primary_term": 1
+} (app.js:208:12)
+[2021-05-04 16:16:39.983] [INFO] cdc - Insert Satisfaction (app.js:212:12)
+[2021-05-04 16:16:39.985] [INFO] cdc - Insert Satisfaction Data : {
+  "q": "天花疫苗有哪些廠牌?",
+  "score": "1",
+  "isdelete": "0",
+  "createtime": "Tue May 04 2021 16:16:39 GMT+0800 (GMT+08:00)"
+} (app.js:215:12)
+[2021-05-04 16:16:40.285] [INFO] cdc - response : {
+  "_index": "qasatisfaction",
+  "_type": "qasatisfaction",
+  "_id": "GcRzNnkBpQ2IkrWCW44e",
+  "_version": 1,
+  "result": "created",
+  "_shards": {
+    "total": 2,
+    "successful": 1,
+    "failed": 0
+  },
+  "_seq_no": 0,
+  "_primary_term": 1
+} (app.js:222:12)
+[2021-05-04 16:17:05.965] [INFO] cdc - statusCode: 200 (app.js:122:24)
+[2021-05-04 16:17:05.969] [INFO] cdc - body: {
+  "entities": [
+    {
+      "ner": "infectiousDisease", 
+      "word": "\u55b5\u7684\u674e"
+    }
+  ], 
+  "intent": "introduction", 
+  "isSuccess": true
+}
+ (app.js:123:24)
+[2021-05-04 16:17:05.971] [INFO] cdc - introduction (app.js:136:28)
+[2021-05-04 16:17:05.977] [INFO] cdc - {
+  "took": 0,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 0,
+      "relation": "eq"
+    },
+    "max_score": null,
+    "hits": []
+  }
+} (app.js:160:28)
+[2021-05-04 16:17:06.298] [INFO] cdc - Insert QALog (app.js:184:12)
+[2021-05-04 16:19:45.964] [INFO] cdc - statusCode: 200 (app.js:122:24)
+[2021-05-04 16:19:45.967] [INFO] cdc - body: {
+  "entities": [
+    {
+      "ner": "infectiousDisease", 
+      "word": "\u55b5\u7684\u674e"
+    }
+  ], 
+  "intent": "introduction", 
+  "isSuccess": true
+}
+ (app.js:123:24)
+[2021-05-04 16:19:45.969] [INFO] cdc - introduction (app.js:136:28)
+[2021-05-04 16:19:45.978] [INFO] cdc - {
+  "took": 0,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 0,
+      "relation": "eq"
+    },
+    "max_score": null,
+    "hits": []
+  }
+} (app.js:160:28)
+[2021-05-04 16:19:46.265] [INFO] cdc - Insert QALog (app.js:184:12)
+[2021-05-04 16:20:58.400] [INFO] cdc - statusCode: 200 (app.js:122:24)
+[2021-05-04 16:20:58.414] [INFO] cdc - body: {
+  "entities": [
+    {
+      "ner": "infectiousDisease", 
+      "word": "\u55b5\u7684\u674e"
+    }
+  ], 
+  "intent": "introduction", 
+  "isSuccess": true
+}
+ (app.js:123:24)
+[2021-05-04 16:20:58.416] [INFO] cdc - introduction (app.js:136:28)
+[2021-05-04 16:20:58.438] [INFO] cdc - {
+  "took": 1,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 0,
+      "relation": "eq"
+    },
+    "max_score": null,
+    "hits": []
+  }
+} (app.js:160:28)
+[2021-05-04 16:20:58.736] [INFO] cdc - Insert QALog (app.js:184:12)
+[2021-05-04 16:21:13.104] [INFO] cdc - not found answer Insert bufQuestion (app.js:188:16)
+[2021-05-04 16:21:13.362] [INFO] cdc - Insert QALog Data : {
+  "entities": [
+    {
+      "ner": "infectiousDisease",
+      "word": "喵的李"
+    }
+  ],
+  "intent": "introduction",
+  "isSuccess": "true",
+  "q": "喵的李",
+  "source": "0",
+  "createtime": "Tue May 04 2021 16:21:11 GMT+0800 (GMT+08:00)"
+} (app.js:202:12)
+[2021-05-04 16:21:13.377] [INFO] cdc - response : {
+  "_index": "qalog",
+  "_type": "qalog",
+  "_id": "G8R3NnkBpQ2IkrWCho4U",
+  "_version": 1,
+  "result": "created",
+  "_shards": {
+    "total": 2,
+    "successful": 1,
+    "failed": 0
+  },
+  "_seq_no": 10,
+  "_primary_term": 1
+} (app.js:209:12)
+[2021-05-04 16:22:00.765] [INFO] cdc - statusCode: 200 (app.js:122:24)
+[2021-05-04 16:22:00.778] [INFO] cdc - body: {
+  "entities": [
+    {
+      "ner": "infectiousDisease", 
+      "word": "\u55b5\u7684\u674e"
+    }
+  ], 
+  "intent": "introduction", 
+  "isSuccess": true
+}
+ (app.js:123:24)
+[2021-05-04 16:22:00.782] [INFO] cdc - introduction (app.js:136:28)
+[2021-05-04 16:22:00.809] [INFO] cdc - {
+  "took": 0,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 0,
+      "relation": "eq"
+    },
+    "max_score": null,
+    "hits": []
+  }
+} (app.js:160:28)
+[2021-05-04 16:22:01.094] [INFO] cdc - Insert QALog (app.js:184:12)
+[2021-05-04 16:22:01.096] [INFO] cdc - not found answer Insert bufQuestion (app.js:188:16)
+[2021-05-04 16:22:01.113] [INFO] cdc - response : {
+  "_index": "bufquestion",
+  "_type": "bufquestion",
+  "_id": "HMR4NnkBpQ2IkrWCQI6L",
+  "_version": 1,
+  "result": "created",
+  "_shards": {
+    "total": 2,
+    "successful": 1,
+    "failed": 0
+  },
+  "_seq_no": 1,
+  "_primary_term": 1
+} (app.js:197:16)
+[2021-05-04 16:22:01.114] [INFO] cdc - Insert QALog Data : {
+  "entities": [
+    {
+      "ner": "infectiousDisease",
+      "word": "喵的李"
+    }
+  ],
+  "intent": "introduction",
+  "isSuccess": "true",
+  "q": "喵的李",
+  "source": "0",
+  "createtime": "Tue May 04 2021 16:22:01 GMT+0800 (GMT+08:00)"
+} (app.js:203:12)
+[2021-05-04 16:22:01.127] [INFO] cdc - response : {
+  "_index": "qalog",
+  "_type": "qalog",
+  "_id": "HcR4NnkBpQ2IkrWCQI6b",
+  "_version": 1,
+  "result": "created",
+  "_shards": {
+    "total": 2,
+    "successful": 1,
+    "failed": 0
+  },
+  "_seq_no": 11,
+  "_primary_term": 1
+} (app.js:210:12)
+[2021-05-04 17:12:23.935] [INFO] cdc - statusCode: 200 (app.js:140:24)
+[2021-05-04 17:12:23.948] [INFO] cdc - body: {
+  "entities": [
+    {
+      "ner": "infectiousDisease", 
+      "word": "\u55b5\u7684\u674e"
+    }
+  ], 
+  "intent": "introduction", 
+  "isSuccess": true
+}
+ (app.js:141:24)
+[2021-05-04 17:12:23.951] [INFO] cdc - introduction (app.js:154:28)
+[2021-05-04 17:12:23.959] [INFO] cdc - {
+  "took": 1,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 0,
+      "relation": "eq"
+    },
+    "max_score": null,
+    "hits": []
+  }
+} (app.js:178:28)
+[2021-05-04 17:12:24.287] [INFO] cdc - Insert QALog (app.js:202:12)
+[2021-05-04 17:12:24.290] [INFO] cdc - not found answer Insert bufQuestion (app.js:206:16)
+[2021-05-04 17:12:24.312] [INFO] cdc - response : {
+  "_index": "bufquestion",
+  "_type": "bufquestion",
+  "_id": "HsSmNnkBpQ2IkrWCYY7m",
+  "_version": 1,
+  "result": "created",
+  "_shards": {
+    "total": 2,
+    "successful": 1,
+    "failed": 0
+  },
+  "_seq_no": 2,
+  "_primary_term": 1
+} (app.js:215:16)
+[2021-05-04 17:12:24.313] [INFO] cdc - Insert QALog Data : {
+  "entities": [
+    {
+      "ner": "infectiousDisease",
+      "word": "喵的李"
+    }
+  ],
+  "intent": "introduction",
+  "isSuccess": "true",
+  "q": "喵的李",
+  "source": "0",
+  "createtime": "Tue May 04 2021 17:12:24 GMT+0800 (GMT+08:00)"
+} (app.js:221:12)
+[2021-05-04 17:12:24.331] [INFO] cdc - response : {
+  "_index": "qalog",
+  "_type": "qalog",
+  "_id": "H8SmNnkBpQ2IkrWCYY77",
+  "_version": 1,
+  "result": "created",
+  "_shards": {
+    "total": 2,
+    "successful": 1,
+    "failed": 0
+  },
+  "_seq_no": 12,
+  "_primary_term": 1
+} (app.js:228:12)
+[2021-05-04 17:46:18.518] [INFO] cdc - [parsing_exception] unknown query [must_not], with { line=1 & col=40 } (app.js:230:16)
+[2021-05-04 17:46:18.873] [INFO] cdc - Insert QALog (app.js:237:12)
+[2021-05-04 17:50:37.171] [INFO] cdc - [parsing_exception] [match_phrase] query doesn't support multiple fields, found [query] and [minimum_should_match], with { line=1 & col=105 } (app.js:234:16)
+[2021-05-04 17:50:37.480] [INFO] cdc - Insert QALog (app.js:241:12)
+[2021-05-04 17:50:37.487] [INFO] cdc - not found answer Insert bufQuestion (app.js:271:20)
+[2021-05-04 17:50:37.591] [INFO] cdc - response : {
+  "_index": "bufquestion",
+  "_type": "bufquestion",
+  "_id": "IMTJNnkBpQ2IkrWCX460",
+  "_version": 1,
+  "result": "created",
+  "_shards": {
+    "total": 2,
+    "successful": 1,
+    "failed": 0
+  },
+  "_seq_no": 3,
+  "_primary_term": 1
+} (app.js:282:20)
+[2021-05-04 17:50:37.592] [INFO] cdc - Insert QALog Data : {
+  "qa": "",
+  "intent": "",
+  "source": "0",
+  "isSuccess": "false",
+  "userId": "Uff16cdc269b781d9e95bba911b52af70",
+  "createtime": "Tue May 04 2021 17:50:37 GMT+0800 (GMT+08:00)"
+} (app.js:289:12)
+[2021-05-04 17:50:42.567] [INFO] cdc - response : {
+  "_index": "qalog",
+  "_type": "qalog",
+  "_id": "IcTJNnkBpQ2IkrWCYI4b",
+  "_version": 1,
+  "result": "created",
+  "_shards": {
+    "total": 2,
+    "successful": 1,
+    "failed": 0
+  },
+  "_seq_no": 13,
+  "_primary_term": 1
+} (app.js:296:12)
+[2021-05-04 17:54:56.133] [DEBUG] cdc - [parsing_exception] [match_phrase] query doesn't support multiple fields, found [q] and [minimum_should_match], with { line=1 & col=101 } (app.js:236:16)
+[2021-05-04 17:54:56.446] [INFO] cdc - Insert QALog (app.js:243:12)
+[2021-05-04 17:55:06.070] [INFO] cdc - not found answer Insert bufQuestion (app.js:273:20)
+[2021-05-04 17:55:06.093] [INFO] cdc - response : {
+  "_index": "bufquestion",
+  "_type": "bufquestion",
+  "_id": "IsTNNnkBpQ2IkrWCeI7c",
+  "_version": 1,
+  "result": "created",
+  "_shards": {
+    "total": 2,
+    "successful": 1,
+    "failed": 0
+  },
+  "_seq_no": 4,
+  "_primary_term": 1
+} (app.js:284:20)
+[2021-05-04 17:55:06.095] [INFO] cdc - Insert QALog Data : {
+  "qa": "",
+  "intent": "",
+  "source": "0",
+  "isSuccess": "false",
+  "userId": "Uff16cdc269b781d9e95bba911b52af70",
+  "createtime": "Tue May 04 2021 17:54:56 GMT+0800 (GMT+08:00)"
+} (app.js:291:12)
+[2021-05-04 17:55:06.111] [INFO] cdc - response : {
+  "_index": "qalog",
+  "_type": "qalog",
+  "_id": "I8TNNnkBpQ2IkrWCeI7y",
+  "_version": 1,
+  "result": "created",
+  "_shards": {
+    "total": 2,
+    "successful": 1,
+    "failed": 0
+  },
+  "_seq_no": 14,
+  "_primary_term": 1
+} (app.js:298:12)
+[2021-05-04 17:58:51.166] [DEBUG] cdc - [parsing_exception] [match_phrase] query does not support [minimum_should_match], with { line=1 & col=110 } (app.js:239:16)
+[2021-05-04 17:58:51.481] [INFO] cdc - Insert QALog (app.js:246:12)
+[2021-05-04 17:58:51.488] [INFO] cdc - not found answer Insert bufQuestion (app.js:276:20)
+[2021-05-04 17:58:51.506] [INFO] cdc - response : {
+  "_index": "bufquestion",
+  "_type": "bufquestion",
+  "_id": "JMTQNnkBpQ2IkrWC6Y5k",
+  "_version": 1,
+  "result": "created",
+  "_shards": {
+    "total": 2,
+    "successful": 1,
+    "failed": 0
+  },
+  "_seq_no": 5,
+  "_primary_term": 1
+} (app.js:287:20)
+[2021-05-04 17:58:51.507] [INFO] cdc - Insert QALog Data : {
+  "qa": "",
+  "intent": "",
+  "source": "0",
+  "isSuccess": "false",
+  "userId": "Uff16cdc269b781d9e95bba911b52af70",
+  "createtime": "Tue May 04 2021 17:58:51 GMT+0800 (GMT+08:00)"
+} (app.js:294:12)
+[2021-05-04 17:58:51.518] [INFO] cdc - response : {
+  "_index": "qalog",
+  "_type": "qalog",
+  "_id": "JcTQNnkBpQ2IkrWC6Y51",
+  "_version": 1,
+  "result": "created",
+  "_shards": {
+    "total": 2,
+    "successful": 1,
+    "failed": 0
+  },
+  "_seq_no": 15,
+  "_primary_term": 1
+} (app.js:301:12)
+[2021-05-04 18:00:03.603] [DEBUG] cdc - body is not defined (app.js:239:16)
+[2021-05-04 18:00:03.967] [INFO] cdc - Insert QALog (app.js:246:12)
+[2021-05-04 18:00:03.974] [INFO] cdc - not found answer Insert bufQuestion (app.js:276:20)
+[2021-05-04 18:00:03.996] [INFO] cdc - response : {
+  "_index": "bufquestion",
+  "_type": "bufquestion",
+  "_id": "JsTSNnkBpQ2IkrWCBI6M",
+  "_version": 1,
+  "result": "created",
+  "_shards": {
+    "total": 2,
+    "successful": 1,
+    "failed": 0
+  },
+  "_seq_no": 6,
+  "_primary_term": 1
+} (app.js:287:20)
+[2021-05-04 18:00:03.997] [INFO] cdc - Insert QALog Data : {
+  "qa": "",
+  "intent": "",
+  "source": "0",
+  "isSuccess": "false",
+  "userId": "Uff16cdc269b781d9e95bba911b52af70",
+  "createtime": "Tue May 04 2021 18:00:03 GMT+0800 (GMT+08:00)"
+} (app.js:294:12)
+[2021-05-04 18:00:04.008] [INFO] cdc - response : {
+  "_index": "qalog",
+  "_type": "qalog",
+  "_id": "J8TSNnkBpQ2IkrWCBI6f",
+  "_version": 1,
+  "result": "created",
+  "_shards": {
+    "total": 2,
+    "successful": 1,
+    "failed": 0
+  },
+  "_seq_no": 16,
+  "_primary_term": 1
+} (app.js:301:12)
+[2021-05-04 18:02:39.307] [DEBUG] cdc - [index_not_found_exception] no such index [bufquestion], with { resource.type="index_or_alias" & resource.id="bufquestion" & index_uuid="_na_" & index="bufquestion" } (app.js:239:16)
+[2021-05-04 18:02:39.634] [INFO] cdc - Insert QALog (app.js:246:12)
+[2021-05-04 18:03:57.342] [DEBUG] cdc - [index_not_found_exception] no such index [bufquestion], with { resource.type="index_or_alias" & resource.id="bufquestion" & index_uuid="_na_" & index="bufquestion" } (app.js:239:16)
+[2021-05-04 18:03:57.641] [INFO] cdc - Insert QALog (app.js:246:12)
+[2021-05-04 18:13:29.161] [DEBUG] cdc - [parsing_exception] Unknown key for a VALUE_BOOLEAN in [ignoreUnavailable]., with { line=1 & col=179 } (app.js:243:16)
+[2021-05-04 18:13:29.543] [INFO] cdc - Insert QALog (app.js:250:12)
+[2021-05-04 18:17:20.312] [DEBUG] cdc - [parsing_exception] Unknown key for a VALUE_BOOLEAN in [ignoreUnavailable]., with { line=1 & col=179 } (app.js:243:16)
+[2021-05-04 18:17:20.642] [INFO] cdc - Insert QALog (app.js:250:12)
+[2021-05-04 18:19:32.176] [DEBUG] cdc - [parsing_exception] Unknown key for a VALUE_BOOLEAN in [ignoreUnavailable]., with { line=1 & col=179 } (app.js:243:16)
+[2021-05-04 18:19:32.486] [INFO] cdc - Insert QALog (app.js:250:12)
+[2021-05-04 18:22:40.055] [DEBUG] cdc - [parsing_exception] Unknown key for a VALUE_BOOLEAN in [ignoreUnavailable]., with { line=1 & col=179 } (app.js:243:16)
+[2021-05-04 18:22:40.374] [INFO] cdc - Insert QALog (app.js:250:12)
+[2021-05-04 18:23:30.712] [DEBUG] cdc - [parsing_exception] [bool] malformed query, expected [END_OBJECT] but found [FIELD_NAME], with { line=1 & col=158 } (app.js:243:16)
+[2021-05-04 18:23:31.017] [INFO] cdc - Insert QALog (app.js:250:12)
+[2021-05-04 18:24:01.126] [DEBUG] cdc - [x_content_parse_exception] [1:157] [bool] unknown field [ignoreUnavailable] (app.js:244:16)
+[2021-05-04 18:24:01.433] [INFO] cdc - Insert QALog (app.js:251:12)
+[2021-05-04 18:25:56.294] [DEBUG] cdc - [parsing_exception] Unknown key for a VALUE_BOOLEAN in [ignore_unavailable]., with { line=1 & col=180 } (app.js:244:16)
+[2021-05-04 18:25:56.634] [INFO] cdc - Insert QALog (app.js:251:12)
+[2021-05-04 18:27:11.524] [DEBUG] cdc - [index_not_found_exception] no such index [bufquestion], with { resource.type="index_or_alias" & resource.id="bufquestion" & index_uuid="_na_" & index="bufquestion" } (app.js:244:16)
+[2021-05-04 18:27:11.861] [INFO] cdc - Insert QALog (app.js:251:12)
+[2021-05-04 18:30:01.180] [INFO] cdc - statusCode: 200 (app.js:201:28)
+[2021-05-04 18:30:01.190] [INFO] cdc - body: {
+  "entities": [
+    {
+      "ner": "infectiousDisease", 
+      "word": "\u55b5\u7684\u674e"
+    }
+  ], 
+  "intent": "introduction", 
+  "isSuccess": true
+}
+ (app.js:202:28)
+[2021-05-04 18:30:01.193] [INFO] cdc - introduction (app.js:207:32)
+[2021-05-04 18:31:16.575] [INFO] cdc - statusCode: 200 (app.js:201:28)
+[2021-05-04 18:31:16.591] [INFO] cdc - body: {
+  "entities": [
+    {
+      "ner": "infectiousDisease", 
+      "word": "\u55b5\u7684\u674e"
+    }
+  ], 
+  "intent": "introduction", 
+  "isSuccess": true
+}
+ (app.js:202:28)
+[2021-05-04 18:31:16.594] [INFO] cdc - introduction (app.js:207:32)
+[2021-05-04 18:31:16.603] [INFO] cdc - {
+  "took": 1,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 0,
+      "relation": "eq"
+    },
+    "max_score": null,
+    "hits": []
+  }
+} (app.js:233:32)
+[2021-05-04 18:31:16.905] [INFO] cdc - Insert QALog (app.js:252:12)
+[2021-05-04 18:31:20.109] [INFO] cdc - not found answer Insert bufQuestion (app.js:289:20)
+[2021-05-04 18:31:20.386] [INFO] cdc - response : {
+  "_index": "bufquestion",
+  "_type": "bufquestion",
+  "_id": "KMTuNnkBpQ2IkrWCpo4D",
+  "_version": 1,
+  "result": "created",
+  "_shards": {
+    "total": 2,
+    "successful": 1,
+    "failed": 0
+  },
+  "_seq_no": 0,
+  "_primary_term": 1
+} (app.js:301:20)
+[2021-05-04 18:31:20.387] [INFO] cdc - Insert QALog Data : {
+  "entities": [
+    {
+      "ner": "infectiousDisease",
+      "word": "喵的李"
+    }
+  ],
+  "intent": "introduction",
+  "isSuccess": "true",
+  "q": "喵的李",
+  "source": "0",
+  "userId": "Uff16cdc269b781d9e95bba911b52af70",
+  "createtime": "Tue May 04 2021 18:31:20 GMT+0800 (GMT+08:00)"
+} (app.js:308:12)
+[2021-05-04 18:31:24.009] [INFO] cdc - response : {
+  "_index": "qalog",
+  "_type": "qalog",
+  "_id": "KcTuNnkBpQ2IkrWCpo5G",
+  "_version": 1,
+  "result": "created",
+  "_shards": {
+    "total": 2,
+    "successful": 1,
+    "failed": 0
+  },
+  "_seq_no": 17,
+  "_primary_term": 1
+} (app.js:315:12)
+[2021-05-04 18:34:35.304] [DEBUG] cdc - body is not defined (app.js:245:16)
+[2021-05-04 18:34:35.570] [INFO] cdc - Insert QALog (app.js:252:12)
+[2021-05-04 18:35:15.624] [DEBUG] cdc - body is not defined (app.js:245:16)
+[2021-05-04 18:35:15.895] [INFO] cdc - Insert QALog (app.js:252:12)
+[2021-05-04 18:46:07.800] [DEBUG] cdc - [parsing_exception] unknown query [must], with { line=1 & col=133 } (app.js:245:16)
+[2021-05-04 18:46:08.125] [INFO] cdc - Insert QALog (app.js:252:12)
+[2021-05-04 18:48:54.494] [DEBUG] cdc - [parsing_exception] unknown query [must], with { line=1 & col=133 } (app.js:245:16)
+[2021-05-04 18:48:54.838] [INFO] cdc - Insert QALog (app.js:252:12)
+[2021-05-04 18:53:43.703] [DEBUG] cdc - [parsing_exception] unknown query [filter], with { line=1 & col=135 } (app.js:248:16)
+[2021-05-04 18:53:44.049] [INFO] cdc - Insert QALog (app.js:255:12)
+[2021-05-04 18:57:06.279] [DEBUG] cdc - [parsing_exception] unknown query [filtered], with { line=1 & col=137 } (app.js:250:16)
+[2021-05-04 18:57:06.611] [INFO] cdc - Insert QALog (app.js:257:12)
+[2021-05-04 18:59:41.206] [DEBUG] cdc - [x_content_parse_exception] [1:73] [bool] failed to parse field [must] (app.js:237:16)
+[2021-05-04 18:59:41.522] [INFO] cdc - Insert QALog (app.js:244:12)
+[2021-05-04 19:01:23.277] [INFO] cdc - statusCode: 200 (app.js:193:28)
+[2021-05-04 19:01:23.289] [INFO] cdc - body: {
+  "entities": [
+    {
+      "ner": "infectiousDisease", 
+      "word": "\u55b5\u7684\u674e"
+    }
+  ], 
+  "intent": "introduction", 
+  "isSuccess": true
+}
+ (app.js:194:28)
+[2021-05-04 19:01:23.292] [INFO] cdc - introduction (app.js:199:32)
+[2021-05-04 19:01:23.300] [INFO] cdc - {
+  "took": 0,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 0,
+      "relation": "eq"
+    },
+    "max_score": null,
+    "hits": []
+  }
+} (app.js:225:32)
+[2021-05-04 19:01:23.657] [INFO] cdc - Insert QALog (app.js:244:12)
+[2021-05-04 19:02:11.235] [INFO] cdc - statusCode: 200 (app.js:193:28)
+[2021-05-04 19:02:11.249] [INFO] cdc - body: {
+  "entities": [
+    {
+      "ner": "infectiousDisease", 
+      "word": "\u55b5\u7684\u674e"
+    }
+  ], 
+  "intent": "introduction", 
+  "isSuccess": true
+}
+ (app.js:194:28)
+[2021-05-04 19:02:11.251] [INFO] cdc - introduction (app.js:199:32)
+[2021-05-04 19:02:11.259] [INFO] cdc - {
+  "took": 0,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 0,
+      "relation": "eq"
+    },
+    "max_score": null,
+    "hits": []
+  }
+} (app.js:225:32)
+[2021-05-04 19:02:11.574] [INFO] cdc - Insert QALog (app.js:244:12)
+[2021-05-04 19:02:15.550] [INFO] cdc - not found answer Insert bufQuestion (app.js:274:20)
+[2021-05-04 19:02:15.811] [INFO] cdc - response : {
+  "_index": "bufquestion",
+  "_type": "bufquestion",
+  "_id": "KsQKN3kBpQ2IkrWC9Y7B",
+  "_version": 1,
+  "result": "created",
+  "_shards": {
+    "total": 2,
+    "successful": 1,
+    "failed": 0
+  },
+  "_seq_no": 0,
+  "_primary_term": 1
+} (app.js:286:20)
+[2021-05-04 19:02:15.813] [INFO] cdc - Insert QALog Data : {
+  "entities": [
+    {
+      "ner": "infectiousDisease",
+      "word": "喵的李"
+    }
+  ],
+  "intent": "introduction",
+  "isSuccess": "true",
+  "q": "喵的李",
+  "source": "0",
+  "userId": "Uff16cdc269b781d9e95bba911b52af70",
+  "createtime": "Tue May 04 2021 19:02:11 GMT+0800 (GMT+08:00)"
+} (app.js:293:12)
+[2021-05-04 19:02:18.921] [INFO] cdc - response : {
+  "_index": "qalog",
+  "_type": "qalog",
+  "_id": "K8QKN3kBpQ2IkrWC9o4J",
+  "_version": 1,
+  "result": "created",
+  "_shards": {
+    "total": 2,
+    "successful": 1,
+    "failed": 0
+  },
+  "_seq_no": 18,
+  "_primary_term": 1
+} (app.js:300:12)
+[2021-05-04 19:05:07.866] [INFO] cdc - statusCode: 200 (app.js:193:28)
+[2021-05-04 19:05:07.878] [INFO] cdc - body: {
+  "entities": [
+    {
+      "ner": "infectiousDisease", 
+      "word": "\u55b5\u7684\u674e"
+    }
+  ], 
+  "intent": "introduction", 
+  "isSuccess": true
+}
+ (app.js:194:28)
+[2021-05-04 19:05:07.880] [INFO] cdc - introduction (app.js:199:32)
+[2021-05-04 19:05:07.887] [INFO] cdc - {
+  "took": 0,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 0,
+      "relation": "eq"
+    },
+    "max_score": null,
+    "hits": []
+  }
+} (app.js:225:32)
+[2021-05-04 19:05:08.222] [INFO] cdc - Insert QALog (app.js:244:12)
+[2021-05-04 19:05:10.723] [INFO] cdc - Insert QALog Data : {
+  "entities": [
+    {
+      "ner": "infectiousDisease",
+      "word": "喵的李"
+    }
+  ],
+  "intent": "introduction",
+  "isSuccess": "true",
+  "q": "喵的李",
+  "source": "0",
+  "userId": "Uff16cdc269b781d9e95bba911b52af70",
+  "createtime": "Tue May 04 2021 19:05:08 GMT+0800 (GMT+08:00)"
+} (app.js:293:12)
+[2021-05-04 19:05:10.740] [INFO] cdc - response : {
+  "_index": "qalog",
+  "_type": "qalog",
+  "_id": "LMQNN3kBpQ2IkrWCoY5I",
+  "_version": 1,
+  "result": "created",
+  "_shards": {
+    "total": 2,
+    "successful": 1,
+    "failed": 0
+  },
+  "_seq_no": 19,
+  "_primary_term": 1
+} (app.js:300:12)
+[2021-05-04 19:05:40.596] [INFO] cdc - statusCode: 200 (app.js:193:28)
+[2021-05-04 19:05:40.599] [INFO] cdc - body: {
+  "entities": [
+    {
+      "ner": "infectiousDisease", 
+      "word": "\u5929\u82b1"
+    }
+  ], 
+  "intent": "introduction", 
+  "isSuccess": true
+}
+ (app.js:194:28)
+[2021-05-04 19:05:40.603] [INFO] cdc - introduction (app.js:199:32)
+[2021-05-04 19:05:40.612] [INFO] cdc - {
+  "took": 2,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 1,
+      "relation": "eq"
+    },
+    "max_score": 14.3764715,
+    "hits": [
+      {
+        "_index": "cdc",
+        "_type": "cdcanswer",
+        "_id": "vMQmMXkBpQ2IkrWC5A5H",
+        "_score": 14.3764715,
+        "_source": {
+          "intentEng": "introduction",
+          "intent": "認識疾病",
+          "entities": "天花",
+          "answer": "天花為一種由天花病毒(variola virus)所引起之急性傳染病。",
+          "question": "什麼是天花?",
+          "relativeQuestion": "天花會有什麼症狀?-如何預防天花?-疑似感染天花了怎麼辦?"
+        }
+      }
+    ]
+  }
+} (app.js:225:32)
+[2021-05-04 19:05:40.896] [INFO] cdc - Insert QALog (app.js:244:12)
+[2021-05-04 19:05:43.950] [INFO] cdc - Insert QALog Data : {
+  "entities": [
+    {
+      "ner": "infectiousDisease",
+      "word": "天花"
+    }
+  ],
+  "intent": "introduction",
+  "isSuccess": "true",
+  "answer": {
+    "intentEng": "introduction",
+    "intent": "認識疾病",
+    "entities": "天花",
+    "answer": "天花為一種由天花病毒(variola virus)所引起之急性傳染病。",
+    "question": "什麼是天花?",
+    "relativeQuestion": "天花會有什麼症狀?-如何預防天花?-疑似感染天花了怎麼辦?"
+  },
+  "q": "天花",
+  "source": "0",
+  "userId": "Uff16cdc269b781d9e95bba911b52af70",
+  "createtime": "Tue May 04 2021 19:05:40 GMT+0800 (GMT+08:00)"
+} (app.js:293:12)
+[2021-05-04 19:05:43.964] [INFO] cdc - response : {
+  "_index": "qalog",
+  "_type": "qalog",
+  "_id": "LcQON3kBpQ2IkrWCI44Q",
+  "_version": 1,
+  "result": "created",
+  "_shards": {
+    "total": 2,
+    "successful": 1,
+    "failed": 0
+  },
+  "_seq_no": 20,
+  "_primary_term": 1
+} (app.js:300:12)
+[2021-05-04 19:05:50.506] [INFO] cdc - Insert Satisfaction (app.js:304:12)
+[2021-05-04 19:05:50.507] [INFO] cdc - Insert Satisfaction Data : {
+  "q": "天花",
+  "score": "1",
+  "isdelete": "0",
+  "createtime": "Tue May 04 2021 19:05:50 GMT+0800 (GMT+08:00)"
+} (app.js:307:12)
+[2021-05-04 19:05:50.526] [INFO] cdc - response : {
+  "_index": "qasatisfaction",
+  "_type": "qasatisfaction",
+  "_id": "LsQON3kBpQ2IkrWCPI6t",
+  "_version": 1,
+  "result": "created",
+  "_shards": {
+    "total": 2,
+    "successful": 1,
+    "failed": 0
+  },
+  "_seq_no": 1,
+  "_primary_term": 1
+} (app.js:314:12)
+[2021-05-04 19:06:07.650] [INFO] cdc - statusCode: 200 (app.js:193:28)
+[2021-05-04 19:06:07.653] [INFO] cdc - body: {
+  "entities": [
+    {
+      "ner": "infectiousDisease", 
+      "word": "\u5929\u82b1"
+    }
+  ], 
+  "intent": "Prevention_method", 
+  "isSuccess": true
+}
+ (app.js:194:28)
+[2021-05-04 19:06:07.655] [INFO] cdc - Prevention_method (app.js:199:32)
+[2021-05-04 19:06:07.663] [INFO] cdc - {
+  "took": 1,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 1,
+      "relation": "eq"
+    },
+    "max_score": 14.3764715,
+    "hits": [
+      {
+        "_index": "cdc",
+        "_type": "cdcanswer",
+        "_id": "xsQmMXkBpQ2IkrWC5A5H",
+        "_score": 14.3764715,
+        "_source": {
+          "intentEng": "Prevention_method",
+          "intent": "預防方法",
+          "entities": "天花",
+          "answer": "1.預防天花最有效的方法就是接種牛痘疫苗，基於目前有限的疫苗儲備量，並考量疫苗接種後之副作用及若暴露天花病毒3天內仍可接種疫苗，有效的預防感染，所以建議疫情爆發前不宜全面接種<br />2.維持良好的個人及環境衞生<br />3.保持室內空氣流通，避免長期處於密閉空間內。",
+          "question": "如何預防天花?",
+          "relativeQuestion": "我想了解天花疫苗?-天花會有什麼症狀?-疑似感染天花了怎麼辦?"
+        }
+      }
+    ]
+  }
+} (app.js:225:32)
+[2021-05-04 19:06:07.943] [INFO] cdc - Insert QALog (app.js:244:12)
+[2021-05-04 19:06:07.945] [INFO] cdc - Insert QALog Data : {
+  "entities": [
+    {
+      "ner": "infectiousDisease",
+      "word": "天花"
+    }
+  ],
+  "intent": "Prevention_method",
+  "isSuccess": "true",
+  "answer": {
+    "intentEng": "Prevention_method",
+    "intent": "預防方法",
+    "entities": "天花",
+    "answer": "1.預防天花最有效的方法就是接種牛痘疫苗，基於目前有限的疫苗儲備量，並考量疫苗接種後之副作用及若暴露天花病毒3天內仍可接種疫苗，有效的預防感染，所以建議疫情爆發前不宜全面接種<br />2.維持良好的個人及環境衞生<br />3.保持室內空氣流通，避免長期處於密閉空間內。",
+    "question": "如何預防天花?",
+    "relativeQuestion": "我想了解天花疫苗?-天花會有什麼症狀?-疑似感染天花了怎麼辦?"
+  },
+  "q": "如何預防天花",
+  "source": "0",
+  "userId": "Uff16cdc269b781d9e95bba911b52af70",
+  "createtime": "Tue May 04 2021 19:06:07 GMT+0800 (GMT+08:00)"
+} (app.js:293:12)
+[2021-05-04 19:06:07.959] [INFO] cdc - response : {
+  "_index": "qalog",
+  "_type": "qalog",
+  "_id": "L8QON3kBpQ2IkrWCgI7L",
+  "_version": 1,
+  "result": "created",
+  "_shards": {
+    "total": 2,
+    "successful": 1,
+    "failed": 0
+  },
+  "_seq_no": 21,
+  "_primary_term": 1
+} (app.js:300:12)
+[2021-05-04 19:06:11.481] [INFO] cdc - Insert Satisfaction (app.js:304:12)
+[2021-05-04 19:06:11.484] [INFO] cdc - Insert Satisfaction Data : {
+  "q": "如何預防天花?",
+  "score": "2",
+  "isdelete": "0",
+  "createtime": "Tue May 04 2021 19:06:11 GMT+0800 (GMT+08:00)"
+} (app.js:307:12)
+[2021-05-04 19:06:11.506] [INFO] cdc - response : {
+  "_index": "qasatisfaction",
+  "_type": "qasatisfaction",
+  "_id": "MMQON3kBpQ2IkrWCjo6h",
+  "_version": 1,
+  "result": "created",
+  "_shards": {
+    "total": 2,
+    "successful": 1,
+    "failed": 0
+  },
+  "_seq_no": 2,
+  "_primary_term": 1
+} (app.js:314:12)

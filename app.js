@@ -7,6 +7,15 @@ var app = express();
 var port = process.env.PORT || 8080;
 var server = http.Server(app).listen(port);
 var bodyParser = require("body-parser");
+const log4js = require('log4js');
+const log4js_extend = require('log4js-extend');
+log4js_extend(log4js, {
+    path: __dirname,
+    format: '(@file:@line:@column)'
+});
+log4js.configure(__dirname + '/log4js.json');
+const logger = log4js.getLogger('cdc');
+
 app.all('*', function (req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
@@ -22,7 +31,7 @@ app.use(bodyParser.json());
 
 
 process.on('uncaughtException', function (err) {
-    console.log('uncaughtException occurred: ' + (err.stack ? err.stack : err));
+    logger.info('uncaughtException occurred: ' + (err.stack ? err.stack : err));
 });
 
 var config = fs.readFileSync(__dirname + '/config.json', 'utf8');
@@ -42,6 +51,65 @@ var esClient = new elasticsearch.Client({
     log: 'trace',
     apiVersion: '7.x', // use the same version of your Elasticsearch instance
 });
+// /cdc/cdcdanswer
+const CDCAnsweEntity = {
+    "intentEng": String,//"introduction",
+    "intent": String,//"認識疾病",
+    "entities": String,//"天花",
+    "answer": String,//"天花為一種由天花病毒(variola virus)所引起之急性傳染病。",
+    "question": String,//"什麼是天花?",
+    "relativeQuestion": String,//"天花會有什麼症狀?-如何預防天花?-疑似感染天花了怎麼辦?"
+}
+// /qalog/qalog
+const QALogEntity = {
+    "entities": [
+        {
+            "ner": String,//"infectiousDisease",
+            "word": String,//"天花"
+        }
+    ],
+    "intent": String,//"introduction",
+    "isSuccess": Boolean,//"true",
+    "answer": [
+        {
+            "intentEng": String,//"introduction",
+            "intent": String,//"認識疾病",
+            "entities": String,//"天花",
+            "answer": String,//"天花為一種由天花病毒(variola virus)所引起之急性傳染病。",
+            "question": String,//"什麼是天花?",
+            "relativeQuestion": String,//"天花會有什麼症狀?-如何預防天花?-疑似感染天花了怎麼辦?"
+        }
+    ],
+    "q": String,//"天花",
+    "source": Number,// 0: bert 1: buf 
+}
+
+// /qasatisfaction/qasatisfaction
+const QASatisfactionEntity = {
+
+    "q": String,//"問題",
+    "score": Number,// 0:不滿意  1: 普通  2 : 滿意
+
+}
+// /bufquestion/bufquestion 
+const QABufQuestion = {
+    "intent": String,//body.intent,
+    "entities": String, //body.entities,
+    "q": String,//"問題",
+    "answer": String,// "答案"
+
+}
+const rutrnErrData = {
+    qa: "",
+    intent: "",
+    entities: [{
+
+    }],
+    answer: [],
+    source: 0,
+    isSuccess: false
+}
+
 /*
 esClient.ping({
     // ping usually has a 3000ms timeout
@@ -50,127 +118,203 @@ esClient.ping({
     if (error) {
         console.trace('elasticsearch cluster is down!');
     } else {
-        console.log('All is well');
+        logger.info('All is well');
     }
 });
 */
-app.get("/:message", function (req, res) {
+app.get("/:message", async function (req, res) {
     try {
         var message = req.params.message;
         var Url = encodeURI(config.ModelUrl + message)
         //decodeURI
         if (message != "favicon.ico") {
-            request(Url, async function (error, response, body) {
-                console.error('error:', error); // Print the error if one occurred
-                console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-                console.log('body:', body); // Print the HTML for the Google homepage.
-                if (error != null) {
-                    res.send({
-                        intent: "",
-                        entities: [{
+            var answer = await esClient.search({
+                index: 'bufquestion',
+                type: 'bufquestion',
+                body: {
+                    size: 5,
+                    from: 0,
+                    query: {
+                        bool: {
+                            must: [
+                                {
+                                    match: {
+                                        q: {
+                                            query: message,
+                                            minimum_should_match: "85%"
+                                        }
+                                    },
 
-                        }],
-                        isSuccess: false
-                    })
-                } else {
-                    body = JSON.parse(body)
-                    console.log(body.intent)
-                    EntityString = []
-                    for (var i in body.entities) {
-                        if (body.entities.length - 1 == i)
-                            EntityString += body.entities[i].word
-                        else
-                            EntityString += body.entities[i].word + " "
-                    }
-                    var answer = await esClient.search({
-                        index: 'cdc',
-                        type: 'cdcanswer',
-                        body: {
-                            size: 5,
-                            from: 0,
-                            query: {
-                                bool: {
-                                    must: [
-                                        { match_phrase: { entities: EntityString } },
-                                        { match_phrase: { intentEng: body.intent } }
-                                    ]
                                 }
+                            ]
+                        }
+                    }
+                },
+                ignore_unavailable: true
+            });
+            console.log("BufQuestion Answer: " + JSON.stringify(answer, null, 2))
+            if (answer.hits.hits.length > 0 && answer.hits.hits[0]._source.answer!="") {
+                EntityString = []
+                for (var i in answer.hits.hits[0].entities) {
+                    if (body.entities.length - 1 == i)
+                        EntityString += answer.hits.hits[0].entities[i].word
+                    else
+                        EntityString += answer.hits.hits[0].entities[i].word + " "
+                }
+                answer = await esClient.search({
+                    index: 'cdc',
+                    type: 'cdcanswer',
+                    body: {
+                        size: 3,
+                        from: 0,
+                        query: {
+                            bool: {
+                                must: [
+                                    { match_phrase: { entities: EntityString } }
+                                ]
                             }
                         }
-                    });
-                    console.log(JSON.stringify(answer, null, 2))
-                    body.answer = answer.hits.hits
-                    res.send(JSON.stringify(body, null, 2))
-                }
-            });
-        }
-
-    }
-    catch (e) {
-        res.send({
-            intent: "",
-            entities: [{
-
-            }],
-            isSuccess: false
-        })
-    }
-
-})
-//接收LINE訊息
-app.post("/", function (req, res) {
-
-    console.log("Get LINE Message");
-    var userMessage = req.body;
-
-    console.log(JSON.stringify(userMessage.events[0]));
-
-    var channel_access_token = config.channel_access_token;
-
-    var data = {
-        'to': userMessage.events[0].source.userId,
-        'replyToken': userMessage.events[0].replyToken,
-        'messages': []
-    };
-    var userInput = "";
-    switch (userMessage.events[0].message.type) {
-        case "text":
-            var msg = userMessage.events[0].message.text;
-            userInput = msg
-            console.log(msg);
-            break;
-
-    }
-    if (userInput != "") {
-        var requestUrl = config.localUrl + "/" + encodeURI(userInput);
-        console.log("url: " + requestUrl)
-        request.get(requestUrl, function (error, response, body) {
-            console.error('error:', error); // Print the error if one occurred
-            console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-            console.log('body:', body); // Print the HTML for the Google homepage.
-            body = JSON.parse(body)
-            if (body.answer.length > 0) {
-                data.messages.push({
-                    type: 'text',
-                    text: String(body.answer[0]._source.answer).replace(/<br \/>/g, "\n")
+                    },
+                    ignore_unavailable: true
+                });
+                res.send({
+                    q: message,
+                    intent: answer.hits.hits[0].intent,
+                    entities: answer.hits.hits[0].entities,
+                    relativeQuestion: answer.hits.hits[0]._source.relativeQuestion,
+                    answer: answer.hits.hits[0].answer,
+                    source: 1,
+                    isSuccess: true
                 })
             }
             else {
-                data.messages.push({
-                    type: 'text',
-                    text: "找不到適合的答案"
-                })
+                request(Url, async function (error, response, body) {
+                    console.error('error:', error); // Print the error if one occurred
+                    logger.info('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+                    logger.info('body:', body); // Print the HTML for the Google homepage.
+                    if (error != null) {
+                        res.send(rutrnErrData)
+                    } else {
+                        body = JSON.parse(body)
+                        logger.info(body.intent)
+                        EntityString = []
+                        for (var i in body.entities) {
+                            if (body.entities.length - 1 == i)
+                                EntityString += body.entities[i].word
+                            else
+                                EntityString += body.entities[i].word + " "
+                        }
+                        var answer = await esClient.search({
+                            index: 'cdc',
+                            type: 'cdcanswer',
+                            body: {
+                                size: 5,
+                                from: 0,
+                                query: {
+                                    bool: {
+                                        must: [
+                                            { match_phrase: { entities: EntityString } },
+                                            { match_phrase: { intentEng: body.intent } }
+                                        ]
+                                    }
+                                }
+                            }
+                            ,
+                            ignore_unavailable: true
+                        });
+                        logger.info(JSON.stringify(answer, null, 2))
+                        body.answer = answer.hits.hits;
+                        body.q = message;
+                        body.source = 0;
+                        body.isSuccess = true;
+                        res.send(JSON.stringify(body, null, 2))
+                    }
+                });
             }
-            ReplyMessage(data, channel_access_token, data.replyToken, function (ret) {
-                if (!ret)
-                    PostToLINE(data, channel_access_token, this.callback); // reply_token 已過期，改用 PUSH_MESSAGE                   
-            });
-        })
+        }
+    }
+    catch (e) {
+        logger.debug(e.message)
+        res.send(rutrnErrData)
     }
 
+})
 
+app.post('/CDC/QALog', async function (req, res) {
+    logger.info("Insert QALog")
+    var body = req.body
+    body.createtime = Date().toLocaleString()
+    if (body.answer == undefined) {
+        var answer = await esClient.search({
+            index: 'bufquestion',
+            type: 'bufquestion',
+            body: {
+                size: 5,
+                from: 0,
+                query: {
+                    bool: {
+                        must: [
+                            {
+                                match: {
+                                    q: {
+                                        query: body.q,
+                                        minimum_should_match: "85%"
+                                    }
+                                },
 
-});
+                            }
+                        ]
+                    }
+                }
+            },
+            ignore_unavailable: true
+
+        });
+        if (answer.hits.hits.length == 0) {
+            logger.info("not found answer Insert bufQuestion")
+            let response = await esClient.index({
+                index: 'bufquestion',
+                type: 'bufquestion',
+                body: {
+                    q: body.q,
+                    intent: body.intent,
+                    entities: body.entities,
+                    answer: [],
+                    createtime: Date().toLocaleString()
+                }
+            });
+            logger.info("response : " + JSON.stringify(response, null, 2))
+        }
+    }
+    else if (body.answer.length > 0) {
+        body.answer = body.answer[0]._source
+    }
+
+    logger.info("Insert QALog Data : " + JSON.stringify(body, null, 2))
+    // 對傳遞的資料執行批量索引
+    let response = await esClient.index({
+        index: 'qalog',
+        type: 'qalog',
+        body: body
+    });
+    logger.info("response : " + JSON.stringify(response, null, 2))
+    res.send(200)
+})
+app.post('/CDC/Satisfaction', async function (req, res) {
+    logger.info("Insert Satisfaction")
+    var body = req.body
+    body.createtime = Date().toLocaleString()
+    logger.info("Insert Satisfaction Data : " + JSON.stringify(body, null, 2))
+    // 對傳遞的資料執行批量索引
+    const response = await esClient.index({
+        index: 'qasatisfaction',
+        type: 'qasatisfaction',
+        body: body
+    });
+    logger.info("response : " + JSON.stringify(response, null, 2))
+    res.send(200)
+})
+
 app.get('/download/content/:message_id', function (request, response) {
     try {
         var channel_id = config.channel_id;
@@ -187,21 +331,21 @@ app.get('/download/content/:message_id', function (request, response) {
         };
 
         var req = https.request(options, function (res) {
-            console.log('STATUS: ' + res.statusCode);
-            console.log('HEADERS: ' + JSON.stringify(res.headers));
+            logger.info('STATUS: ' + res.statusCode);
+            logger.info('HEADERS: ' + JSON.stringify(res.headers));
             res.body = '';
 
             this.response.setHeader('Content-Length', res.headers['content-length']);
             this.response.setHeader('Content-Type', res.headers['content-type']);
 
             res.on('data', function (chunk) {
-                console.log('get response data');
+                logger.info('get response data');
                 res.body = res.body + chunk;
                 this.response.write(chunk);
             }.bind({ response: this.response }));
             res.on('end', function () {
                 try {
-                    console.log('response end');
+                    logger.info('response end');
                     this.response.end();
                 } catch (e) {
                     logger.error(e);
@@ -213,141 +357,7 @@ app.get('/download/content/:message_id', function (request, response) {
         logger.error(e);
     }
 });
-function GetContent(data, channel_access_token) { //OK
-    var options = {
-        host: 'api.line.me',
-        port: '443',
-        path: '/v2/bot/message/' + data.events[0].message.id + '/content',
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Authorization': 'Bearer <' + channel_access_token + '>'
-        }
-    };
-    var https = require('https');
 
-    var req = https.request(options, function (res) {
-        res.setEncoding("binary");
-        console.log('STATUS: ' + res.statusCode);
-        console.log('HEADERS: ' + JSON.stringify(res.headers));
-        res.body = '';
-        res.on('data', function (chunk) {
-            console.log('get response data');
-
-            res.body = res.body + chunk;
-        });
-
-        res.on('end', function () {
-
-            res.body = require('btoa')(res.body);
-            try {
-                fs.writeFile("/tmp/123.jpg", res.body, 'base64', function (err) {
-                    if (err) throw err;
-                });
-                console.log('response end');
-                // 將 res.body 寫入檔案
-            } catch (e) {
-                console.log(e);
-            }
-
-        });
-    });
-    req.end();
-}
-
-function ReplyMessage(data, channel_access_token, reply_token, callback) {
-    console.log("ReplyMessage")
-    console.log(JSON.stringify(data));
-    var options = {
-        host: 'api.line.me',
-        port: '443',
-        path: '/v2/bot/message/reply',
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Content-Length': Buffer.byteLength(JSON.stringify(data)),
-            'Authorization': 'Bearer <' + channel_access_token + '>'
-        }
-    };
-    var https = require('https');
-    var req = https.request(options, function (res) {
-        res.setEncoding('utf8');
-        res.on('data', function (chunk) {
-            console.log('Response: ' + chunk);
-        });
-        res.on('end', function () { });
-        console.log('Reply message status code: ' + res.statusCode);
-        if (res.statusCode == 200) {
-            console.log('Reply message success');
-            callback(true);
-        } else {
-            console.log('Reply message failure');
-            callback(false);
-        }
-    });
-    req.write(JSON.stringify(data));
-    req.end();
-}
-
-function GetAnswer(message, callback) {
-
-    var options = {
-        host: 'http://127.0.0.1',
-        port: '80',
-        path: '/GetAnswer/' + message,
-        method: 'Get',
-    };
-    var https = require('https');
-    var req = https.request(options, function (res) {
-        res.setEncoding('utf8');
-        var result = ""
-        res.on('data', function (chunk) {
-            console.log('Response: ' + chunk);
-            result += chunk
-        });
-        res.on('end', function () { });
-        console.log('Reply message status code: ' + res.statusCode);
-        if (res.statusCode == 200) {
-            console.log('Reply message success');
-            callback(true, JSON.parse(result));
-        } else {
-            console.log('Reply message failure');
-            callback(false);
-        }
-    });
-    //req.write(JSON.stringify(data));
-    req.end();
-
-
-}
-function PostToLINE(data, channel_access_token, callback) {
-    console.log("PostToLINE")
-    console.log(JSON.stringify(data));
-    var options = {
-        host: 'api.line.me',
-        port: '443',
-        path: '/v2/bot/message/push',
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Content-Length': Buffer.byteLength(JSON.stringify(data)),
-            'Authorization': 'Bearer <' + channel_access_token + '>'
-        }
-    };
-    var https = require('https');
-    var req = https.request(options, function (res) {
-        res.setEncoding('utf8');
-        res.on('data', function (chunk) {
-            console.log('Response: ' + chunk);
-        });
-        res.on('end', function () { });
-    });
-    req.write(JSON.stringify(data));
-    req.end();
-    try {
-        callback(true);
-    } catch (e) { };
-}
 app.get('/tmp/:filename', function (request, response) {
     var filename = request.params.filename;
     var stream = require('fs').createReadStream('/tmp/' + filename);
@@ -359,7 +369,7 @@ app.get("/api", function (req, res) {
     res.send("API is running");
 });
 app.get("/CDC/InsertCsvData", function (req, res) {
-    console.log('function InsertData')
+    logger.info('function InsertData')
     var answerCsv = fs.readFileSync('./data/CDC用Answer.csv', 'binary');
     ConvertToTable(answerCsv, async function (DataTable) {
         var saveData = [];
@@ -386,18 +396,19 @@ app.get("/CDC/InsertCsvData", function (req, res) {
         // 對傳遞的資料執行批量索引
         esClient.bulk({ body: saveData }, function (err, response) {
             if (err) {
-                console.log("Failed Bulk operation".red, err)
+                logger.info("Failed Bulk operation".red, err)
             } else {
-                console.log("Successfully imported %s".green, (saveData.length) / 2);
+                logger.info("Successfully imported %s".green, (saveData.length) / 2);
+                logger.info("response: " + JSON.stringify(response, null, 2))
             }
 
-            console.log('InsertData success')
+            logger.info('InsertData success')
             res.send(200)
         })
     })
 })
 async function postUserData(answer, intent, entities, question, relativeQuestion, intentEng) { //ID隨機
-    console.log("function postUserData")
+    logger.info("function postUserData")
     return new Promise((resolve, reject) => {
         var contents = JSON.stringify({
             "intentEng": intentEng,
@@ -421,7 +432,7 @@ async function postUserData(answer, intent, entities, question, relativeQuestion
         var req = http.request(options, function (res) {
             res.setEncoding('utf8');
             res.on('data', function (data) {
-                console.log("data:", data); //一段html代码
+                logger.info("data:", data); //一段html代码
                 resolve([true, data]);
             });
         });
@@ -496,17 +507,17 @@ var text = new Map();
 
 app.post("/", function (request, response) {
     ///
-    console.log("Get LINE Message");
+    logger.info("Get LINE Message");
     var results = request.body.events;
-    console.log(JSON.stringify(results));
-    console.log('receive message count: ' + results.length);
+    logger.info(JSON.stringify(results));
+    logger.info('receive message count: ' + results.length);
     for (var idx = 0; idx < results.length; idx++) {
 
         switch (results[idx].message.type) {
             case "text":
                 var userText = results[idx].message.text;
-                console.log("userStage: " + userStage.get(results[idx].source.userId))
-                console.log("userData: " + userData.get(results[idx].source.userId))
+                logger.info("userStage: " + userStage.get(results[idx].source.userId))
+                logger.info("userData: " + userData.get(results[idx].source.userId))
                 if (userText.indexOf("預約") != -1 || userText.indexOf("掛號") != -1 || userStage.get(results[idx].source.userId) == "預約") {
                     if (userStage.get(results[idx].source.userId) == null) {
                         userStage.set(results[idx].source.userId, "預約")
@@ -518,8 +529,8 @@ app.post("/", function (request, response) {
                 } else { //
                     if (userStage.get(results[idx].source.userId) == null) {
                         linemessage.SendMessage(results[idx].source.userId, "看不懂喔", 'linehack2018', results[idx].source.replyToken, function (result) {
-                            if (!result) console.log(result);
-                            else console.log(result);
+                            if (!result) logger.info(result);
+                            else logger.info(result);
                         })
                     }
                 }
@@ -527,13 +538,13 @@ app.post("/", function (request, response) {
             default:
                 if (userStage.get(results[idx].source.userId) == "預約") {
                     linemessage.SendMessage(results[idx].source.userId, "你還沒完成預約流程喔", 'linehack2018', results[idx].source.replyToken, function (result) {
-                        if (!result) console.log(result);
-                        else console.log(result);
+                        if (!result) logger.info(result);
+                        else logger.info(result);
                     })
                 } else if (userStage.get(results[idx].source.userId) == null) {
                     linemessage.SendMessage(results[idx].source.userId, "看不懂喔", 'linehack2018', results[idx].source.replyToken, function (result) {
-                        if (!result) console.log(result);
-                        else console.log(result);
+                        if (!result) logger.info(result);
+                        else logger.info(result);
                     })
                 }
                 break;
@@ -542,11 +553,11 @@ app.post("/", function (request, response) {
 });
 //
 function ResProcessCheck(userId, userText, callback) {
-    console.log("into ResProcessCheck")
+    logger.info("into ResProcessCheck")
     var find = false;
     var ResProcess;
     if (userData.get(userId) == null) {
-        console.log("ResProcessCheck userData null")
+        logger.info("ResProcessCheck userData null")
         ResProcess = {
             object: null,
             date: null, //日期
@@ -554,7 +565,7 @@ function ResProcessCheck(userId, userText, callback) {
             doctorName: null
         };
     } else {
-        console.log("ResProcessCheck userData hasValue")
+        logger.info("ResProcessCheck userData hasValue")
         ResProcess = userData.get(userId);
     }
     for (var i = 0; i < doctorNames.length; i++) {
@@ -609,16 +620,16 @@ function ResProcessCheck(userId, userText, callback) {
             break;
         }
     }
-    console.log("after check: " + JSON.stringify(ResProcess))
+    logger.info("after check: " + JSON.stringify(ResProcess))
     userData.set(userId, ResProcess)
     callback();
 }
 
 function resProcessMessage(userId, replyToken) {
-    console.log("into resProcess")
+    logger.info("into resProcess")
     var text = "";
     var ResProcess = userData.get(userId);
-    console.log("resProcess " + JSON.stringify(ResProcess))
+    logger.info("resProcess " + JSON.stringify(ResProcess))
     if (ResProcess.object == null) {
         text = "請問要預約的科系是什麼?"
     } else if (ResProcess.date == null) {
@@ -634,8 +645,8 @@ function resProcessMessage(userId, replyToken) {
         userData.set(userId, null)
     }
     linemessage.SendMessage(userId, text, 'linehack2018', replyToken, function (result) {
-        if (!result) console.log(result);
-        else console.log(result);
+        if (!result) logger.info(result);
+        else logger.info(result);
     })
 }
 

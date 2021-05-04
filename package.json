@@ -8,15 +8,15 @@
   },
   "author": "",
   "dependencies": {
+    "body-parser": "latest",
+    "elasticsearch": "latest",
     "express": "^4.16.3",
+    "fs": "latest",
     "http": "0.0.0",
     "https": "^1.0.0",
+    "iconv-lite": "latest",
     "log4js": "^1.1.1",
     "log4js-extend": "^0.1.2",
-    "body-parser": "latest",
-    "request": "latest",
-    "iconv-lite": "latest",
-    "fs": "latest",
-    "elasticsearch": "latest"
+    "request": "latest"
   }
 }
