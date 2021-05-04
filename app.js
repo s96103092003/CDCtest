@@ -28,6 +28,8 @@ process.on('uncaughtException', function (err) {
 var config = fs.readFileSync(__dirname + '/config.json', 'utf8');
 config = JSON.parse(config);
 
+var linemessage = require('./linemessage');
+var LineMessageAPI = new linemessage.linemessage();
 //接收LINE訊息
 app.post("/", function (req, res) {
 
@@ -36,51 +38,68 @@ app.post("/", function (req, res) {
 
     console.log(JSON.stringify(userMessage.events[0]));
 
-    var channel_access_token = config.channel_access_token;
-
-    var data = {
-        'to': userMessage.events[0].source.userId,
-        'replyToken': userMessage.events[0].replyToken,
-        'messages': []
-    };
-    var userInput = "";
     switch (userMessage.events[0].message.type) {
         case "text":
             var msg = userMessage.events[0].message.text;
             userInput = msg
             console.log(msg);
+            var requestUrl = config.localUrl + "/" + encodeURI(userInput);
+            console.log("url: " + requestUrl)
+            request.get(requestUrl, function (error, response, body) {
+                console.error('error:', error); // Print the error if one occurred
+                console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+                console.log('body:', body); // Print the HTML for the Google homepage.
+                body = JSON.parse(body)
+                if (body.answer.length > 0) {
+                    userInput = String(body.answer[0]._source.answer).replace(/<br \/>/g, "\n")
+                    LineMessageAPI.SendMessage(userMessage.events[0].source.userId, userMessage.events[0].replyToken, userInput)
+                    var relativeQuestion = String(body.answer[0]._source.relativeQuestion).split('-')
+                    var buttons = []
+                    for (var i in relativeQuestion) {
+                        buttons.push({
+                            "type": "message",
+                            "label": relativeQuestion[i],
+                            "text": relativeQuestion[i]
+                        })
+                    }
+                    LineMessageAPI.SendButtons(userMessage.events[0].source.userId, "接下來想了解什麼", "", userMessage.events[0].replyToken)
+
+                    LineMessageAPI.SendConfirm(userMessage.events[0].source.userId, "您對該回答滿意嗎", [{
+                        "type": "postback",
+                        "label": "滿意",
+                        "data": `action=qa&q=${userInput}&score=2`,
+                        "text": "Buy"
+
+                    }, {
+                        "type": "postback",
+                        "label": "普通",
+                        "data": "action=qa&q=${userInput}&score=1",
+                        "text": "Buy"
+
+                    }, {
+                        "type": "postback",
+                        "label": "不滿意",
+                        "data": "action=qa&q=${userInput}&score=0",
+                        "text": "Buy"
+
+                    }], "", userMessage.events[0].replyToken)
+                }
+                else {
+                    userInput = "找不到適合的答案"
+                    LineMessageAPI.SendMessage(userMessage.events[0].source.userId, userMessage.events[0].replyToken, userInput)
+                }
+                request.post(config.localUrl + "/CDC/QALog", body, function (error, response, body) {
+                    console.error('error:', error); // Print the error if one occurred
+                    console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+                    console.log('body:', body); // Print the HTML for the Google homepage.
+
+                })
+            })
             break;
+        case "postback" :
 
+            break;
     }
-    if (userInput != "") {
-        var requestUrl = config.localUrl + "/" + encodeURI(userInput);
-        console.log("url: " + requestUrl)
-        request.get(requestUrl, function (error, response, body) {
-            console.error('error:', error); // Print the error if one occurred
-            console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-            console.log('body:', body); // Print the HTML for the Google homepage.
-            body = JSON.parse(body)
-            if (body.answer.length > 0) {
-                data.messages.push({
-                    type: 'text',
-                    text: String(body.answer[0]._source.answer).replace(/<br \/>/g, "\n")
-                })
-            }
-            else {
-                data.messages.push({
-                    type: 'text',
-                    text: "找不到適合的答案"
-                })
-            }
-            ReplyMessage(data, channel_access_token, data.replyToken, function (ret) {
-                if (!ret)
-                    PostToLINE(data, channel_access_token, this.callback); // reply_token 已過期，改用 PUSH_MESSAGE                   
-            });
-        })
-    }
-    
-
-
 });
 
 app.get('/download/content/:message_id', function (request, response) {
@@ -167,68 +186,6 @@ function GetContent(data, channel_access_token) { //OK
     req.end();
 }
 
-function ReplyMessage(data, channel_access_token, reply_token, callback) {
-    console.log("ReplyMessage")
-    console.log(JSON.stringify(data));
-    var options = {
-        host: 'api.line.me',
-        port: '443',
-        path: '/v2/bot/message/reply',
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Content-Length': Buffer.byteLength(JSON.stringify(data)),
-            'Authorization': 'Bearer <' + channel_access_token + '>'
-        }
-    };
-    var https = require('https');
-    var req = https.request(options, function (res) {
-        res.setEncoding('utf8');
-        res.on('data', function (chunk) {
-            console.log('Response: ' + chunk);
-        });
-        res.on('end', function () { });
-        console.log('Reply message status code: ' + res.statusCode);
-        if (res.statusCode == 200) {
-            console.log('Reply message success');
-            callback(true);
-        } else {
-            console.log('Reply message failure');
-            callback(false);
-        }
-    });
-    req.write(JSON.stringify(data));
-    req.end();
-}
-
-function PostToLINE(data, channel_access_token, callback) {
-    console.log("PostToLINE")
-    console.log(JSON.stringify(data));
-    var options = {
-        host: 'api.line.me',
-        port: '443',
-        path: '/v2/bot/message/push',
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Content-Length': Buffer.byteLength(JSON.stringify(data)),
-            'Authorization': 'Bearer <' + channel_access_token + '>'
-        }
-    };
-    var https = require('https');
-    var req = https.request(options, function (res) {
-        res.setEncoding('utf8');
-        res.on('data', function (chunk) {
-            console.log('Response: ' + chunk);
-        });
-        res.on('end', function () { });
-    });
-    req.write(JSON.stringify(data));
-    req.end();
-    try {
-        callback(true);
-    } catch (e) { };
-}
 app.get('/tmp/:filename', function (request, response) {
     var filename = request.params.filename;
     var stream = require('fs').createReadStream('/tmp/' + filename);

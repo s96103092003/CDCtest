@@ -3,199 +3,184 @@ var config = fs.readFileSync(__dirname + '/config.json', 'utf8');
 config = JSON.parse(config);
 var linemessage = function () {
     // 傳送訊息給 LINE 使用者
-    this.SendMessage = function (userId, message, password, reply_token, callback) {
-        if (password == 'linehack2018') {
-            var data = {
-                'to': userId,
-                'messages': [{
-                    'type': 'text',
-                    'text': message
-                }]
-            };
-            console.log('傳送訊息給 ' + userId);
-            ReplyMessage(data, config.channel_access_token, reply_token, function (ret) {
-                if (ret) {
-                    this.callback(true);
-                } else {
-                    PostToLINE(data, config.channel_access_token, this.callback);
-                }
-            }.bind({
-                callback: callback
-            }));
-        } else {
-            callback(false);
-        }
+    this.SendMessage = function (userId, reply_token, message, callback) {
+
+        var data = {
+            'to': userId,
+            'messages': [{
+                'type': 'text',
+                'text': message
+            }]
+        };
+        console.log('傳送訊息給 ' + userId);
+        ReplyMessage(data, config.channel_access_token, reply_token, function (ret) {
+            if (ret) {
+                this.callback(true);
+            } else {
+                PostToLINE(data, config.channel_access_token, this.callback);
+            }
+        }.bind({
+            callback: callback
+        }));
     }
-    this.SendMessageAndQuickReply = function (userId, message, password, reply_token, quickReply, callback) {
-        if (password == 'linehack2018') {
-            var data = {
-                'to': userId,
-                'messages': [{
-                    'type': 'text',
-                    'text': message,
-                    'quickReply': quickReply
-                }]
-            };
-            console.log('傳送訊息給 ' + userId);
-            ReplyMessage(data, config.channel_access_token, reply_token, function (ret) {
-                if (ret) {
-                    this.callback(true);
-                } else {
-                    PostToLINE(data, config.channel_access_token, this.callback);
-                }
-            }.bind({
-                callback: callback
-            }));
-        } else {
-            callback(false);
-        }
+    this.SendMessageAndQuickReply = function (userId, reply_token, message, quickReply, callback) {
+
+        var data = {
+            'to': userId,
+            'messages': [{
+                'type': 'text',
+                'text': message,
+                'quickReply': quickReply
+            }]
+        };
+        console.log('傳送訊息給 ' + userId);
+        ReplyMessage(data, config.channel_access_token, reply_token, function (ret) {
+            if (ret) {
+                this.callback(true);
+            } else {
+                PostToLINE(data, config.channel_access_token, this.callback);
+            }
+        }.bind({
+            callback: callback
+        }));
+
     }
 
     // 傳送[可點選圖片]給 LINE 使用者
-    this.SendImagemap = function (userId, baseUrl, altText, imagemap, password, reply_token, callback) {
-        if (password == 'linehack2018') {
-            var data = {
-                'to': userId,
-                'messages': [{
-                    "type": "imagemap",
-                    "baseUrl": baseUrl,
-                    "altText": altText,
-                    "baseSize": {
-                        "height": 1040,
-                        "width": 1040
-                    },
-                    "actions": imagemap
-                }]
-            };
-            console.log('傳送訊息給 ' + userId);
-            console.log('傳送圖片網址: ' + baseUrl);
-            ReplyMessage(data, config.channel_access_token, reply_token, function (ret) {
-                if (ret) {
-                    this.callback(true);
-                } else {
-                    PostToLINE(data, config.channel_access_token, this.callback);
-                }
-            }.bind({
-                callback: callback
-            }));
-        } else {
-            callback(false);
-        }
+    this.SendImagemap = function (userId, baseUrl, altText, imagemap, reply_token, callback) {
+
+        var data = {
+            'to': userId,
+            'messages': [{
+                "type": "imagemap",
+                "baseUrl": baseUrl,
+                "altText": altText,
+                "baseSize": {
+                    "height": 1040,
+                    "width": 1040
+                },
+                "actions": imagemap
+            }]
+        };
+        console.log('傳送訊息給 ' + userId);
+        console.log('傳送圖片網址: ' + baseUrl);
+        ReplyMessage(data, config.channel_access_token, reply_token, function (ret) {
+            if (ret) {
+                this.callback(true);
+            } else {
+                PostToLINE(data, config.channel_access_token, this.callback);
+            }
+        }.bind({
+            callback: callback
+        }));
+
     }
 
     // 傳送【選單】給 LINE 使用者
-    this.SendButtons = function (userId, text, buttons, alt_text, password, reply_token, callback) {
-        if (password == 'linehack2018') {
-            var data = {
-                'to': userId,
-                'messages': [{
-                    'type': 'template',
-                    'altText': alt_text,
-                    'template': {
-                        'type': 'buttons',
-                        'text': text,
-                        'actions': buttons
-                    }
-                }]
-            };
-            console.log('傳送訊息給 ' + userId);
-            ReplyMessage(data, config.channel_access_token, reply_token, function (ret) {
-                if (ret) {
-                    this.callback(true);
-                } else {
-                    PostToLINE(data, config.channel_access_token, this.callback);
+    this.SendButtons = function (userId, text, buttons, alt_text, reply_token, callback) {
+
+        var data = {
+            'to': userId,
+            'messages': [{
+                'type': 'template',
+                'altText': alt_text,
+                'template': {
+                    'type': 'buttons',
+                    'text': text,
+                    'actions': buttons
                 }
-            }.bind({
-                callback: callback
-            }));
-        } else {
-            callback(false);
-        }
+            }]
+        };
+        console.log('傳送訊息給 ' + userId);
+        ReplyMessage(data, config.channel_access_token, reply_token, function (ret) {
+            if (ret) {
+                this.callback(true);
+            } else {
+                PostToLINE(data, config.channel_access_token, this.callback);
+            }
+        }.bind({
+            callback: callback
+        }));
+
     }
 
     // 傳送【確認】給 LINE 使用者
-    this.SendConfirm = function (userId, text, buttons, alt_text, password, reply_token, callback) {
-        if (password == 'linehack2018') {
-            var data = {
-                'to': userId,
-                'messages': [{
-                    'type': 'template',
-                    'altText': alt_text,
-                    'template': {
-                        'type': 'confirm',
-                        'text': text,
-                        'actions': buttons
-                    }
-                }]
-            };
-            console.log('傳送訊息給 ' + userId);
-            ReplyMessage(data, config.channel_access_token, reply_token, function (ret) {
-                if (ret) {
-                    this.callback(true);
-                } else {
-                    PostToLINE(data, config.channel_access_token, this.callback);
+    this.SendConfirm = function (userId, text, buttons, alt_text, reply_token, callback) {
+
+        var data = {
+            'to': userId,
+            'messages': [{
+                'type': 'template',
+                'altText': alt_text,
+                'template': {
+                    'type': 'confirm',
+                    'text': text,
+                    'actions': buttons
                 }
-            }.bind({
-                callback: callback
-            }));
-        } else {
-            callback(false);
-        }
+            }]
+        };
+        console.log('傳送訊息給 ' + userId);
+        ReplyMessage(data, config.channel_access_token, reply_token, function (ret) {
+            if (ret) {
+                this.callback(true);
+            } else {
+                PostToLINE(data, config.channel_access_token, this.callback);
+            }
+        }.bind({
+            callback: callback
+        }));
+
     }
 
     // 傳送【可滾動選單】給 LINE 使用者
-    this.SendCarousel = function (userId, columns, password, reply_token, callback) {
-        if (password == 'linehack2018') {
-            var data = {
-                'to': userId,
-                'messages': [{
-                    'type': 'template',
-                    'altText': '請至行動裝置檢視訊息',
-                    'template': {
-                        'type': 'carousel',
-                        'columns': columns
-                    }
-                }]
-            };
-            console.log('傳送訊息給 ' + userId);
-            ReplyMessage(data, config.channel_access_token, reply_token, function (ret) {
-                if (ret) {
-                    this.callback(true);
-                } else {
-                    PostToLINE(data, config.channel_access_token, this.callback);
+    this.SendCarousel = function (userId, columns, reply_token, callback) {
+
+        var data = {
+            'to': userId,
+            'messages': [{
+                'type': 'template',
+                'altText': '請至行動裝置檢視訊息',
+                'template': {
+                    'type': 'carousel',
+                    'columns': columns
                 }
-            }.bind({
-                callback: callback
-            }));
-        } else {
-            callback(false);
-        }
+            }]
+        };
+        console.log('傳送訊息給 ' + userId);
+        ReplyMessage(data, config.channel_access_token, reply_token, function (ret) {
+            if (ret) {
+                this.callback(true);
+            } else {
+                PostToLINE(data, config.channel_access_token, this.callback);
+            }
+        }.bind({
+            callback: callback
+        }));
+
     }
 
     // 傳送【自訂卡片】給 LINE 使用者
-    this.SendFlex = function (userId, flex, password, reply_token, callback) {
-        if (password == 'linehack2018') {
-            var data = {
-                'to': userId,
-                'messages': [{
-                    'type': 'flex',
-                    'altText': '請至行動裝置檢視訊息',
-                    'contents': flex
-                }]
-            };
-            console.log('傳送訊息給 ' + userId);
-            ReplyMessage(data, config.channel_access_token, reply_token, function (ret) {
-                if (ret) {
-                    this.callback(true);
-                } else {
-                    PostToLINE(data, config.channel_access_token, this.callback);
-                }
-            }.bind({
-                callback: callback
-            }));
-        } else {
-            callback(false);
-        }
+    this.SendFlex = function (userId, flex, reply_token, callback) {
+
+        var data = {
+            'to': userId,
+            'messages': [{
+                'type': 'flex',
+                'altText': '請至行動裝置檢視訊息',
+                'contents': flex
+            }]
+        };
+        console.log('傳送訊息給 ' + userId);
+        ReplyMessage(data, config.channel_access_token, reply_token, function (ret) {
+            if (ret) {
+                this.callback(true);
+            } else {
+                PostToLINE(data, config.channel_access_token, this.callback);
+            }
+        }.bind({
+            callback: callback
+        }));
+
     }
 
     // 取得 LINE 使用者資訊
@@ -252,7 +237,7 @@ var linemessage = function () {
             res.on('data', function (chunk) {
                 console.log('Response: ' + chunk);
             });
-            res.on('end', function () {});
+            res.on('end', function () { });
             console.log('Reply message status code: ' + res.statusCode);
             if (res.statusCode == 200) {
                 console.log('Reply message success');
@@ -292,7 +277,7 @@ var linemessage = function () {
         req.end();
         try {
             callback(true);
-        } catch (e) {};
+        } catch (e) { };
     }
 
     function IssueAccessToken() {
