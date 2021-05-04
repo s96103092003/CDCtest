@@ -52,7 +52,7 @@ app.post("/", function (req, res) {
                 body = JSON.parse(body)
                 if (body.answer.length > 0) {
                     userInput = String(body.answer[0]._source.answer).replace(/<br \/>/g, "\n")
-                    LineMessageAPI.SendMessage(userMessage.events[0].source.userId, userMessage.events[0].replyToken, userInput, function(){})
+                    LineMessageAPI.SendMessage(userMessage.events[0].source.userId, userMessage.events[0].replyToken, userInput, function () { })
                     var relativeQuestion = String(body.answer[0]._source.relativeQuestion).split('-')
                     var buttons = []
                     for (var i in relativeQuestion) {
@@ -62,7 +62,7 @@ app.post("/", function (req, res) {
                             "text": relativeQuestion[i]
                         })
                     }
-                    LineMessageAPI.SendButtons(userMessage.events[0].source.userId, "接下來想了解什麼", "", userMessage.events[0].replyToken, function(){})
+                    LineMessageAPI.SendButtons(userMessage.events[0].source.userId, "接下來想了解什麼", "", userMessage.events[0].replyToken, function () { })
 
                     LineMessageAPI.SendConfirm(userMessage.events[0].source.userId, "您對該回答滿意嗎", [{
                         "type": "postback",
@@ -82,13 +82,16 @@ app.post("/", function (req, res) {
                         "data": "action=qa&q=${userInput}&score=0",
                         "text": "Buy"
 
-                    }], "", userMessage.events[0].replyToken, function(){})
+                    }], "", userMessage.events[0].replyToken, function () { })
                 }
                 else {
                     userInput = "找不到適合的答案"
-                    LineMessageAPI.SendMessage(userMessage.events[0].source.userId, userMessage.events[0].replyToken, userInput, function(){})
+                    LineMessageAPI.SendMessage(userMessage.events[0].source.userId, userMessage.events[0].replyToken, userInput, function () { })
                 }
-                request.post(config.localUrl + "/CDC/QALog", body, function (error, response, body) {
+                request.post({
+                    url: config.localUrl + "/CDC/QALog",
+                    form: body
+                }, function (error, response, body) {
                     console.error('error:', error); // Print the error if one occurred
                     console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
                     console.log('body:', body); // Print the HTML for the Google homepage.
@@ -96,7 +99,7 @@ app.post("/", function (req, res) {
                 })
             })
             break;
-        case "postback" :
+        case "postback":
 
             break;
     }
