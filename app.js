@@ -62,26 +62,21 @@ app.post("/", function (req, res) {
                             "text": relativeQuestion[i]
                         })
                     }
-                    LineMessageAPI.SendButtons(userMessage.events[0].source.userId, "接下來想了解什麼", "", userMessage.events[0].replyToken, function () { })
+                    LineMessageAPI.SendButtons(userMessage.events[0].source.userId, "接下來想了解什麼", buttons, "", userMessage.events[0].replyToken, function () { })
 
                     LineMessageAPI.SendConfirm(userMessage.events[0].source.userId, "您對該回答滿意嗎", [{
                         "type": "postback",
                         "label": "滿意",
                         "data": `action=qa&q=${userInput}&score=2`,
-                        "text": "Buy"
-
                     }, {
                         "type": "postback",
                         "label": "普通",
-                        "data": "action=qa&q=${userInput}&score=1",
-                        "text": "Buy"
+                        "data": `action=qa&q=${userInput}&score=1`,
 
                     }, {
                         "type": "postback",
                         "label": "不滿意",
-                        "data": "action=qa&q=${userInput}&score=0",
-                        "text": "Buy"
-
+                        "data": `action=qa&q=${userInput}&score=0`,
                     }], "", userMessage.events[0].replyToken, function () { })
                 }
                 else {
