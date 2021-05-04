@@ -30,7 +30,6 @@ var config = fs.readFileSync(__dirname + '/config.json', 'utf8');
 config = JSON.parse(config);
 
 var linemessage = require('./linemessage');
-const { url } = require("inspector");
 var LineMessageAPI = new linemessage.linemessage();
 //接收LINE訊息
 app.post("/", function (req, res) {
