@@ -88,6 +88,7 @@ app.post("/", function (req, res) {
                     }
                     else {
                         userInput = "找不到適合的答案"
+                        body.answer = []
                         LineMessageAPI.SendMessage(userMessage.events[0].source.userId, userMessage.events[0].replyToken, userInput, function () { })
                     }
                     request.post({
@@ -110,13 +111,10 @@ app.post("/", function (req, res) {
         let action = arg["action"];
         let q = arg["q"];
         let score = arg["score"];
-        console.log(q)
-        console.log(action)
-        console.log(score)
         switch (action) {
             case "qa":
                 request.post({
-                    url: config.localUrl + "/CDC/QALog",
+                    url: config.localUrl + "/CDC/Satisfaction",
                     form: {
                         q : q,
                         score : score,
