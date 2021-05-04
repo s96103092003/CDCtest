@@ -29,6 +29,7 @@ var config = fs.readFileSync(__dirname + '/config.json', 'utf8');
 config = JSON.parse(config);
 
 var linemessage = require('./linemessage');
+const { url } = require("inspector");
 var LineMessageAPI = new linemessage.linemessage();
 //接收LINE訊息
 app.post("/", function (req, res) {
@@ -38,32 +39,22 @@ app.post("/", function (req, res) {
 
     console.log(JSON.stringify(userMessage.events[0]));
 
-    switch (userMessage.events[0].message.type) {
-        case "text":
-            var msg = userMessage.events[0].message.text;
-            userInput = msg
-            console.log(msg);
-            var requestUrl = config.localUrl + "/" + encodeURI(userInput);
-            console.log("url: " + requestUrl)
-            request.get(requestUrl, function (error, response, body) {
-                console.error('error:', error); // Print the error if one occurred
-                console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-                console.log('body:', body); // Print the HTML for the Google homepage.
-                body = JSON.parse(body)
-                if (body.answer.length > 0) {
-                    userInput = String(body.answer[0]._source.answer).replace(/<br \/>/g, "\n")
-                    LineMessageAPI.SendMessage(userMessage.events[0].source.userId, userMessage.events[0].replyToken, userInput, function () {
-                        var relativeQuestion = String(body.answer[0]._source.relativeQuestion).split('-')
-                        var buttons = []
-                        for (var i in relativeQuestion) {
-                            buttons.push({
-                                "type": "message",
-                                "label": relativeQuestion[i],
-                                "text": relativeQuestion[i]
-                            })
-                        }
-                        LineMessageAPI.SendButtons(userMessage.events[0].source.userId, "接下來想了解什麼", buttons, "接下來想了解什麼", userMessage.events[0].replyToken, function () {
-
+    if (userMessage.events[0].type === "message") {
+        switch (userMessage.events[0].message.type) {
+            case "text":
+                var msg = userMessage.events[0].message.text;
+                userInput = msg
+                console.log(msg);
+                var requestUrl = config.localUrl + "/" + encodeURI(userInput);
+                console.log("url: " + requestUrl)
+                request.get(requestUrl, function (error, response, body) {
+                    console.error('error:', error); // Print the error if one occurred
+                    console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+                    console.log('body:', body); // Print the HTML for the Google homepage.
+                    body = JSON.parse(body)
+                    if (body.answer.length > 0) {
+                        let answer = String(body.answer[0]._source.answer).replace(/<br \/>/g, "\n")
+                        LineMessageAPI.SendMessage(userMessage.events[0].source.userId, userMessage.events[0].replyToken, answer, function () {
                             LineMessageAPI.SendButtons(userMessage.events[0].source.userId, "您對該回答滿意嗎", [{
                                 "type": "postback",
                                 "label": "滿意",
@@ -77,30 +68,67 @@ app.post("/", function (req, res) {
                                 "type": "postback",
                                 "label": "不滿意",
                                 "data": `action=qa&q=${userInput}&score=0`,
-                            }], "您對該回答滿意嗎", userMessage.events[0].replyToken, function () { })
-                        })
-                    })
+                            }], "您對該回答滿意嗎", userMessage.events[0].replyToken, function () {
+                                var relativeQuestion = String(body.answer[0]._source.relativeQuestion).split('-')
+                                var buttons = []
+                                for (var i in relativeQuestion) {
+                                    buttons.push({
+                                        "type": "message",
+                                        "label": relativeQuestion[i],
+                                        "text": relativeQuestion[i]
+                                    })
+                                }
+                                LineMessageAPI.SendButtons(userMessage.events[0].source.userId, "接下來想了解什麼", buttons, "接下來想了解什麼", userMessage.events[0].replyToken, function () {
+                                })
 
-                }
-                else {
-                    userInput = "找不到適合的答案"
-                    LineMessageAPI.SendMessage(userMessage.events[0].source.userId, userMessage.events[0].replyToken, userInput, function () { })
-                }
+                            })
+
+                        })
+
+                    }
+                    else {
+                        userInput = "找不到適合的答案"
+                        LineMessageAPI.SendMessage(userMessage.events[0].source.userId, userMessage.events[0].replyToken, userInput, function () { })
+                    }
+                    request.post({
+                        url: config.localUrl + "/CDC/QALog",
+                        form: body
+                    }, function (error, response, body) {
+                        console.error('error:', error); // Print the error if one occurred
+                        console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+                        console.log('body:', body); // Print the HTML for the Google homepage.
+
+                    })
+                })
+                break;
+        }
+
+    }
+    else if (userMessage.events[0].type === "postback") {
+        let arg = url.parse(userMessage.events[0].postback.data, true).query;
+        //let action = req.query["action"];
+        let action = arg["action"];
+        let q = arg["q"];
+        let score = arg["score"];
+        switch (action) {
+            case "qa":
                 request.post({
                     url: config.localUrl + "/CDC/QALog",
-                    form: body
+                    form: {
+                        q : q,
+                        score : score,
+                        isdelete : 0          
+                    }
                 }, function (error, response, body) {
                     console.error('error:', error); // Print the error if one occurred
                     console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
                     console.log('body:', body); // Print the HTML for the Google homepage.
-
                 })
-            })
-            break;
-        case "postback":
+                break;
 
-            break;
+        }
     }
+
 });
 
 app.get('/download/content/:message_id', function (request, response) {
