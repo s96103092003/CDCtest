@@ -62,7 +62,7 @@ app.post("/", function (req, res) {
                             "text": relativeQuestion[i]
                         })
                     }
-                    LineMessageAPI.SendButtons(userMessage.events[0].source.userId, "接下來想了解什麼", "", userMessage.events[0].replyToken)
+                    LineMessageAPI.SendButtons(userMessage.events[0].source.userId, "接下來想了解什麼", "", userMessage.events[0].replyToken, function(){})
 
                     LineMessageAPI.SendConfirm(userMessage.events[0].source.userId, "您對該回答滿意嗎", [{
                         "type": "postback",
@@ -82,7 +82,7 @@ app.post("/", function (req, res) {
                         "data": "action=qa&q=${userInput}&score=0",
                         "text": "Buy"
 
-                    }], "", userMessage.events[0].replyToken)
+                    }], "", userMessage.events[0].replyToken, function(){})
                 }
                 else {
                     userInput = "找不到適合的答案"
