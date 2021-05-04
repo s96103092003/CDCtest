@@ -52,32 +52,35 @@ app.post("/", function (req, res) {
                 body = JSON.parse(body)
                 if (body.answer.length > 0) {
                     userInput = String(body.answer[0]._source.answer).replace(/<br \/>/g, "\n")
-                    LineMessageAPI.SendMessage(userMessage.events[0].source.userId, userMessage.events[0].replyToken, userInput, function () { })
-                    var relativeQuestion = String(body.answer[0]._source.relativeQuestion).split('-')
-                    var buttons = []
-                    for (var i in relativeQuestion) {
-                        buttons.push({
-                            "type": "message",
-                            "label": relativeQuestion[i],
-                            "text": relativeQuestion[i]
+                    LineMessageAPI.SendMessage(userMessage.events[0].source.userId, userMessage.events[0].replyToken, userInput, function () {
+                        var relativeQuestion = String(body.answer[0]._source.relativeQuestion).split('-')
+                        var buttons = []
+                        for (var i in relativeQuestion) {
+                            buttons.push({
+                                "type": "message",
+                                "label": relativeQuestion[i],
+                                "text": relativeQuestion[i]
+                            })
+                        }
+                        LineMessageAPI.SendButtons(userMessage.events[0].source.userId, "接下來想了解什麼", buttons, "接下來想了解什麼1", userMessage.events[0].replyToken, function () {
+
+                            LineMessageAPI.SendConfirm(userMessage.events[0].source.userId, "您對該回答滿意嗎", [{
+                                "type": "postback",
+                                "label": "滿意",
+                                "data": `action=qa&q=${userInput}&score=2`,
+                            }, {
+                                "type": "postback",
+                                "label": "普通",
+                                "data": `action=qa&q=${userInput}&score=1`,
+
+                            }, {
+                                "type": "postback",
+                                "label": "不滿意",
+                                "data": `action=qa&q=${userInput}&score=0`,
+                            }], "您對該回答滿意嗎1", userMessage.events[0].replyToken, function () { })
                         })
-                    }
-                    LineMessageAPI.SendButtons(userMessage.events[0].source.userId, "接下來想了解什麼", buttons, "接下來想了解什麼1", userMessage.events[0].replyToken, function () { })
+                    })
 
-                    LineMessageAPI.SendConfirm(userMessage.events[0].source.userId, "您對該回答滿意嗎", [{
-                        "type": "postback",
-                        "label": "滿意",
-                        "data": `action=qa&q=${userInput}&score=2`,
-                    }, {
-                        "type": "postback",
-                        "label": "普通",
-                        "data": `action=qa&q=${userInput}&score=1`,
-
-                    }, {
-                        "type": "postback",
-                        "label": "不滿意",
-                        "data": `action=qa&q=${userInput}&score=0`,
-                    }], "您對該回答滿意嗎1", userMessage.events[0].replyToken, function () { })
                 }
                 else {
                     userInput = "找不到適合的答案"
