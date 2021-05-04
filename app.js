@@ -97,7 +97,7 @@ app.post("/", function (req, res) {
                         console.error('error:', error); // Print the error if one occurred
                         console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
                         console.log('body:', body); // Print the HTML for the Google homepage.
-
+                        LineMessageAPI.SendMessage(userMessage.events[0].source.userId, userMessage.events[0].replyToken, "已收到您的滿意度回覆", function () {})
                     })
                 })
                 break;
