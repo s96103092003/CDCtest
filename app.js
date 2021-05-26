@@ -32,6 +32,18 @@ config = JSON.parse(config);
 var linemessage = require('./linemessage');
 var LineMessageAPI = new linemessage.linemessage();
 //接收LINE訊息
+/*
+answer 
+{
+    q: message,
+    intent: answer.hits.hits[0].intent,
+    entities: answer.hits.hits[0].entities,
+    relativeQuestion: answerRelateQ.hits.hits[0]._source.relativeQuestion,
+    answer: answer.hits.hits[0].answer,
+    source: 1,
+    isSuccess: true
+}
+*/
 app.post("/", function (req, res) {
 
     console.log("Get LINE Message");
@@ -52,7 +64,7 @@ app.post("/", function (req, res) {
                     console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
                     console.log('body:', body); // Print the HTML for the Google homepage.
                     body = JSON.parse(body)
-                    if(body.source == 0){
+                    if (body.source == 0) {
                         if (body.answer.length > 0) {
                             let answer = String(body.answer[0]._source.answer).replace(/<br \/>/g, "\n")
                             LineMessageAPI.SendMessage(userMessage.events[0].source.userId, userMessage.events[0].replyToken, answer, function () {
@@ -64,7 +76,7 @@ app.post("/", function (req, res) {
                                     "type": "postback",
                                     "label": "普通",
                                     "data": `?action=qa&q=${userInput}&score=1`,
-    
+
                                 }, {
                                     "type": "postback",
                                     "label": "不滿意",
@@ -81,18 +93,18 @@ app.post("/", function (req, res) {
                                     }
                                     LineMessageAPI.SendButtons(userMessage.events[0].source.userId, "接下來想了解什麼", buttons, "接下來想了解什麼", userMessage.events[0].replyToken, function () {
                                     })
-    
+
                                 })
-    
+
                             })
-    
+
                         }
                         else {
-                            userInput = "找不到適合的答案"                      
+                            userInput = "找不到適合的答案"
                             LineMessageAPI.SendMessage(userMessage.events[0].source.userId, userMessage.events[0].replyToken, userInput, function () { })
                         }
                     }
-                    else if(body.source == 1){
+                    else if (body.source == 1) {
                         let answer = String(body.answer).replace(/<br \/>/g, "\n")
                         LineMessageAPI.SendMessage(userMessage.events[0].source.userId, userMessage.events[0].replyToken, answer, function () {
                             LineMessageAPI.SendButtons(userMessage.events[0].source.userId, "您對該回答滿意嗎", [{
@@ -134,7 +146,7 @@ app.post("/", function (req, res) {
                         console.error('error:', error); // Print the error if one occurred
                         console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
                         console.log('body:', body); // Print the HTML for the Google homepage.
-                        
+
                     })
                 })
                 break;
@@ -151,15 +163,15 @@ app.post("/", function (req, res) {
                 request.post({
                     url: config.localUrl + "/CDC/Satisfaction",
                     form: {
-                        q : q,
-                        score : score,
-                        isdelete : 0          
+                        q: q,
+                        score: score,
+                        isdelete: 0
                     }
                 }, function (error, response, body) {
                     console.error('error:', error); // Print the error if one occurred
                     console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
                     console.log('body:', body); // Print the HTML for the Google homepage.
-                    LineMessageAPI.SendMessage(userMessage.events[0].source.userId, userMessage.events[0].replyToken, "已收到您的滿意度回覆", function () {})
+                    LineMessageAPI.SendMessage(userMessage.events[0].source.userId, userMessage.events[0].replyToken, "已收到您的滿意度回覆", function () { })
                 })
                 break;
 
