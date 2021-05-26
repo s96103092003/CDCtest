@@ -7,6 +7,7 @@ var app = express();
 var port = process.env.PORT || 8080;
 var server = http.Server(app).listen(port);
 var bodyParser = require("body-parser");
+var pinyin = require("pinyin");
 const log4js = require('log4js');
 const log4js_extend = require('log4js-extend');
 log4js_extend(log4js, {
@@ -43,8 +44,13 @@ let Chi2EngIntentTag = {}
 for (let k in Eng2ChiIntentTag) {
     Chi2EngIntentTag[Eng2ChiIntentTag[k]] = k
 }
+let StopWordTable = ConvertToTable(fs.readFileSync(__dirname + '/廢詞表.csv', 'binary'))
+let StopWordsMap = new Map()
+StopWordTable.forEach(element => {
+    if (!StopWordsMap.has(element[0]))
 
-
+        StopWordsMap.set(element[0], element[0])
+});
 var elasticsearch = require('elasticsearch');
 var esClient = new elasticsearch.Client({
     host: 'localhost:9200',
@@ -96,6 +102,9 @@ const QABufQuestion = {
     "intent": String,//body.intent,
     "entities": String, //body.entities,
     "q": String,//"問題",
+    "romaQ": String,//"羅馬拼音問題",
+    "Ws": String,//"去除STOP段詞",
+    "WsQ": String,//"去除STOP段詞ROMA",
     "answer": String,// "答案"
 
 }
@@ -122,38 +131,70 @@ esClient.ping({
     }
 });
 */
+let searchBufQuestionQuery = {
+    index: 'bufquestion',
+    type: 'bufquestion',
+    body: {
+        size: 5,
+        from: 0,
+        query: {
+            bool: {
+                must: [
+                    {
+                        match: {
+                            q: {
+                                query: "",
+                                minimum_should_match: "85%"
+                            }
+                        },
+
+                    }
+                ]
+            }
+        }
+    },
+    ignore_unavailable: true
+}
+let searchCDCAnswerRelateQ = {
+    index: 'cdc',
+    type: 'cdcanswer',
+    body: {
+        size: 3,
+        from: 0,
+        query: {
+            bool: {
+                must: [
+                    { match_phrase: { entities: "" } }
+                ]
+            }
+        }
+    },
+    ignore_unavailable: true
+}
+console.log(pinyin("什麼是天花", {
+    style: pinyin.STYLE_NORMAL, // 设置拼音风格
+
+}));
+
+
+
+
 app.get("/:message", async function (req, res) {
     try {
         var message = req.params.message;
         var Url = encodeURI(config.ModelUrl + message)
+        /*
+            "romaQ": String,//"羅馬拼音問題",
+            "Ws": String,//"去除STOP段詞",
+            "WsQ": String,//"去除STOP段詞ROMA",
+        */
         //decodeURI
         if (message != "favicon.ico") {
-            var answer = await esClient.search({
-                index: 'bufquestion',
-                type: 'bufquestion',
-                body: {
-                    size: 5,
-                    from: 0,
-                    query: {
-                        bool: {
-                            must: [
-                                {
-                                    match: {
-                                        q: {
-                                            query: message,
-                                            minimum_should_match: "85%"
-                                        }
-                                    },
 
-                                }
-                            ]
-                        }
-                    }
-                },
-                ignore_unavailable: true
-            });
+            searchBufQuestionQuery.body.query.bool.must[0].match.q.query = message
+            var answer = await esClient.search(searchBufQuestionQuery);
             console.log("BufQuestion Answer: " + JSON.stringify(answer, null, 2))
-            if (answer.hits.hits.length > 0 && answer.hits.hits[0]._source.answer!="") {
+            if (answer.hits.hits.length > 0 && answer.hits.hits[0]._source.answer != "") {
                 EntityString = []
                 for (var i in answer.hits.hits[0].entities) {
                     if (body.entities.length - 1 == i)
@@ -161,27 +202,13 @@ app.get("/:message", async function (req, res) {
                     else
                         EntityString += answer.hits.hits[0].entities[i].word + " "
                 }
-                answer = await esClient.search({
-                    index: 'cdc',
-                    type: 'cdcanswer',
-                    body: {
-                        size: 3,
-                        from: 0,
-                        query: {
-                            bool: {
-                                must: [
-                                    { match_phrase: { entities: EntityString } }
-                                ]
-                            }
-                        }
-                    },
-                    ignore_unavailable: true
-                });
+                searchCDCAnswerRelateQ.body.query.bool.must[0].match_phrase.entities = EntityString
+                answerRelateQ = await esClient.search(searchCDCAnswerRelateQ);
                 res.send({
                     q: message,
                     intent: answer.hits.hits[0].intent,
                     entities: answer.hits.hits[0].entities,
-                    relativeQuestion: answer.hits.hits[0]._source.relativeQuestion,
+                    relativeQuestion: answerRelateQ.hits.hits[0]._source.relativeQuestion,
                     answer: answer.hits.hits[0].answer,
                     source: 1,
                     isSuccess: true
@@ -223,6 +250,10 @@ app.get("/:message", async function (req, res) {
                             ignore_unavailable: true
                         });
                         logger.info(JSON.stringify(answer, null, 2))
+                        if (answer.hits.hits.length > 0 && answer.hits.hits[0]._source.answer == "" && answer.hits.hits.length == 0)
+                            body.needAddBuf = true
+                        else
+                            body.needAddBuf = false
                         body.answer = answer.hits.hits;
                         body.q = message;
                         body.source = 0;
@@ -244,47 +275,21 @@ app.post('/CDC/QALog', async function (req, res) {
     logger.info("Insert QALog")
     var body = req.body
     body.createtime = Date().toLocaleString()
-    if (body.answer == undefined) {
-        var answer = await esClient.search({
+    if (body.needAddBuf) {
+
+        logger.info("answer Insert bufQuestion")
+        let response = await esClient.index({
             index: 'bufquestion',
             type: 'bufquestion',
             body: {
-                size: 5,
-                from: 0,
-                query: {
-                    bool: {
-                        must: [
-                            {
-                                match: {
-                                    q: {
-                                        query: body.q,
-                                        minimum_should_match: "85%"
-                                    }
-                                },
-
-                            }
-                        ]
-                    }
-                }
-            },
-            ignore_unavailable: true
-
+                q: body.q,
+                intent: body.intent,
+                entities: body.entities,
+                answer: [],
+                createtime: Date().toLocaleString()
+            }
         });
-        if (answer.hits.hits.length == 0) {
-            logger.info("not found answer Insert bufQuestion")
-            let response = await esClient.index({
-                index: 'bufquestion',
-                type: 'bufquestion',
-                body: {
-                    q: body.q,
-                    intent: body.intent,
-                    entities: body.entities,
-                    answer: [],
-                    createtime: Date().toLocaleString()
-                }
-            });
-            logger.info("response : " + JSON.stringify(response, null, 2))
-        }
+        logger.info("response : " + JSON.stringify(response, null, 2))
     }
     else if (body.answer.length > 0) {
         body.answer = body.answer[0]._source
@@ -440,11 +445,7 @@ async function postUserData(answer, intent, entities, question, relativeQuestion
         req.end;
     });
 }
-
-
-
-
-function ConvertToTable(data, callBack) {
+function ConvertToTable(data) {
     data = data.toString();
     var table = new Array();
     var rows = new Array();
@@ -454,7 +455,7 @@ function ConvertToTable(data, callBack) {
     for (var i = 0; i < rows.length; i++) {
         table.push(rows[i].split(","));
     }
-    callBack(table);
+    return table;
 }
 
 /*var http = require("http");
