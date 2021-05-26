@@ -171,24 +171,26 @@ let searchCDCAnswerRelateQ = {
     },
     ignore_unavailable: true
 }
-console.log(pinyin("什麼是天花", {
-    style: pinyin.STYLE_NORMAL, // 设置拼音风格
-
-}));
-
-
-
 
 app.get("/:message", async function (req, res) {
     try {
         var message = req.params.message;
-        var Url = encodeURI(config.ModelUrl + message)
+
+        var QToRoma = pinyin(message, {
+            style: pinyin.STYLE_NORMAL, // 设置拼音风格  
+        })
+        let romaQ = ""
+        QToRoma.forEach(element => {
+            romaQ += " " + element
+        });
+        var WS = await GetWs(message)
         /*
             "romaQ": String,//"羅馬拼音問題",
             "Ws": String,//"去除STOP段詞",
             "WsQ": String,//"去除STOP段詞ROMA",
         */
         //decodeURI
+        var Url = encodeURI(config.ModelUrl + message)
         if (message != "favicon.ico") {
 
             searchBufQuestionQuery.body.query.bool.must[0].match.q.query = message
@@ -443,6 +445,18 @@ async function postUserData(answer, intent, entities, question, relativeQuestion
         });
         req.write(contents);
         req.end;
+    });
+}
+
+async function GetWs(message) { //ID隨機
+    logger.info("function GetWs")
+    message = encodeURI(message)
+    return await new Promise((resolve, reject) => {
+         request.get('http://localhost:5001/GetWS/' + message, function (err, res, body) {
+            console.log(body)
+            body = JSON.parse(body)
+            resolve([true, body]);
+        })
     });
 }
 function ConvertToTable(data) {
