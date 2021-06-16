@@ -44,7 +44,7 @@ let Chi2EngIntentTag = {}
 for (let k in Eng2ChiIntentTag) {
     Chi2EngIntentTag[Eng2ChiIntentTag[k]] = k
 }
-let StopWordTable = ConvertToTable(fs.readFileSync(__dirname + '/廢詞表.csv', 'binary'))
+let StopWordTable = ConvertToTable1(fs.readFileSync(__dirname + '/data/廢詞表.csv', 'binary'))
 let StopWordsMap = new Map()
 StopWordTable.forEach(element => {
     if (!StopWordsMap.has(element[0]))
@@ -104,9 +104,9 @@ const QABufQuestion = {
     "q": String,//"問題",
     "romaQ": String,//"羅馬拼音問題",
     "Ws": String,//"去除STOP段詞",
-    "WsQ": String,//"去除STOP段詞ROMA",
-    "answer": String,// "答案"
-
+    "romaWs": String,//"去除STOP段詞ROMA",
+    "answer": String,// "答案",
+    "createtime": String //"創建時間"
 }
 const rutrnErrData = {
     qa: "",
@@ -142,7 +142,7 @@ let searchBufQuestionQuery = {
                 must: [
                     {
                         match: {
-                            q: {
+                            romaWs: {
                                 query: "",
                                 minimum_should_match: "85%"
                             }
@@ -171,29 +171,40 @@ let searchCDCAnswerRelateQ = {
     },
     ignore_unavailable: true
 }
-
 app.get("/:message", async function (req, res) {
     try {
         var message = req.params.message;
-
-        var QToRoma = pinyin(message, {
-            style: pinyin.STYLE_NORMAL, // 设置拼音风格  
-        })
         let romaQ = ""
-        QToRoma.forEach(element => {
-            romaQ += " " + element
+        let romaWs = ""
+        let Ws = ""
+        message1 = message.replace(/[\ |\~|\`|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\-|\_|\+|\=|\||\\|\[|\]|\{|\}|\;|\:|\"|\'|\,|\<|\.|\>|\/|\?/\，/\。/\；/\：/\“/\”/\》/\《/\|/\{/\}/\、/\!/\~/\`]/g,"")
+
+        var WSBuf = await GetWs(message1)
+        //前處理
+        WSBuf.forEach(element => {
+            let roma = pinyin(element, {
+                style: pinyin.STYLE_NORMAL, // 设置拼音风格  
+            })
+            let thisWsRoma = ""
+            roma.forEach(element => {
+                thisWsRoma += element + " "
+            })
+            romaQ += thisWsRoma
+            if (!StopWordsMap.has(element)) {
+                romaWs += thisWsRoma + " "
+                Ws += element
+            }
         });
-        var WS = await GetWs(message)
         /*
             "romaQ": String,//"羅馬拼音問題",
             "Ws": String,//"去除STOP段詞",
-            "WsQ": String,//"去除STOP段詞ROMA",
+            "romaWs": String,//"去除STOP段詞ROMA",
         */
         //decodeURI
         var Url = encodeURI(config.ModelUrl + message)
         if (message != "favicon.ico") {
-
-            searchBufQuestionQuery.body.query.bool.must[0].match.q.query = message
+            //用段詞ROMA 搜尋BUF裡面有沒有相應的句子
+            searchBufQuestionQuery.body.query.bool.must[0].match.q.query = romaWs
             var answer = await esClient.search(searchBufQuestionQuery);
             console.log("BufQuestion Answer: " + JSON.stringify(answer, null, 2))
             if (answer.hits.hits.length > 0 && answer.hits.hits[0]._source.answer != "") {
@@ -213,7 +224,10 @@ app.get("/:message", async function (req, res) {
                     relativeQuestion: answerRelateQ.hits.hits[0]._source.relativeQuestion,
                     answer: answer.hits.hits[0].answer,
                     source: 1,
-                    isSuccess: true
+                    isSuccess: true,
+                    romaQ: answer.hits.hits[0].romaQ,
+                    Ws: answer.hits.hits[0].Ws,
+                    romaWs: answer.hits.hits[0].romaWs,
                 })
             }
             else {
@@ -260,6 +274,9 @@ app.get("/:message", async function (req, res) {
                         body.q = message;
                         body.source = 0;
                         body.isSuccess = true;
+                        body.romaQ = romaQ;
+                        body.Ws = Ws;
+                        body.romaWs = romaWs;
                         res.send(JSON.stringify(body, null, 2))
                     }
                 });
@@ -278,7 +295,6 @@ app.post('/CDC/QALog', async function (req, res) {
     var body = req.body
     body.createtime = Date().toLocaleString()
     if (body.needAddBuf) {
-
         logger.info("answer Insert bufQuestion")
         let response = await esClient.index({
             index: 'bufquestion',
@@ -288,7 +304,10 @@ app.post('/CDC/QALog', async function (req, res) {
                 intent: body.intent,
                 entities: body.entities,
                 answer: [],
-                createtime: Date().toLocaleString()
+                createtime: body.createtime,
+                romaQ: body.romaQ,
+                Ws: body.Ws,
+                romaWs: body.romaWs,
             }
         });
         logger.info("response : " + JSON.stringify(response, null, 2))
@@ -307,6 +326,9 @@ app.post('/CDC/QALog', async function (req, res) {
     logger.info("response : " + JSON.stringify(response, null, 2))
     res.send(200)
 })
+/**
+ * 紀錄滿意度
+ */
 app.post('/CDC/Satisfaction', async function (req, res) {
     logger.info("Insert Satisfaction")
     var body = req.body
@@ -414,6 +436,70 @@ app.get("/CDC/InsertCsvData", function (req, res) {
         })
     })
 })
+app.get("/CDC/InsertQAData", function (req, res) {
+    logger.info('function InsertQAData')
+    var answerCsv = fs.readFileSync('./data/QA句子新增.csv', 'binary');
+    var createtime = Date().toLocaleString()
+    ConvertToTable(answerCsv, async function (DataTable) {
+        var saveData = [];
+        for (var i = 0; i < DataTable.length; i++) {
+            if(DataTable[i][0] == "")
+                break;
+            var entityString = DataTable[i][2].split('-').join(' ')
+
+            let romaQ = ""
+            let romaWs = ""
+            let Ws = ""
+            message1 = DataTable[i][0].replace(/[\ |\~|\`|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\-|\_|\+|\=|\||\\|\[|\]|\{|\}|\;|\:|\"|\'|\,|\<|\.|\>|\/|\?/\，/\。/\；/\：/\“/\”/\》/\《/\|/\{/\}/\、/\!/\~/\`]/g,"")
+            var WSBuf = await GetWs(message1)
+            //前處理
+            WSBuf.forEach(element => {
+                let roma = pinyin(element, {
+                    style: pinyin.STYLE_NORMAL, // 设置拼音风格  
+                })
+                let thisWsRoma = ""
+                roma.forEach(element => {
+                    thisWsRoma += element + " "
+                })
+                romaQ += thisWsRoma
+                if (!StopWordsMap.has(element)) {
+                    romaWs += thisWsRoma + " "
+                    Ws += element
+                }
+            });
+            //await postUserData(DataTable[i][0], DataTable[i][3], entityString, DataTable[i][1], DataTable[i][2], Chi2EngIntentTag[DataTable[i][3]])
+            saveData.push({
+                index: {
+                    _index: 'bufquestion',
+                    _type: 'bufquestion',
+                }
+            })
+            saveData.push({
+                q: DataTable[i][0],
+                intent: "",
+                entities: entityString,
+                answer: DataTable[i][1],
+                createtime: createtime,
+                romaQ: romaQ,
+                Ws: Ws,
+                romaWs: romaWs,
+            })
+        }
+        // 對傳遞的資料執行批量索引
+        esClient.bulk({ body: saveData }, function (err, response) {
+            if (err) {
+                logger.info("Failed Bulk operation".red, err)
+            } else {
+                logger.info("Successfully imported %s".green, (saveData.length) / 2);
+                logger.info("response: " + JSON.stringify(response, null, 2))
+            }
+
+            logger.info('InsertData success')
+            res.send(200)
+        })
+    })
+})
+/*
 async function postUserData(answer, intent, entities, question, relativeQuestion, intentEng) { //ID隨機
     logger.info("function postUserData")
     return new Promise((resolve, reject) => {
@@ -447,19 +533,25 @@ async function postUserData(answer, intent, entities, question, relativeQuestion
         req.end;
     });
 }
-
+*/
 async function GetWs(message) { //ID隨機
-    logger.info("function GetWs")
-    message = encodeURI(message)
+    logger.info("function GetWs " + message)
+    message = encodeURI(message.replace(/\//g, ''))
     return await new Promise((resolve, reject) => {
-         request.get('http://localhost:5001/GetWS/' + message, function (err, res, body) {
-            console.log(body)
-            body = JSON.parse(body)
-            resolve([true, body]);
+        request.get('http://localhost:5001/GetWS/' + message, function (err, res, body) {
+            //console.log(body)
+            try {
+                body = JSON.parse(body)
+            } 
+            catch (e) {
+                logger.debug(message)
+            }
+
+            resolve(body.wsAnswer);
         })
     });
 }
-function ConvertToTable(data) {
+function ConvertToTable1(data) {
     data = data.toString();
     var table = new Array();
     var rows = new Array();
@@ -471,7 +563,18 @@ function ConvertToTable(data) {
     }
     return table;
 }
-
+function ConvertToTable(data, callBack) {
+    data = data.toString();
+    var table = new Array();
+    var rows = new Array();
+    var buf = new Buffer(data, 'binary');
+    var str = iconv.decode(buf, 'utf-8');
+    rows = str.split("\r\n");
+    for (var i = 0; i < rows.length; i++) {
+        table.push(rows[i].split(","));
+    }
+    callBack(table);
+}
 /*var http = require("http");
 var https = require('https');
 var express = require("express");
