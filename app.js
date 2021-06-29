@@ -135,21 +135,12 @@ let searchBufQuestionQuery = {
     index: 'bufquestion',
     type: 'bufquestion',
     body: {
-        size: 5,
+        size: 3,
         from: 0,
         query: {
             bool: {
-                must: [
-                    {
-                        match: {
-                            romaWs: {
-                                query: "",
-                                minimum_should_match: "85%"
-                            }
-                        },
-
-                    }
-                ]
+                should: [],
+                minimum_should_match: "85%"
             }
         }
     },
@@ -176,8 +167,9 @@ app.get("/:message", async function (req, res) {
         var message = req.params.message;
         let romaQ = ""
         let romaWs = ""
+        let romaWsArray = []
         let Ws = ""
-        message1 = message.replace(/[\ |\~|\`|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\-|\_|\+|\=|\||\\|\[|\]|\{|\}|\;|\:|\"|\'|\,|\<|\.|\>|\/|\?/\，/\。/\；/\：/\“/\”/\》/\《/\|/\{/\}/\、/\!/\~/\`]/g,"")
+        message1 = message.replace(/[\ |\~|\`|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\-|\_|\+|\=|\||\\|\[|\]|\{|\}|\;|\:|\"|\'|\,|\<|\.|\>|\/|\?/\，/\。/\；/\：/\“/\”/\》/\《/\|/\{/\}/\、/\!/\~/\`]/g, "")
 
         var WSBuf = await GetWs(message1)
         //前處理
@@ -192,6 +184,7 @@ app.get("/:message", async function (req, res) {
             romaQ += thisWsRoma
             if (!StopWordsMap.has(element)) {
                 romaWs += thisWsRoma + " "
+                romaWsArray.push(thisWsRoma)
                 Ws += element
             }
         });
@@ -204,31 +197,71 @@ app.get("/:message", async function (req, res) {
         var Url = encodeURI(config.ModelUrl + message)
         if (message != "favicon.ico") {
             //用段詞ROMA 搜尋BUF裡面有沒有相應的句子
-            searchBufQuestionQuery.body.query.bool.must[0].match.q.query = romaWs
+
+            let queryBuf = []
+            romaWsArray.forEach(element => {
+                queryBuf.push({
+                    match_phrase: {
+                        romaWs: element
+                    }
+                })
+            });
+
+            searchBufQuestionQuery.body.query.bool.should = queryBuf
             var answer = await esClient.search(searchBufQuestionQuery);
             console.log("BufQuestion Answer: " + JSON.stringify(answer, null, 2))
             if (answer.hits.hits.length > 0 && answer.hits.hits[0]._source.answer != "") {
-                EntityString = []
+                EntityString = ""
                 for (var i in answer.hits.hits[0].entities) {
                     if (body.entities.length - 1 == i)
                         EntityString += answer.hits.hits[0].entities[i].word
                     else
                         EntityString += answer.hits.hits[0].entities[i].word + " "
                 }
-                searchCDCAnswerRelateQ.body.query.bool.must[0].match_phrase.entities = EntityString
-                answerRelateQ = await esClient.search(searchCDCAnswerRelateQ);
-                res.send({
-                    q: message,
-                    intent: answer.hits.hits[0].intent,
-                    entities: answer.hits.hits[0].entities,
-                    relativeQuestion: answerRelateQ.hits.hits[0]._source.relativeQuestion,
-                    answer: answer.hits.hits[0].answer,
-                    source: 1,
-                    isSuccess: true,
-                    romaQ: answer.hits.hits[0].romaQ,
-                    Ws: answer.hits.hits[0].Ws,
-                    romaWs: answer.hits.hits[0].romaWs,
-                })
+                let bufEntity = answer.hits.hits[0]._source.entities.split('-')
+                let bufEntityArray = []
+                bufEntity.forEach(element => {
+                    bufEntityArray.push({
+                        "ner": "",
+                        "word": element
+                    })
+                });
+                if (answer.hits.hits.length > 2) {
+                    var relativeQuestion = []
+                    answer.hits.hits.forEach(element => {
+                        relativeQuestion.push(element._source.q)
+                    });
+                    relativeQuestion = relativeQuestion.join("-")
+
+                    res.send({
+                        q: message,
+                        intent: answer.hits.hits[0]._source.intent,
+                        entities: bufEntityArray,
+                        relativeQuestion: relativeQuestion,
+                        answer: answer.hits.hits[0]._source.answer,
+                        source: 1,
+                        isSuccess: true,
+                        romaQ: answer.hits.hits[0]._source.romaQ,
+                        Ws: answer.hits.hits[0]._source.Ws,
+                        romaWs: answer.hits.hits[0]._source.romaWs,
+                    })
+                }
+                else {
+                    searchCDCAnswerRelateQ.body.query.bool.must[0].match_phrase.entities = EntityString
+                    answerRelateQ = await esClient.search(searchCDCAnswerRelateQ);
+                    res.send({
+                        q: message,
+                        intent: answer.hits.hits[0]._source.intent,
+                        entities: bufEntityArray,
+                        relativeQuestion: answerRelateQ.hits.hits.length == 0 ? '': answerRelateQ.hits.hits[0]._source.relativeQuestion,
+                        answer: answer.hits.hits[0]._source.answer,
+                        source: 1,
+                        isSuccess: true,
+                        romaQ: answer.hits.hits[0]._source.romaQ,
+                        Ws: answer.hits.hits[0]._source.Ws,
+                        romaWs: answer.hits.hits[0]._source.romaWs,
+                    })
+                }
             }
             else {
                 request(Url, async function (error, response, body) {
@@ -294,7 +327,7 @@ app.post('/CDC/QALog', async function (req, res) {
     logger.info("Insert QALog")
     var body = req.body
     body.createtime = Date().toLocaleString()
-    if (body.needAddBuf) {
+    if (body.needAddBuf == 'true') {
         logger.info("answer Insert bufQuestion")
         let response = await esClient.index({
             index: 'bufquestion',
@@ -443,14 +476,14 @@ app.get("/CDC/InsertQAData", function (req, res) {
     ConvertToTable(answerCsv, async function (DataTable) {
         var saveData = [];
         for (var i = 0; i < DataTable.length; i++) {
-            if(DataTable[i][0] == "")
+            if (DataTable[i][0] == "")
                 break;
             var entityString = DataTable[i][2].split('-').join(' ')
 
             let romaQ = ""
             let romaWs = ""
             let Ws = ""
-            message1 = DataTable[i][0].replace(/[\ |\~|\`|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\-|\_|\+|\=|\||\\|\[|\]|\{|\}|\;|\:|\"|\'|\,|\<|\.|\>|\/|\?/\，/\。/\；/\：/\“/\”/\》/\《/\|/\{/\}/\、/\!/\~/\`]/g,"")
+            message1 = DataTable[i][0].replace(/[\ |\~|\`|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\-|\_|\+|\=|\||\\|\[|\]|\{|\}|\;|\:|\"|\'|\,|\<|\.|\>|\/|\?/\，/\。/\；/\：/\“/\”/\》/\《/\|/\{/\}/\、/\!/\~/\`]/g, "")
             var WSBuf = await GetWs(message1)
             //前處理
             WSBuf.forEach(element => {
@@ -542,7 +575,7 @@ async function GetWs(message) { //ID隨機
             //console.log(body)
             try {
                 body = JSON.parse(body)
-            } 
+            }
             catch (e) {
                 logger.debug(message)
             }
