@@ -5,5 +5,5 @@
     "channel_access_token": "yHeoGNC/JKjX3Fc1LVrQSf3jTXpvF+zn4rId5lZaqbgoAmIHTW0cmG35VlLmHzJ6KUkuoPokEvsQe3pVBDM5xLZUPWdtmTn0MyLof3OGx5VQ0hlj6PhDN2ds2In7MvTXKtd/17iO9gmOUi4M5Qt1FwdB04t89/1O/w1cDnyilFU=",
     "AUTH_TOKEN": "",
     "ModelUrl": "http://127.0.0.1:5000/GetAnswer/",
-    "localUrl" : "http://394fc3832456.ngrok.io"
+    "localUrl" : "http://639a6cb18b82.ngrok.io"
 }
