@@ -87,7 +87,7 @@ app.post("/", function (req, res) {
                                     for (var i in relativeQuestion) {
                                         buttons.push({
                                             "type": "message",
-                                            "label": relativeQuestion[i],
+                                            "label": relativeQuestion[i].length >20 ? (relativeQuestion[i].substring(0,17)+"..."): relativeQuestion[i],
                                             "text": relativeQuestion[i]
                                         })
                                     }
