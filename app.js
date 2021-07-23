@@ -48,8 +48,20 @@ let StopWordTable = ConvertToTable1(fs.readFileSync(__dirname + '/data/廢詞表
 let StopWordsMap = new Map()
 StopWordTable.forEach(element => {
     if (!StopWordsMap.has(element[0]))
-
         StopWordsMap.set(element[0], element[0])
+});
+let commonWordTable = ConvertToTable1(fs.readFileSync(__dirname + '/data/commonWord.csv', 'binary'))
+let commonWordMap = new Map()
+commonWordTable.forEach(elements => {
+    elements.forEach(element => {
+        if (element != "") {
+            var roma = pinyin(element, {
+                style: pinyin.STYLE_NORMAL, // 设置拼音风格  
+            }).join(' ')
+            if (!commonWordMap.has(roma))
+                commonWordMap.set(roma, elements[0])
+        }
+    });
 });
 var elasticsearch = require('elasticsearch');
 var esClient = new elasticsearch.Client({
@@ -172,15 +184,20 @@ app.get("/:message", async function (req, res) {
         message1 = message.replace(/[\ |\~|\`|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\-|\_|\+|\=|\||\\|\[|\]|\{|\}|\;|\:|\"|\'|\,|\<|\.|\>|\/|\?/\，/\。/\；/\：/\“/\”/\》/\《/\|/\{/\}/\、/\!/\~/\`]/g, "")
 
         var WSBuf = await GetWs(message1)
+        var message2 = ""
         //前處理
         WSBuf.forEach(element => {
             let roma = pinyin(element, {
                 style: pinyin.STYLE_NORMAL, // 设置拼音风格  
             })
-            let thisWsRoma = ""
-            roma.forEach(element => {
-                thisWsRoma += element + " "
-            })
+            let thisWsRoma = roma.join(" ")
+
+            if (commonWordMap.has(thisWsRoma)) {
+                message2 += commonWordMap.get(thisWsRoma)
+            } else {
+                message2 += element
+            }
+
             romaQ += thisWsRoma
             if (!StopWordsMap.has(element)) {
                 romaWs += thisWsRoma + " "
@@ -194,14 +211,14 @@ app.get("/:message", async function (req, res) {
             "romaWs": String,//"去除STOP段詞ROMA",
         */
         //decodeURI
-        var Url = encodeURI(config.ModelUrl + message)
+        var Url = encodeURI(config.ModelUrl + message2.toLowerCase())
         if (message != "favicon.ico") {
             //用段詞ROMA 搜尋BUF裡面有沒有相應的句子
 
             let queryBuf = []
             romaWsArray.forEach(element => {
                 queryBuf.push({
-                    match_phrase: {
+                    term: {
                         romaWs: element
                     }
                 })
@@ -253,7 +270,7 @@ app.get("/:message", async function (req, res) {
                         q: message,
                         intent: answer.hits.hits[0]._source.intent,
                         entities: bufEntityArray,
-                        relativeQuestion: answerRelateQ.hits.hits.length == 0 ? '': answerRelateQ.hits.hits[0]._source.relativeQuestion,
+                        relativeQuestion: answerRelateQ.hits.hits.length == 0 ? '' : answerRelateQ.hits.hits[0]._source.relativeQuestion,
                         answer: answer.hits.hits[0]._source.answer,
                         source: 1,
                         isSuccess: true,
@@ -273,7 +290,7 @@ app.get("/:message", async function (req, res) {
                     } else {
                         body = JSON.parse(body)
                         logger.info(body.intent)
-                        EntityString = []
+                        EntityString = ""
                         for (var i in body.entities) {
                             if (body.entities.length - 1 == i)
                                 EntityString += body.entities[i].word
@@ -299,7 +316,7 @@ app.get("/:message", async function (req, res) {
                             ignore_unavailable: true
                         });
                         logger.info(JSON.stringify(answer, null, 2))
-                        if (answer.hits.hits.length > 0 && answer.hits.hits[0]._source.answer == "" && answer.hits.hits.length == 0)
+                        if (answer.hits.hits.length == 0 || answer.hits.hits[0]._source.answer == "")
                             body.needAddBuf = true
                         else
                             body.needAddBuf = false
@@ -329,13 +346,20 @@ app.post('/CDC/QALog', async function (req, res) {
     body.createtime = Date().toLocaleString()
     if (body.needAddBuf == 'true') {
         logger.info("answer Insert bufQuestion")
+        EntityString = ""
+        for (var i in body.entities) {
+            if (body.entities.length - 1 == i)
+                EntityString += body.entities[i].word
+            else
+                EntityString += body.entities[i].word + " "
+        }
         let response = await esClient.index({
             index: 'bufquestion',
             type: 'bufquestion',
             body: {
                 q: body.q,
                 intent: body.intent,
-                entities: body.entities,
+                entities: EntityString,
                 answer: [],
                 createtime: body.createtime,
                 romaQ: body.romaQ,
@@ -469,6 +493,46 @@ app.get("/CDC/InsertCsvData", function (req, res) {
         })
     })
 })
+app.get("/CDC/getTestScore", function (req, res) {
+    logger.info('function getTestScore')
+    var answerCsv = fs.readFileSync('./data/測試資料.csv', 'binary');
+    ConvertToTable(answerCsv, async function (DataTable) {
+        var saveData = "\ufeff";
+        for (var i = 0; i < DataTable.length; i++) {
+            if (DataTable[i][0].length == 0) continue;
+            var data = await GetAnswer(DataTable[i][0])
+            if (data.source == 1)
+                saveData += `${DataTable[i][0]},${data.answer}\r\n`
+            else {
+                if (data.answer.length > 0)
+                    saveData += `${DataTable[i][0]},${String(data.answer[0]._source.answer)}\r\n`
+                else
+                    saveData += `${DataTable[i][0]},\r\n`
+
+            }
+        }
+        fs.writeFileSync("./data/測試資料結果.csv", saveData, "utf-8")
+        res.send(200)
+
+    })
+})
+async function GetAnswer(message) { //ID隨機
+    logger.info("function GetWs " + message)
+    message = encodeURI(message.replace(/\//g, ''))
+    return await new Promise((resolve, reject) => {
+        request.get('http://localhost:8080/' + message, function (err, res, body) {
+            //console.log(body)
+            try {
+                body = JSON.parse(body)
+            }
+            catch (e) {
+                logger.debug(message)
+            }
+
+            resolve(body);
+        })
+    });
+}
 app.get("/CDC/InsertQAData", function (req, res) {
     logger.info('function InsertQAData')
     var answerCsv = fs.readFileSync('./data/QA句子新增.csv', 'binary');
