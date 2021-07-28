@@ -194,7 +194,7 @@ let searchCDCAnswerRelateQ = {
 }
 app.get("/:message", async function (req, res) {
     try {
-        var message = req.params.message;
+        var message = toASCII(req.params.message);
         let romaQ = ""
         let romaWs = ""
         let romaWsArray = []
@@ -570,7 +570,7 @@ app.get("/CDC/InsertQAData", function (req, res) {
             let romaQ = ""
             let romaWs = ""
             let Ws = ""
-            message1 = DataTable[i][0].replace(/[\ |\~|\`|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\-|\_|\+|\=|\||\\|\[|\]|\{|\}|\;|\:|\"|\'|\,|\<|\.|\>|\/|\?/\，/\。/\；/\：/\“/\”/\》/\《/\|/\{/\}/\、/\!/\~/\`]/g, "")
+            message1 = toASCII(DataTable[i][0]).replace(/[\ |\~|\`|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\-|\_|\+|\=|\||\\|\[|\]|\{|\}|\;|\:|\"|\'|\,|\<|\.|\>|\/|\?/\，/\。/\；/\：/\“/\”/\》/\《/\|/\{/\}/\、/\!/\~/\`]/g, "")
             var WSBuf = await GetWs(message1)
             //前處理
             WSBuf.forEach(element => {
@@ -697,6 +697,18 @@ function ConvertToTable(data, callBack) {
         table.push(rows[i].split(","));
     }
     callBack(table);
+}
+function toASCII(chars) {
+    var ascii = '';
+    for(var i=0, l=chars.length; i<l; i++) {
+        var c = chars[i].charCodeAt(0);
+        //只針對半形去轉換
+        if (c >= 0xFF00 && c <= 0xFFEF) {
+            c = 0xFF & (c + 0x20);
+        }
+        ascii += String.fromCharCode(c);
+    }
+    return ascii;
 }
 /*var http = require("http");
 var https = require('https');
