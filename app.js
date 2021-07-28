@@ -152,12 +152,30 @@ let searchBufQuestionQuery = {
         query: {
             bool: {
                 should: [],
-                minimum_should_match: "85%"
+                minimum_should_match: "-15%"
             }
         }
     },
     ignore_unavailable: true
 }
+/*
+let searchBufQuestionQuery = {
+    index: 'bufquestion',
+    type: 'bufquestion',
+    body: {
+        size: 3,
+        from: 0,
+        query: {
+            match:{  
+                romaWs:{  
+                   query: "",
+                   minimum_should_match: "85%"
+                }
+             }
+        }
+    },
+    ignore_unavailable: true
+}*/
 let searchCDCAnswerRelateQ = {
     index: 'cdc',
     type: 'cdcanswer',
@@ -190,19 +208,24 @@ app.get("/:message", async function (req, res) {
             let roma = pinyin(element, {
                 style: pinyin.STYLE_NORMAL, // 设置拼音风格  
             })
-            let thisWsRoma = roma.join(" ")
+            let thisWsRoma = roma.join("")
 
             if (commonWordMap.has(thisWsRoma)) {
                 message2 += commonWordMap.get(thisWsRoma)
             } else {
                 message2 += element
             }
-
-            romaQ += thisWsRoma
+            if (romaQ !== "")
+                romaQ += " " + thisWsRoma  
+            else
+                romaQ += thisWsRoma
             if (!StopWordsMap.has(element)) {
-                romaWs += thisWsRoma + " "
-                romaWsArray.push(thisWsRoma)
+                if (romaWs !== "")
+                    romaWs += " " + thisWsRoma
+                else
+                    romaWs += thisWsRoma
                 Ws += element
+                romaWsArray.push(thisWsRoma)
             }
         });
         /*
@@ -223,7 +246,7 @@ app.get("/:message", async function (req, res) {
                     }
                 })
             });
-
+            //searchBufQuestionQuery.body.query.match.romaWs.query = romaWs
             searchBufQuestionQuery.body.query.bool.should = queryBuf
             var answer = await esClient.search(searchBufQuestionQuery);
             console.log("BufQuestion Answer: " + JSON.stringify(answer, null, 2))
@@ -554,13 +577,16 @@ app.get("/CDC/InsertQAData", function (req, res) {
                 let roma = pinyin(element, {
                     style: pinyin.STYLE_NORMAL, // 设置拼音风格  
                 })
-                let thisWsRoma = ""
-                roma.forEach(element => {
-                    thisWsRoma += element + " "
-                })
-                romaQ += thisWsRoma
+                let thisWsRoma = roma.join("")
+                if (romaQ !== "")
+                    romaQ += " " + thisWsRoma
+                else
+                    romaQ += thisWsRoma
                 if (!StopWordsMap.has(element)) {
-                    romaWs += thisWsRoma + " "
+                    if (romaWs !== "")
+                        romaWs += " " + thisWsRoma
+                    else
+                        romaWs += thisWsRoma
                     Ws += element
                 }
             });
