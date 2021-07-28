@@ -208,7 +208,7 @@ app.get("/:message", async function (req, res) {
             let roma = pinyin(element, {
                 style: pinyin.STYLE_NORMAL, // 设置拼音风格  
             })
-            let thisWsRoma = roma.join("")
+            let thisWsRoma = roma.join("").toLocaleLowerCase()
 
             if (commonWordMap.has(thisWsRoma)) {
                 message2 += commonWordMap.get(thisWsRoma)
@@ -603,9 +603,9 @@ app.get("/CDC/InsertQAData", function (req, res) {
                 entities: entityString,
                 answer: DataTable[i][1],
                 createtime: createtime,
-                romaQ: romaQ,
+                romaQ: romaQ.toLocaleLowerCase(),
                 Ws: Ws,
-                romaWs: romaWs,
+                romaWs: romaWs.toLocaleLowerCase(),
             })
         }
         // 對傳遞的資料執行批量索引
