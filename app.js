@@ -57,7 +57,7 @@ commonWordTable.forEach(elements => {
         if (element != "") {
             var roma = pinyin(element, {
                 style: pinyin.STYLE_NORMAL, // 设置拼音风格  
-            }).join(' ')
+            }).join('')
             if (!commonWordMap.has(roma))
                 commonWordMap.set(roma, elements[0])
         }
@@ -199,7 +199,7 @@ app.get("/:message", async function (req, res) {
         let romaWs = ""
         let romaWsArray = []
         let Ws = ""
-        message1 = message.replace(/[\ |\~|\`|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\-|\_|\+|\=|\||\\|\[|\]|\{|\}|\;|\:|\"|\'|\,|\<|\.|\>|\/|\?/\，/\。/\；/\：/\“/\”/\》/\《/\|/\{/\}/\、/\!/\~/\`]/g, "")
+        message1 = message.replace(/[\ |\「|\」|\~|\`|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\-|\_|\+|\=|\||\\|\[|\]|\{|\}|\;|\:|\"|\'|\,|\<|\.|\>|\/|\?/\，/\。/\；/\：/\“/\”/\》/\《/\|/\{/\}/\、/\!/\~/\`]/g, "").toLowerCase()
 
         var WSBuf = await GetWs(message1)
         var message2 = ""
@@ -216,7 +216,7 @@ app.get("/:message", async function (req, res) {
                 message2 += element
             }
             if (romaQ !== "")
-                romaQ += " " + thisWsRoma  
+                romaQ += " " + thisWsRoma
             else
                 romaQ += thisWsRoma
             if (!StopWordsMap.has(element)) {
@@ -249,7 +249,7 @@ app.get("/:message", async function (req, res) {
             //searchBufQuestionQuery.body.query.match.romaWs.query = romaWs
             searchBufQuestionQuery.body.query.bool.should = queryBuf
             var answer = await esClient.search(searchBufQuestionQuery);
-            console.log("BufQuestion Answer: " + JSON.stringify(answer, null, 2))
+            //console.log("BufQuestion Answer: " + JSON.stringify(answer, null, 2))
             if (answer.hits.hits.length > 0 && answer.hits.hits[0]._source.answer != "") {
                 EntityString = ""
                 for (var i in answer.hits.hits[0].entities) {
@@ -294,7 +294,7 @@ app.get("/:message", async function (req, res) {
                         intent: answer.hits.hits[0]._source.intent,
                         entities: bufEntityArray,
                         relativeQuestion: answerRelateQ.hits.hits.length == 0 ? '' : answerRelateQ.hits.hits[0]._source.relativeQuestion,
-                        answer: answer.hits.hits[0]._source.answer,
+                        answer: answer.hits.hits[0]._source.answer == "" ?(answer.hits.hits[0]._source.intent+answer.hits.hits[0]._source.Ws) :answer.hits.hits[0]._source.answer,
                         source: 1,
                         isSuccess: true,
                         romaQ: answer.hits.hits[0]._source.romaQ,
@@ -305,14 +305,14 @@ app.get("/:message", async function (req, res) {
             }
             else {
                 request(Url, async function (error, response, body) {
-                    console.error('error:', error); // Print the error if one occurred
-                    logger.info('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-                    logger.info('body:', body); // Print the HTML for the Google homepage.
+                    //console.error('error:', error); // Print the error if one occurred
+                   // logger.info('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+                    //logger.info('body:', body); // Print the HTML for the Google homepage.
                     if (error != null) {
                         res.send(rutrnErrData)
                     } else {
                         body = JSON.parse(body)
-                        logger.info(body.intent)
+                        //logger.info(body.intent)
                         EntityString = ""
                         for (var i in body.entities) {
                             if (body.entities.length - 1 == i)
@@ -338,7 +338,7 @@ app.get("/:message", async function (req, res) {
                             ,
                             ignore_unavailable: true
                         });
-                        logger.info(JSON.stringify(answer, null, 2))
+                        //logger.info(JSON.stringify(answer, null, 2))
                         if (answer.hits.hits.length == 0 || answer.hits.hits[0]._source.answer == "")
                             body.needAddBuf = true
                         else
@@ -518,29 +518,44 @@ app.get("/CDC/InsertCsvData", function (req, res) {
 })
 app.get("/CDC/getTestScore", function (req, res) {
     logger.info('function getTestScore')
-    var answerCsv = fs.readFileSync('./data/測試資料.csv', 'binary');
+    var answerCsv = fs.readFileSync('./data/QA爬蟲新增.csv', 'binary');
     ConvertToTable(answerCsv, async function (DataTable) {
         var saveData = "\ufeff";
         for (var i = 0; i < DataTable.length; i++) {
             if (DataTable[i][0].length == 0) continue;
             var data = await GetAnswer(DataTable[i][0])
-            if (data.source == 1)
-                saveData += `${DataTable[i][0]},${data.answer}\r\n`
-            else {
-                if (data.answer.length > 0)
-                    saveData += `${DataTable[i][0]},${String(data.answer[0]._source.answer)}\r\n`
+            if (data.source == 1) {
+                if (String(data.answer).substring(0, 10) == String(DataTable[i][1]).substring(0, 10))
+                    saveData += `${DataTable[i][0]},${data.answer},O\r\n`
                 else
-                    saveData += `${DataTable[i][0]},\r\n`
+                    saveData += `${DataTable[i][0]},${data.answer},X\r\n`
+            }
+            else {
+                if (data.answer.length > 0) {
+                    if (String(data.answer).substring(0, 10) == String(DataTable[i][1]).substring(0, 10))
+                        saveData += `${DataTable[i][0]},${String(data.answer[0]._source.answer)},O\r\n`
+                    else
+                        saveData += `${DataTable[i][0]},${String(data.answer[0]._source.answer)},X\r\n`
+                }
+                else {
+                    if (String(data.answer).substring(0, 10) == String(DataTable[i][1]).substring(0, 10))
+                        saveData += `${DataTable[i][0]},,O\r\n`
+                    else
+                        saveData += `${DataTable[i][0]},,X\r\n`
+
+                }
+
 
             }
         }
-        fs.writeFileSync("./data/測試資料結果.csv", saveData, "utf-8")
+        fs.writeFileSync("./data/測試資料結果QA爬蟲新增.csv", saveData, "utf-8")
+        console.log("Ok")
         res.send(200)
 
     })
 })
 async function GetAnswer(message) { //ID隨機
-    logger.info("function GetWs " + message)
+    //logger.info("function GetWs " + message)
     message = encodeURI(message.replace(/\//g, ''))
     return await new Promise((resolve, reject) => {
         request.get('http://localhost:8080/' + message, function (err, res, body) {
@@ -658,7 +673,7 @@ async function postUserData(answer, intent, entities, question, relativeQuestion
 }
 */
 async function GetWs(message) { //ID隨機
-    logger.info("function GetWs " + message)
+    //logger.info("function GetWs " + message)
     message = encodeURI(message.replace(/\//g, ''))
     return await new Promise((resolve, reject) => {
         request.get('http://localhost:5001/GetWS/' + message, function (err, res, body) {
@@ -700,7 +715,7 @@ function ConvertToTable(data, callBack) {
 }
 function toASCII(chars) {
     var ascii = '';
-    for(var i=0, l=chars.length; i<l; i++) {
+    for (var i = 0, l = chars.length; i < l; i++) {
         var c = chars[i].charCodeAt(0);
         //只針對半形去轉換
         if (c >= 0xFF00 && c <= 0xFFEF) {
