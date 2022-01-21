@@ -11,7 +11,7 @@
     "express": "^4.16.3",
     "http": "0.0.0",
     "https": "^1.0.0",
-    "log4js": "^1.1.1",
+    "log4js": "^6.4.0",
     "log4js-extend": "^0.1.2",
     "body-parser": "latest",
     "url": "latest",
